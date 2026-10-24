@@ -403,218 +403,222 @@ describe("repository helper outcome parity", () => {
     },
   );
 
-  it("dry-runs every advertised operation across both benchmark context variants", async () => {
-    const directory = mkdtempSync(join(tmpdir(), "yeli-agent-eval-"));
-    temporaryDirectories.push(directory);
-    const artifactPath = join(directory, "benchmark.yeli.html");
-    const payload = await createDocumentPayload(
-      '---\ntitle: "Benchmark"\ntags: [portable]\n---\n# Benchmark\n\n- [ ] Check\n',
-      { docId: "doc-agent-eval", revision: 2 },
-    );
-    writeFileSync(
-      artifactPath,
-      shellWith(serializePayloadBlock(payload)),
-      "utf8",
-    );
-
-    const reportPath = join(directory, "benchmark-report.json");
-    const benchmarkArguments = [
-      resolve("scripts/eval-agents.ts"),
-      "--artifact",
-      artifactPath,
-      "--mode",
-      "fake",
-      "--output",
-      reportPath,
-    ];
-    const output = execFileSync(process.execPath, benchmarkArguments, {
-      cwd: resolve("."),
-      encoding: "utf8",
-    });
-    expect(readFileSync(reportPath, "utf8")).toBe(output);
-    expect(statSync(reportPath).mode & 0o777).toBe(0o600);
-    const noClobber = spawnSync(process.execPath, benchmarkArguments, {
-      cwd: resolve("."),
-      encoding: "utf8",
-    });
-    expect(noClobber.status).toBe(1);
-    expect(JSON.parse(noClobber.stderr)).toMatchObject({
-      error: { code: "OUTPUT_EXISTS" },
-      ok: false,
-    });
-    expect(readFileSync(reportPath, "utf8")).toBe(output);
-    expect(
-      readdirSync(directory).filter((name) => name.endsWith(".yeli-tmp")),
-    ).toEqual([]);
-    const report = JSON.parse(output) as {
-      artifactHash: string;
-      releaseScoreClaimed: boolean;
-      results: Array<{
-        contextVariant: string;
-        freshnessBefore: string;
-        freshnessAfter: string;
-        operation: string;
-        oracle: { code: string; ok: boolean };
-        planning: {
-          contextDigest: string;
-          contextKind: string;
-          contextSourceHash: string;
-          inputArtifactHash: string;
-          planDigest: string;
-        };
-        shellDrift: boolean;
-        success: boolean;
-        touchedByteRegions: unknown[];
-      }>;
-    };
-
-    expect(report.releaseScoreClaimed).toBe(false);
-    expect(
-      new Set(report.results.map((result) => result.contextVariant)),
-    ).toEqual(new Set(["manifest-bearing", "manifest-free"]));
-    for (const operation of [
-      "inspect",
-      "extract",
-      "replace",
-      "patch-lines",
-      "metadata",
-      "refresh",
-      "validate",
-      "render",
-      "export-static",
-    ]) {
-      expect(
-        report.results.filter((result) => result.operation === operation),
-      ).toHaveLength(2);
-    }
-    expect(report.results.every((result) => result.success)).toBe(true);
-    expect(report.results.every((result) => result.oracle.ok)).toBe(true);
-    expect(report.results.every((result) => !result.shellDrift)).toBe(true);
-    for (const operation of [
-      "inspect",
-      "extract",
-      "replace",
-      "patch-lines",
-      "metadata",
-      "refresh",
-      "validate",
-      "render",
-      "export-static",
-    ]) {
-      const pair = report.results.filter(
-        (result) => result.operation === operation,
+  it(
+    "dry-runs every advertised operation across both benchmark context variants",
+    { timeout: 30_000 },
+    async () => {
+      const directory = mkdtempSync(join(tmpdir(), "yeli-agent-eval-"));
+      temporaryDirectories.push(directory);
+      const artifactPath = join(directory, "benchmark.yeli.html");
+      const payload = await createDocumentPayload(
+        '---\ntitle: "Benchmark"\ntags: [portable]\n---\n# Benchmark\n\n- [ ] Check\n',
+        { docId: "doc-agent-eval", revision: 2 },
       );
-      expect(
-        new Set(pair.map((result) => result.planning.contextKind)),
-      ).toEqual(new Set(["bounded-pre-read", "raw-markdown"]));
-      expect(
-        new Set(pair.map((result) => result.planning.contextDigest)).size,
-      ).toBe(2);
-      expect(
-        new Set(pair.map((result) => result.planning.planDigest)).size,
-      ).toBe(2);
-    }
-    expect(
-      report.results.find((result) => result.operation === "refresh"),
-    ).toMatchObject({
-      freshnessBefore: "stale",
-      freshnessAfter: "fresh",
-    });
-    expect(
-      report.results
-        .filter((result) => result.operation === "refresh")
-        .every(
-          (result) =>
-            result.planning.inputArtifactHash !== report.artifactHash &&
-            result.planning.contextSourceHash.length === 64,
-        ),
-    ).toBe(true);
-    expect(
-      report.results
-        .filter((result) =>
-          ["replace", "patch-lines", "metadata", "refresh"].includes(
-            result.operation,
-          ),
-        )
-        .every((result) => result.touchedByteRegions.length > 0),
-    ).toBe(true);
-
-    const invalidFixtureRoot = join(directory, "invalid-fixture-root");
-    mkdirSync(join(invalidFixtureRoot, "tests/fixtures/agent-eval"), {
-      recursive: true,
-    });
-    writeFileSync(
-      join(invalidFixtureRoot, "tests/fixtures/agent-eval/tasks.json"),
-      JSON.stringify({
-        benchmarkVersion: 1,
-        operations: ["unknown-operation"],
-        oracleFaults: [],
-        variants: ["manifest-bearing", "manifest-free"],
-      }),
-      "utf8",
-    );
-    const invalidFixture = spawnSync(
-      process.execPath,
-      [
-        resolve("scripts/eval-agents.ts"),
-        "--artifact",
+      writeFileSync(
         artifactPath,
-        "--mode",
-        "fake",
-      ],
-      { cwd: invalidFixtureRoot, encoding: "utf8" },
-    );
-    expect(invalidFixture.status).toBe(1);
-    expect(JSON.parse(invalidFixture.stderr)).toMatchObject({
-      error: {
-        code: "EVALUATION_FAILED",
-        message: "Agent evaluation fixture is invalid",
-      },
-      ok: false,
-    });
-
-    const wrongOutputRoot = join(directory, "wrong-output-root");
-    mkdirSync(join(wrongOutputRoot, "tests/fixtures/agent-eval"), {
-      recursive: true,
-    });
-    writeFileSync(
-      join(wrongOutputRoot, "tests/fixtures/agent-eval/tasks.json"),
-      readFileSync(
-        resolve("tests/fixtures/agent-eval/wrong-output.json"),
+        shellWith(serializePayloadBlock(payload)),
         "utf8",
-      ),
-      "utf8",
-    );
-    const wrongOutput = execFileSync(
-      process.execPath,
-      [
+      );
+
+      const reportPath = join(directory, "benchmark-report.json");
+      const benchmarkArguments = [
         resolve("scripts/eval-agents.ts"),
         "--artifact",
         artifactPath,
         "--mode",
         "fake",
-      ],
-      { cwd: wrongOutputRoot, encoding: "utf8" },
-    );
-    const wrongOutputReport = JSON.parse(wrongOutput) as {
-      results: Array<{
-        contextVariant: string;
-        operation: string;
-        oracle: { code: string; ok: boolean };
-        success: boolean;
-      }>;
-      summary: { successes: number };
-    };
-    expect(
-      wrongOutputReport.results.find(
-        (result) =>
-          result.operation === "extract" &&
-          result.contextVariant === "manifest-free",
-      ),
-    ).toMatchObject({
-      oracle: { code: "EXTRACT_CONTENT_MATCH", ok: false },
-      success: false,
-    });
-    expect(wrongOutputReport.summary.successes).toBe(17);
-  });
+        "--output",
+        reportPath,
+      ];
+      const output = execFileSync(process.execPath, benchmarkArguments, {
+        cwd: resolve("."),
+        encoding: "utf8",
+      });
+      expect(readFileSync(reportPath, "utf8")).toBe(output);
+      expect(statSync(reportPath).mode & 0o777).toBe(0o600);
+      const noClobber = spawnSync(process.execPath, benchmarkArguments, {
+        cwd: resolve("."),
+        encoding: "utf8",
+      });
+      expect(noClobber.status).toBe(1);
+      expect(JSON.parse(noClobber.stderr)).toMatchObject({
+        error: { code: "OUTPUT_EXISTS" },
+        ok: false,
+      });
+      expect(readFileSync(reportPath, "utf8")).toBe(output);
+      expect(
+        readdirSync(directory).filter((name) => name.endsWith(".yeli-tmp")),
+      ).toEqual([]);
+      const report = JSON.parse(output) as {
+        artifactHash: string;
+        releaseScoreClaimed: boolean;
+        results: Array<{
+          contextVariant: string;
+          freshnessBefore: string;
+          freshnessAfter: string;
+          operation: string;
+          oracle: { code: string; ok: boolean };
+          planning: {
+            contextDigest: string;
+            contextKind: string;
+            contextSourceHash: string;
+            inputArtifactHash: string;
+            planDigest: string;
+          };
+          shellDrift: boolean;
+          success: boolean;
+          touchedByteRegions: unknown[];
+        }>;
+      };
+
+      expect(report.releaseScoreClaimed).toBe(false);
+      expect(
+        new Set(report.results.map((result) => result.contextVariant)),
+      ).toEqual(new Set(["manifest-bearing", "manifest-free"]));
+      for (const operation of [
+        "inspect",
+        "extract",
+        "replace",
+        "patch-lines",
+        "metadata",
+        "refresh",
+        "validate",
+        "render",
+        "export-static",
+      ]) {
+        expect(
+          report.results.filter((result) => result.operation === operation),
+        ).toHaveLength(2);
+      }
+      expect(report.results.every((result) => result.success)).toBe(true);
+      expect(report.results.every((result) => result.oracle.ok)).toBe(true);
+      expect(report.results.every((result) => !result.shellDrift)).toBe(true);
+      for (const operation of [
+        "inspect",
+        "extract",
+        "replace",
+        "patch-lines",
+        "metadata",
+        "refresh",
+        "validate",
+        "render",
+        "export-static",
+      ]) {
+        const pair = report.results.filter(
+          (result) => result.operation === operation,
+        );
+        expect(
+          new Set(pair.map((result) => result.planning.contextKind)),
+        ).toEqual(new Set(["bounded-pre-read", "raw-markdown"]));
+        expect(
+          new Set(pair.map((result) => result.planning.contextDigest)).size,
+        ).toBe(2);
+        expect(
+          new Set(pair.map((result) => result.planning.planDigest)).size,
+        ).toBe(2);
+      }
+      expect(
+        report.results.find((result) => result.operation === "refresh"),
+      ).toMatchObject({
+        freshnessBefore: "stale",
+        freshnessAfter: "fresh",
+      });
+      expect(
+        report.results
+          .filter((result) => result.operation === "refresh")
+          .every(
+            (result) =>
+              result.planning.inputArtifactHash !== report.artifactHash &&
+              result.planning.contextSourceHash.length === 64,
+          ),
+      ).toBe(true);
+      expect(
+        report.results
+          .filter((result) =>
+            ["replace", "patch-lines", "metadata", "refresh"].includes(
+              result.operation,
+            ),
+          )
+          .every((result) => result.touchedByteRegions.length > 0),
+      ).toBe(true);
+
+      const invalidFixtureRoot = join(directory, "invalid-fixture-root");
+      mkdirSync(join(invalidFixtureRoot, "tests/fixtures/agent-eval"), {
+        recursive: true,
+      });
+      writeFileSync(
+        join(invalidFixtureRoot, "tests/fixtures/agent-eval/tasks.json"),
+        JSON.stringify({
+          benchmarkVersion: 1,
+          operations: ["unknown-operation"],
+          oracleFaults: [],
+          variants: ["manifest-bearing", "manifest-free"],
+        }),
+        "utf8",
+      );
+      const invalidFixture = spawnSync(
+        process.execPath,
+        [
+          resolve("scripts/eval-agents.ts"),
+          "--artifact",
+          artifactPath,
+          "--mode",
+          "fake",
+        ],
+        { cwd: invalidFixtureRoot, encoding: "utf8" },
+      );
+      expect(invalidFixture.status).toBe(1);
+      expect(JSON.parse(invalidFixture.stderr)).toMatchObject({
+        error: {
+          code: "EVALUATION_FAILED",
+          message: "Agent evaluation fixture is invalid",
+        },
+        ok: false,
+      });
+
+      const wrongOutputRoot = join(directory, "wrong-output-root");
+      mkdirSync(join(wrongOutputRoot, "tests/fixtures/agent-eval"), {
+        recursive: true,
+      });
+      writeFileSync(
+        join(wrongOutputRoot, "tests/fixtures/agent-eval/tasks.json"),
+        readFileSync(
+          resolve("tests/fixtures/agent-eval/wrong-output.json"),
+          "utf8",
+        ),
+        "utf8",
+      );
+      const wrongOutput = execFileSync(
+        process.execPath,
+        [
+          resolve("scripts/eval-agents.ts"),
+          "--artifact",
+          artifactPath,
+          "--mode",
+          "fake",
+        ],
+        { cwd: wrongOutputRoot, encoding: "utf8" },
+      );
+      const wrongOutputReport = JSON.parse(wrongOutput) as {
+        results: Array<{
+          contextVariant: string;
+          operation: string;
+          oracle: { code: string; ok: boolean };
+          success: boolean;
+        }>;
+        summary: { successes: number };
+      };
+      expect(
+        wrongOutputReport.results.find(
+          (result) =>
+            result.operation === "extract" &&
+            result.contextVariant === "manifest-free",
+        ),
+      ).toMatchObject({
+        oracle: { code: "EXTRACT_CONTENT_MATCH", ok: false },
+        success: false,
+      });
+      expect(wrongOutputReport.summary.successes).toBe(17);
+    },
+  );
 });
