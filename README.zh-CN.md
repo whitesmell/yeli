@@ -8,16 +8,16 @@
 用浏览器打开，离线阅读、编辑与演示；也可以导出 Markdown，
 换一个工具继续工作。
 
-[官网（计划上线）](https://yeli.zetury.com/?lang=zh-CN) ·
+[官网](https://yeli.zetury.com/?lang=zh-CN) ·
 [GitHub](https://github.com/whitesmell/yeli) ·
 [文档](docs/README.zh-CN.md) ·
 [Agent 指南](docs/agent-quickstart.zh-CN.md) ·
 [参与贡献](CONTRIBUTING.zh-CN.md)
 
 **实验性。** 源码仓库：[whitesmell/yeli](https://github.com/whitesmell/yeli)，
-官网计划通过 GitHub Pages 发布到 `yeli.zetury.com`。
-目前尚未宣布官网和公开下载上线。剩余发布工作见
-[项目状态](docs/project-status.zh-CN.md)。
+官网与双语教程已通过 GitHub Pages 上线：`yeli.zetury.com`。
+网站提供实验性示例与离线手册，尚未宣布编辑器稳定版。
+剩余发布工作见[项目状态](docs/project-status.zh-CN.md)。
 
 ![Yeli 编辑器示例：目录、文档属性与 Markdown 编辑画布](site/assets/editor.png)
 

@@ -8,16 +8,17 @@ One `.yeli.html` file carries your Markdown source, editor, renderer, and
 embedded assets. Open it in a browser to read, edit, and present offline.
 Export the Markdown and keep working when your tools change.
 
-[Website — planned](https://yeli.zetury.com/?lang=en) ·
+[Website](https://yeli.zetury.com/?lang=en) ·
 [GitHub](https://github.com/whitesmell/yeli) ·
 [Documentation](docs/README.md) ·
 [Agent guide](docs/agent-quickstart.md) ·
 [Contribute](CONTRIBUTING.md)
 
 **Experimental.** Source: [whitesmell/yeli](https://github.com/whitesmell/yeli).
-The website is planned for `yeli.zetury.com` on GitHub Pages.
-The website and public downloads are not announced as live. See
-[project status](docs/project-status.md) for the remaining release work.
+The website and bilingual tutorials are live at `yeli.zetury.com` on GitHub Pages.
+The site includes experimental samples and offline handbooks; a stable editor
+release is not announced. See [project status](docs/project-status.md) for the
+remaining release work.
 
 ![Yeli editor example with an outline, document properties, and a Markdown editing canvas](site/assets/editor.en.png)
 

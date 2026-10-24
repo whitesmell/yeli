@@ -18,7 +18,7 @@ English: [project-status.md](project-status.md)
 | 项目许可证        | MIT；所有者于 2026-10-24 确认，全文见根目录 `LICENSE` | 分发时保留项目及第三方许可声明  |
 | 社区入口          | README、文档、贡献 / 安全指南、Issue 表单、PR 模板    | 在正式仓库验证                  |
 | 私密安全报告      | GitHub 私密漏洞报告已于 2026-10-25 启用并验证         | 使用安全策略中链接的渠道        |
-| 官网与教程        | 选定 GitHub Pages 与 `yeli.zetury.com`，尚未部署      | 核实选定 HTTPS 部署后再标为在线 |
+| 官网与教程        | 已通过 GitHub Pages 上线 `https://yeli.zetury.com`，强制 HTTPS | 持续核验网站检查与部署文件 |
 | 公开下载 / 稳定版 | 未宣布                                                | 满足发布门槛并核实公开产物      |
 
 当前不发布 npm；`private: true` 保持不变。依赖许可证不能代替项目自身许可证。
