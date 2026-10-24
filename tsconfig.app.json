@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowImportingTsExtensions": true,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": {
+      "#advanced-mode": ["src/optional/advanced-source/none.ts"]
+    },
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  },
+  "include": [
+    "src",
+    "scripts/yeli.ts",
+    "scripts/yeli-files.ts",
+    "scripts/eval-agents.ts",
+    "scripts/real-agent-eval.ts",
+    "scripts/keygen.ts",
+    "scripts/release-cli.ts",
+    "scripts/release-paths.ts",
+    "scripts/sign-release.ts",
+    "scripts/validate-single.ts",
+    "tests/unit",
+    "tests/integration",
+    "tests/security",
+    "tests/browser"
+  ]
+}

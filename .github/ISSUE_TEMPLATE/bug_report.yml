@@ -1,0 +1,48 @@
+name: Bug report
+description: Report a reproducible problem in yeli.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Yeli is experimental. Use a minimal synthetic document.
+        Do not include real documents, recovery data, credentials, or private keys.
+        For vulnerabilities, follow SECURITY.md instead of posting exploit details.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Include the artifact hash if the problem depends on a built file.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser/version, OS, default or advanced profile, and file or HTTPS transport.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include the smallest synthetic Markdown example and precise steps.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: For save problems, include capability messages and whether a copy was downloaded.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional evidence
+      description: Redacted screenshots or logs from synthetic data only.

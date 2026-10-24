@@ -1,0 +1,531 @@
+{
+  "version": 1,
+  "updated": "2026-10-24",
+  "locales": ["zh-CN", "en"],
+  "chapters": [
+    {
+      "id": "yeli/overview",
+      "title": {
+        "zh-CN": "功能总览与使用入口",
+        "en": "Features and where to find them"
+      },
+      "description": {
+        "zh-CN": "一页了解能做什么、从哪里操作、何时使用。",
+        "en": "See what Yeli does, where to start and when to use each feature."
+      },
+      "features": [],
+      "section": "start"
+    },
+    {
+      "id": "yeli/quickstart",
+      "title": {
+        "zh-CN": "第一次编辑与保存",
+        "en": "Your first edit and save"
+      },
+      "description": {
+        "zh-CN": "用一次完整往返学会打开、编辑、保存和分享。",
+        "en": "Open, edit, save and share through one complete round trip."
+      },
+      "features": ["open", "new"],
+      "section": "start"
+    },
+    {
+      "id": "yeli/workspace",
+      "title": {
+        "zh-CN": "认识工作区",
+        "en": "Find your way around"
+      },
+      "description": {
+        "zh-CN": "两种主模式、目录、属性与帮助入口。",
+        "en": "The two main modes, outline, properties and help."
+      },
+      "features": ["modes", "outline", "title", "language"],
+      "section": "start"
+    },
+    {
+      "id": "yeli/mission",
+      "title": {
+        "zh-CN": "为什么是 Yeli",
+        "en": "Why Yeli"
+      },
+      "description": {
+        "zh-CN": "从可读文本到人和 Agent 共用的文档。",
+        "en": "From readable text to documents people and Agents can work with."
+      },
+      "features": ["mission"],
+      "section": "start"
+    },
+    {
+      "id": "yeli/writing",
+      "title": {
+        "zh-CN": "正文与选区编辑",
+        "en": "Edit text and selections"
+      },
+      "description": {
+        "zh-CN": "直接写作、局部格式与原文保留。",
+        "en": "Write on the page, format selections and preserve source."
+      },
+      "features": ["selection"],
+      "section": "write"
+    },
+    {
+      "id": "yeli/blocks",
+      "title": {
+        "zh-CN": "区块、斜杠与模板",
+        "en": "Blocks, slash commands and templates"
+      },
+      "description": {
+        "zh-CN": "插入、转换、复制与删除正文结构。",
+        "en": "Insert, convert, duplicate and delete document structure."
+      },
+      "features": ["blocks", "slash", "template"],
+      "section": "write"
+    },
+    {
+      "id": "yeli/tables",
+      "title": {
+        "zh-CN": "编辑表格",
+        "en": "Edit tables"
+      },
+      "description": {
+        "zh-CN": "创建行列、对齐单元格并保留 Markdown。",
+        "en": "Create rows and columns while keeping Markdown."
+      },
+      "features": ["tables"],
+      "section": "write"
+    },
+    {
+      "id": "yeli/media",
+      "title": {
+        "zh-CN": "图片与离线资源",
+        "en": "Images and offline resources"
+      },
+      "description": {
+        "zh-CN": "嵌入图片、替换说明与处理外部资源。",
+        "en": "Embed images, update descriptions and handle external resources."
+      },
+      "features": ["images", "remote-media"],
+      "section": "write"
+    },
+    {
+      "id": "yeli/properties",
+      "title": {
+        "zh-CN": "文档属性与 frontmatter",
+        "en": "Document properties and frontmatter"
+      },
+      "description": {
+        "zh-CN": "标题、标签、作者及五种自定义属性。",
+        "en": "Title, tags, authors and five custom property types."
+      },
+      "features": ["properties"],
+      "section": "write"
+    },
+    {
+      "id": "yeli/search",
+      "title": {
+        "zh-CN": "搜索与替换",
+        "en": "Find and replace"
+      },
+      "description": {
+        "zh-CN": "定位正文，检查范围后替换。",
+        "en": "Locate text and inspect matches before replacing."
+      },
+      "features": ["search", "replace"],
+      "section": "write"
+    },
+    {
+      "id": "yeli/save",
+      "title": {
+        "zh-CN": "保存、副本与冲突",
+        "en": "Save, copies and conflicts"
+      },
+      "description": {
+        "zh-CN": "区分磁盘保存、下载、重新关联与恢复。",
+        "en": "Distinguish saving, downloads, reconnection and recovery."
+      },
+      "features": ["save", "conflict", "reconnect"],
+      "section": "deliver"
+    },
+    {
+      "id": "yeli/history",
+      "title": {
+        "zh-CN": "历史、恢复与撤销",
+        "en": "History, recovery and undo"
+      },
+      "description": {
+        "zh-CN": "先看变化再恢复，理解浏览器记录的范围。",
+        "en": "Review changes before restoring browser-local versions."
+      },
+      "features": ["history", "restore", "recovery"],
+      "section": "deliver"
+    },
+    {
+      "id": "yeli/reading",
+      "title": {
+        "zh-CN": "阅读、专注与演示",
+        "en": "Read, focus and present"
+      },
+      "description": {
+        "zh-CN": "调整字号与宽度，使用标题组织演示。",
+        "en": "Adjust reading layout and use headings to present."
+      },
+      "features": ["focus", "presentation", "appearance"],
+      "section": "deliver"
+    },
+    {
+      "id": "yeli/export",
+      "title": {
+        "zh-CN": "导入、导出与分享",
+        "en": "Import, export and share"
+      },
+      "description": {
+        "zh-CN": "按继续编辑、阅读或归档选择输出。",
+        "en": "Choose outputs for editing, reading or archiving."
+      },
+      "features": ["import", "export", "print"],
+      "section": "deliver"
+    },
+    {
+      "id": "yeli/best-practices",
+      "title": {
+        "zh-CN": "工作流与最佳实践",
+        "en": "Workflows and best practices"
+      },
+      "description": {
+        "zh-CN": "从会议记录、长文到分享与 Agent 接续的完整做法。",
+        "en": "Complete workflows for meeting notes, long documents, sharing and Agent handoffs."
+      },
+      "features": [],
+      "section": "workflow"
+    },
+    {
+      "id": "yeli/agent",
+      "title": {
+        "zh-CN": "与 Agent 一起工作",
+        "en": "Work with an Agent"
+      },
+      "description": {
+        "zh-CN": "CLI、Skill、预读、窄修改与验收。",
+        "en": "CLI, Skill, pre-read, narrow edits and validation."
+      },
+      "features": ["agent", "cli", "skill"],
+      "section": "workflow"
+    },
+    {
+      "id": "yeli/shortcuts",
+      "title": {
+        "zh-CN": "快捷键速查",
+        "en": "Keyboard shortcuts"
+      },
+      "description": {
+        "zh-CN": "Mac 与 Windows/Linux 分列，按用途查按键与适用条件。",
+        "en": "Find Mac and Windows/Linux keys by purpose, with the conditions for use."
+      },
+      "features": ["shortcuts"],
+      "section": "reference"
+    },
+    {
+      "id": "yeli/commands",
+      "title": {
+        "zh-CN": "完整命令参考",
+        "en": "Complete command reference"
+      },
+      "description": {
+        "zh-CN": "按用途查命令、入口与生效条件。",
+        "en": "Find every command, its entry point and availability by purpose."
+      },
+      "features": ["commands"],
+      "section": "reference"
+    },
+    {
+      "id": "yeli/compatibility",
+      "title": {
+        "zh-CN": "兼容性、安全与排错",
+        "en": "Compatibility, safety and troubleshooting"
+      },
+      "description": {
+        "zh-CN": "根据实际环境选择保存与交付路径。",
+        "en": "Choose save and delivery paths for your actual environment."
+      },
+      "features": ["advanced", "safety", "troubleshooting"],
+      "section": "reference"
+    },
+    {
+      "id": "markdown/intro",
+      "title": {
+        "zh-CN": "Markdown 的起源、方言与 Agent",
+        "en": "Markdown: origins, dialects and Agents"
+      },
+      "description": {
+        "zh-CN": "为什么纯文本长期有用，又为什么渲染结果会不同。",
+        "en": "Why plain text lasts and why renderers differ."
+      },
+      "features": [],
+      "topics": ["history", "dialects", "agent-context"],
+      "section": "md-start"
+    },
+    {
+      "id": "markdown/cheatsheet",
+      "title": {
+        "zh-CN": "Markdown 语法速查",
+        "en": "Markdown cheat sheet"
+      },
+      "description": {
+        "zh-CN": "一页找到常用写法及支持边界。",
+        "en": "Find common syntax and its support boundaries in one page."
+      },
+      "features": [],
+      "topics": ["cheatsheet"],
+      "section": "md-start"
+    },
+    {
+      "id": "markdown/headings-paragraphs",
+      "title": {
+        "zh-CN": "标题、段落、换行与分隔线",
+        "en": "Headings, paragraphs, breaks and rules"
+      },
+      "description": {
+        "zh-CN": "用结构组织文档，而非堆积视觉样式。",
+        "en": "Organize a document with structure instead of visual spacing."
+      },
+      "features": [],
+      "topics": ["headings", "paragraphs", "line-breaks", "thematic-breaks"],
+      "section": "md-basic"
+    },
+    {
+      "id": "markdown/emphasis",
+      "title": {
+        "zh-CN": "强调、删除线与嵌套",
+        "en": "Emphasis, strikethrough and nesting"
+      },
+      "description": {
+        "zh-CN": "掌握成对标记，避免误格式化。",
+        "en": "Pair markers correctly and avoid accidental formatting."
+      },
+      "features": [],
+      "topics": ["bold", "italic", "strike", "nesting"],
+      "section": "md-basic"
+    },
+    {
+      "id": "markdown/lists-quotes",
+      "title": {
+        "zh-CN": "列表、引用与嵌套结构",
+        "en": "Lists, quotes and nested structure"
+      },
+      "description": {
+        "zh-CN": "正确缩进，让条目关系清晰。",
+        "en": "Use indentation to make relationships clear."
+      },
+      "features": [],
+      "topics": ["lists", "ordered", "nested", "blockquotes"],
+      "section": "md-basic"
+    },
+    {
+      "id": "markdown/code",
+      "title": {
+        "zh-CN": "行内代码与代码块",
+        "en": "Inline code and code blocks"
+      },
+      "description": {
+        "zh-CN": "展示代码而不执行，理解语言标识。",
+        "en": "Display code without executing it and understand language labels."
+      },
+      "features": [],
+      "topics": ["inline-code", "fences", "indented-code", "language-tags"],
+      "section": "md-basic"
+    },
+    {
+      "id": "markdown/links-images",
+      "title": {
+        "zh-CN": "链接、图片与引用链接",
+        "en": "Links, images and reference links"
+      },
+      "description": {
+        "zh-CN": "把可见名称、目的地址和离线资源分开理解。",
+        "en": "Separate labels, destinations and offline assets."
+      },
+      "features": [],
+      "topics": ["links", "reference-links", "images", "autolinks"],
+      "section": "md-basic"
+    },
+    {
+      "id": "markdown/tables-tasks",
+      "title": {
+        "zh-CN": "表格、任务与 GFM 常用扩展",
+        "en": "Tables, tasks and common GFM extensions"
+      },
+      "description": {
+        "zh-CN": "管道表格、对齐、复选框和兼容性。",
+        "en": "Pipe tables, alignment, checkboxes and compatibility."
+      },
+      "features": [],
+      "topics": ["tables", "alignment", "tasks", "strikethrough"],
+      "section": "md-extended"
+    },
+    {
+      "id": "markdown/extensions",
+      "title": {
+        "zh-CN": "扩展语法与 Yeli 支持表",
+        "en": "Extensions and Yeli support"
+      },
+      "description": {
+        "zh-CN": "知道写法，更要知道当前是否渲染。",
+        "en": "Learn syntax and check whether it renders here."
+      },
+      "features": [],
+      "topics": [
+        "footnotes",
+        "heading-ids",
+        "definitions",
+        "emoji",
+        "highlight",
+        "subscript",
+        "superscript",
+        "math",
+        "mermaid",
+        "bare-urls"
+      ],
+      "section": "md-extended"
+    },
+    {
+      "id": "markdown/html-escaping",
+      "title": {
+        "zh-CN": "HTML、转义与安全边界",
+        "en": "HTML, escaping and safety"
+      },
+      "description": {
+        "zh-CN": "展示字面符号，区分语法能力与执行权限。",
+        "en": "Display literal symbols and distinguish syntax from execution."
+      },
+      "features": [],
+      "topics": ["escaping", "html", "safety"],
+      "section": "md-extended"
+    },
+    {
+      "id": "markdown/frontmatter",
+      "title": {
+        "zh-CN": "YAML frontmatter 与可维护文档",
+        "en": "YAML frontmatter and maintainable documents"
+      },
+      "description": {
+        "zh-CN": "用文件头表达元数据，同时保持正文可移植。",
+        "en": "Keep metadata in the file header and preserve portable text."
+      },
+      "features": [],
+      "topics": ["frontmatter", "yaml", "metadata"],
+      "section": "md-extended"
+    },
+    {
+      "id": "markdown/practice",
+      "title": {
+        "zh-CN": "综合练习与参考资料",
+        "en": "Practice and references"
+      },
+      "description": {
+        "zh-CN": "把语法、Agent 任务和 Yeli 交付连成一次练习。",
+        "en": "Connect syntax, an Agent task and Yeli delivery in one exercise."
+      },
+      "features": [],
+      "topics": ["practice", "references"],
+      "section": "md-extended"
+    }
+  ],
+  "sections": [
+    {
+      "id": "start",
+      "track": "yeli",
+      "title": {
+        "zh-CN": "开始使用",
+        "en": "Get started"
+      },
+      "description": {
+        "zh-CN": "了解功能，完成第一次编辑与保存。",
+        "en": "Explore capabilities and complete your first edit and save."
+      }
+    },
+    {
+      "id": "write",
+      "track": "yeli",
+      "title": {
+        "zh-CN": "写作与组织",
+        "en": "Write and organize"
+      },
+      "description": {
+        "zh-CN": "按编辑对象学习正文、区块、表格、图片与属性。",
+        "en": "Learn text, blocks, tables, images and document properties."
+      }
+    },
+    {
+      "id": "deliver",
+      "track": "yeli",
+      "title": {
+        "zh-CN": "保存与交付",
+        "en": "Save and deliver"
+      },
+      "description": {
+        "zh-CN": "保住修改，整理版本，选择阅读与分享方式。",
+        "en": "Keep edits, manage versions and choose how to read and share."
+      }
+    },
+    {
+      "id": "workflow",
+      "track": "yeli",
+      "title": {
+        "zh-CN": "工作流与最佳实践",
+        "en": "Workflows and best practices"
+      },
+      "description": {
+        "zh-CN": "把功能连成会议记录、长文和 Agent 接续流程。",
+        "en": "Connect features into meeting notes, long documents and Agent handoffs."
+      }
+    },
+    {
+      "id": "reference",
+      "track": "yeli",
+      "title": {
+        "zh-CN": "查阅参考",
+        "en": "Reference"
+      },
+      "description": {
+        "zh-CN": "查快捷键、完整命令、兼容性与问题处理。",
+        "en": "Look up shortcuts, all commands, compatibility and troubleshooting."
+      }
+    },
+    {
+      "id": "md-start",
+      "track": "markdown",
+      "title": {
+        "zh-CN": "认识与速查",
+        "en": "Introduction and quick reference"
+      },
+      "description": {
+        "zh-CN": "理解 Markdown，再查常用写法。",
+        "en": "Understand Markdown, then look up common syntax."
+      }
+    },
+    {
+      "id": "md-basic",
+      "track": "markdown",
+      "title": {
+        "zh-CN": "基础语法",
+        "en": "Basic syntax"
+      },
+      "description": {
+        "zh-CN": "从段落到链接，练习可移植的正文结构。",
+        "en": "Practice portable structures, from paragraphs to links."
+      }
+    },
+    {
+      "id": "md-extended",
+      "track": "markdown",
+      "title": {
+        "zh-CN": "扩展与实践",
+        "en": "Extensions and practice"
+      },
+      "description": {
+        "zh-CN": "核对支持范围，学习元数据并完成练习。",
+        "en": "Check support, learn metadata and complete the exercise."
+      }
+    }
+  ]
+}

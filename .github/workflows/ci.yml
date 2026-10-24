@@ -1,0 +1,64 @@
+name: deterministic-ci
+
+on:
+  workflow_call:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm run check:public
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run build:single:all
+      - run: npm test
+      - run: npm run test:integration
+      - run: npm run test:security
+      - run: npm run test:agent
+      - run: npm run test:cli
+      - run: npm run test:fidelity
+      - run: npm run test:browser
+      - run: npm run test:quality
+      - run: npm run validate:single
+      - run: npm run validate:single -- --locale en
+      - run: npm run build:site
+      - run: npm run check:site
+      - run: npm run test:site
+
+      - name: Upload exact release candidate and browser failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: yeli-ci-evidence
+          if-no-files-found: ignore
+          path: |
+            dist/html/starter.en.yeli.html
+            dist/html/starter.zh-CN.yeli.html
+            playwright-report/
+            test-results/
+
+  forbidden-release-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reject private signing material
+        run: |
+          if git grep -I -l -E '^-----BEGIN ([A-Z0-9]+ )*PRIVATE KEY-----$' -- .; then
+            echo 'Private signing material is forbidden in the repository.' >&2
+            exit 1
+          fi

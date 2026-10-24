@@ -1,0 +1,236 @@
+.presentation-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  padding: 20px;
+  background: #071027f2;
+}
+
+.presentation-backdrop:fullscreen {
+  padding: max(20px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+
+.presentation-overlay {
+  width: min(1380px, 100%);
+  height: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  color: #eef2fa;
+}
+
+.presentation-overlay > header,
+.presentation-overlay > footer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  min-height: 58px;
+  gap: 18px;
+}
+
+.presentation-overlay > header > :last-child,
+.presentation-overlay > footer > :last-child {
+  justify-self: end;
+}
+
+.presentation-actions {
+  display: inline-flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.presentation-overlay > footer > :first-child {
+  justify-self: start;
+}
+
+.presentation-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+}
+
+.presentation-brand svg,
+.presentation-overlay footer svg {
+  width: 17px;
+  height: 17px;
+}
+
+.presentation-overlay > header .icon-button {
+  min-width: 40px;
+  min-height: 40px;
+  border: 1px solid #ffffff38;
+  color: #f8fafc;
+  background: #ffffff14;
+}
+
+.presentation-overlay > header .icon-button:hover:not(:disabled) {
+  border-color: #ffffff66;
+  color: #ffffff;
+  background: #ffffff26;
+}
+
+.presentation-overlay > header .icon-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.presentation-page {
+  align-self: center;
+  width: min(1120px, 100%);
+  max-height: calc(100vh - 156px);
+  margin: 0 auto;
+  overflow: auto;
+  border: 1px solid #ffffff24;
+  border-radius: 20px;
+  background: #f9fafc;
+  padding: clamp(34px, 6vw, 88px);
+  box-shadow: 0 28px 90px #00000045;
+}
+
+.presentation-backdrop.is-fullscreen .presentation-overlay {
+  width: min(1520px, 100%);
+}
+
+.presentation-backdrop.is-fullscreen .presentation-page {
+  width: min(1320px, 100%);
+  max-height: calc(100vh - 132px);
+  padding: clamp(40px, 7vw, 108px);
+}
+
+.presentation-backdrop.is-fullscreen .presentation-overlay > header,
+.presentation-backdrop.is-fullscreen .presentation-overlay > footer {
+  color: transparent;
+  transition: color 160ms ease;
+}
+
+.presentation-backdrop.is-fullscreen .presentation-actions,
+.presentation-backdrop.is-fullscreen .presentation-overlay > footer > button,
+.presentation-backdrop.is-fullscreen .presentation-overlay > footer > strong {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.presentation-backdrop.is-fullscreen .presentation-overlay > header:hover,
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > header:focus-within,
+.presentation-backdrop.is-fullscreen .presentation-overlay > footer:hover,
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > footer:focus-within {
+  color: #eef2fa;
+}
+
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > header:hover
+  .presentation-actions,
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > header:focus-within
+  .presentation-actions,
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > footer:hover
+  > button,
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > footer:focus-within
+  > button,
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > footer:hover
+  > strong,
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > footer:focus-within
+  > strong {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > footer:hover
+  > strong,
+.presentation-backdrop.is-fullscreen
+  .presentation-overlay
+  > footer:focus-within
+  > strong {
+  color: #b8c3da;
+}
+
+@media (hover: none) {
+  .presentation-backdrop.is-fullscreen .presentation-overlay > header,
+  .presentation-backdrop.is-fullscreen .presentation-overlay > footer {
+    color: #eef2fa;
+  }
+
+  .presentation-backdrop.is-fullscreen .presentation-actions,
+  .presentation-backdrop.is-fullscreen .presentation-overlay > footer > button,
+  .presentation-backdrop.is-fullscreen .presentation-overlay > footer > strong {
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .presentation-backdrop.is-fullscreen .presentation-overlay > footer > strong {
+    color: #b8c3da;
+  }
+}
+
+.presentation-page .markdown-document {
+  width: min(820px, 100%);
+  margin: 0 auto;
+  font-size: clamp(16px, 1.6vw, 21px);
+  line-height: 1.75;
+}
+
+.presentation-page .markdown-document h1,
+.presentation-page .markdown-document h2 {
+  margin-top: 0;
+  font-size: clamp(34px, 4vw, 58px);
+}
+
+.presentation-backdrop.is-fullscreen .presentation-page .markdown-document {
+  width: min(940px, 100%);
+  font-size: clamp(18px, 1.75vw, 24px);
+}
+
+.presentation-backdrop.is-fullscreen .presentation-page .markdown-document h1,
+.presentation-backdrop.is-fullscreen .presentation-page .markdown-document h2 {
+  font-size: clamp(40px, 4.5vw, 68px);
+}
+
+.presentation-overlay footer button {
+  width: min(132px, 28vw);
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #ffffff2b;
+  border-radius: 9px;
+  padding: 0 13px;
+  color: #eef2fa;
+  background: #ffffff0f;
+  font-size: 11px;
+}
+
+.presentation-overlay footer button:disabled {
+  opacity: 0.35;
+}
+
+.presentation-overlay footer strong {
+  max-width: 50vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  color: #b8c3da;
+}

@@ -1,0 +1,33 @@
+name: Feature proposal
+description: Describe a user problem and a scoped improvement for yeli.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read CONTRIBUTING.md and docs/README.md first.
+        V1 focuses on offline, local-first Markdown documents and external Agent interoperability.
+        Built-in AI, accounts, collaboration, sync, and executable document plugins are outside V1.
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Who encounters it, in what workflow, and what happens today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the user-visible result and the smallest useful scope.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Include existing workflows or a simpler solution.
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and evidence
+      description: Consider offline use, source fidelity, complete-file size, safety, browser behavior, and Agent compatibility.

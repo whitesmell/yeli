@@ -1,0 +1,22 @@
+{
+  "benchmarkVersion": 1,
+  "operations": [
+    "inspect",
+    "extract",
+    "replace",
+    "patch-lines",
+    "metadata",
+    "refresh",
+    "validate",
+    "render",
+    "export-static"
+  ],
+  "variants": ["manifest-bearing", "manifest-free"],
+  "oracleFaults": [
+    {
+      "kind": "schema-valid-wrong-output",
+      "operation": "extract",
+      "variant": "manifest-free"
+    }
+  ]
+}

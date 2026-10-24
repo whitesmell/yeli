@@ -1,0 +1,28 @@
+{
+  "name": "yeli",
+  "version": "0.1.0",
+  "description": "File-only CLI and Agent skill for portable Yeli Markdown documents.",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
+  "bin": {
+    "yeli": "bin/yeli.js"
+  },
+  "files": [
+    "bin/",
+    "lib/",
+    "docs/",
+    "skills/",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "dependencies": {
+    "dompurify": "3.4.14",
+    "jsdom": "30.0.1",
+    "markdown-it": "15.0.1",
+    "yaml": "2.9.0"
+  }
+}

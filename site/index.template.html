@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#06152f" />
+    <meta
+      name="description"
+      content="Yeli 页里：人和 AI 都好用的 Markdown 编辑器。一份 .yeli.html，自带编辑器与原文，离线可读可改。"
+    />
+    <title>Yeli 页里 — 人和 AI 都好用的 Markdown 编辑器</title>
+    <link rel="icon" href="@@FAVICON@@" />
+    <style>
+      @@CSS@@;
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#editor" data-i18n="skip">跳到产品内容</a>
+    <header class="site-header">
+      <nav class="nav wrap" aria-label="主导航" data-label="navigation">
+        <a class="brand" href="#top" aria-label="Yeli 首页">@@LOGO@@</a>
+        <div class="nav-sections">
+          <a href="#editor" data-i18n="navEditor">编辑器</a>
+          <a href="#agent">Agent</a>
+          <a href="#delivery" data-i18n="navDelivery">交付与复用</a>
+          <a href="#opensource" data-i18n="navOpen">开源</a>
+        </div>
+        <div class="nav-utilities">
+          <button class="text-button nav-docs" data-doc="start">
+            <span data-i18n="docs">文档</span> @@ICON:ArrowUpRight@@
+          </button>
+          <button class="text-button" data-repository>
+            GitHub @@ICON:ArrowUpRight@@
+          </button>
+          <label class="language-label"
+            ><span class="sr-only" data-i18n="language">语言</span>
+            <select id="language" aria-label="语言" data-label="language">
+              <option value="zh-CN">简体中文</option>
+              <option value="en">English</option>
+            </select>
+            @@ICON:ChevronDown@@
+          </label>
+          <button
+            id="menu-toggle"
+            class="icon-button menu-toggle"
+            aria-label="打开导航"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+            data-label="menu"
+          >
+            @@ICON:Bars3@@
+          </button>
+        </div>
+      </nav>
+      <div id="mobile-menu" class="mobile-menu" hidden>
+        <a href="#editor" data-i18n="navEditor">编辑器</a
+        ><a href="#agent">Agent</a>
+        <a href="#delivery" data-i18n="navDelivery">交付与复用</a
+        ><a href="#opensource" data-i18n="navOpen">开源</a>
+        <button data-doc="start" data-i18n="docs">文档</button>
+      </div>
+    </header>
+    <section class="hero" id="top">
+      <div class="hero-copy wrap">
+        <h1>
+          <span data-i18n="heroLine1">人和 AI，都好用的</span
+          ><span data-i18n="heroLine2">Markdown 编辑器。</span>
+        </h1>
+        <p class="hero-subtitle">
+          <span data-i18n="heroSub1"
+            >一份 .yeli.html，自带编辑器与 Markdown 原文；</span
+          ><span data-i18n="heroSub2"
+            >离线可读可改，换一个工具也能接着做。</span
+          >
+        </p>
+        <div class="actions hero-actions">
+          <a
+            class="button primary"
+            data-demo
+            href="sample.zh-CN.yeli.html"
+            target="_blank"
+            rel="noopener"
+            ><span data-i18n="demo">打开示例</span> @@ICON:ArrowRight@@</a
+          >
+          <button class="button secondary" data-doc="agent">
+            <span data-i18n="agentGuide">Agent 指南</span> @@ICON:ArrowUpRight@@
+          </button>
+        </div>
+      </div>
+      <figure class="hero-art">
+        <div class="hero-scene">
+          <img
+            src="@@HERO@@"
+            width="1536"
+            height="1024"
+            alt="人通过页面编辑，外部 Agent 通过相连的 Markdown 原文工作；两种方式属于同一份文档。"
+            data-alt="heroAlt"
+            fetchpriority="high"
+          />
+          <div class="agent-label">
+            <strong data-i18n="agentAudience">AI Agent</strong
+            ><span data-i18n="agentContext">理解上下文，接续工作。</span>
+          </div>
+        </div>
+      </figure>
+      <div class="hero-bottom">
+        <span class="offline-pill" data-i18n="offline"
+          >离线可用 · 本地保存</span
+        >
+      </div>
+    </section>
+    <main>
+      <section class="section wrap" id="editor" aria-labelledby="editor-title">
+        <div class="section-heading">
+          <p class="eyebrow" data-i18n="navEditor">编辑器</p>
+          <h2 id="editor-title" data-i18n="editorTitle">
+            直接编辑，所见即所得。
+          </h2>
+          <p class="lead" data-i18n="editorLead">
+            专注内容表达，省去源码与预览之间的反复切换。
+          </p>
+        </div>
+        <figure class="editor-figure">
+          <a
+            data-demo
+            href="sample.zh-CN.yeli.html"
+            target="_blank"
+            rel="noopener"
+            class="editor-link"
+            aria-label="在新标签页打开 Yeli 编辑器示例"
+            data-label="editorDemo"
+          >
+            <img
+              src="@@EDITOR@@"
+              data-src-en="@@EDITOR_EN@@"
+              width="2880"
+              height="1440"
+              alt="Yeli 编辑器实拍：图形 Logo 与 Yeli 品牌、独立文档标题、目录和所见即所得编辑区。"
+              data-alt="editorAlt"
+              loading="lazy"
+            />
+            <span class="figure-action"
+              ><span data-i18n="tryEditor">打开编辑器</span>
+              @@ICON:ArrowUpRight@@</span
+            >
+          </a>
+        </figure>
+        <div class="feature-grid">
+          <article>
+            <h3 data-i18n="syntax">Markdown 语法</h3>
+            <p data-i18n="syntaxDesc">标题、列表、表格与待办。</p>
+            <a
+              class="inline-link"
+              data-tutorial="markdown/intro.html"
+              href="docs/zh-CN/markdown/intro.html"
+              ><span data-i18n="learnMarkdown">学习 Markdown</span>
+              @@ICON:ArrowUpRight@@</a
+            >
+          </article>
+          <article>
+            <h3 data-i18n="shortcuts">常用快捷键</h3>
+            <p data-i18n="shortcutsDesc">加粗、搜索与保存。</p>
+            <button class="shortcut-button" data-doc="shortcuts">
+              <kbd>⌘ / Ctrl</kbd
+              ><span data-i18n="seeShortcuts">查看快捷键</span>
+            </button>
+          </article>
+          <article>
+            <h3 data-i18n="readEdit">阅读与编辑</h3>
+            <p data-i18n="readEditDesc">写作有工具，阅读更专注。</p>
+          </article>
+        </div>
+      </section>
+      <section class="section wrap" id="agent" aria-labelledby="agent-title">
+        <div class="section-heading">
+          <p class="eyebrow">Agent</p>
+          <h2 id="agent-title" data-i18n="agentTitle">
+            给 Agent，可读写的上下文。
+          </h2>
+          <p class="lead" data-i18n="agentLead">
+            让 Agent 快速定位上下文，按需局部修改原文。
+          </p>
+        </div>
+        <div
+          class="pipeline"
+          role="group"
+          aria-label="预读、修改、校验"
+          data-label="pipeline"
+        >
+          <article class="pipeline-step">
+            <header class="step-header">
+              <div>
+                <h3><span>01</span> <span data-i18n="preRead">预读</span></h3>
+                <span class="mono step-command">pre-read</span>
+              </div>
+              @@ICON:ArrowRight@@
+            </header>
+            <div class="step-content">
+              <pre>
+revision: 2
+sourceHash: 85e44270…</pre>
+              <div class="target-lines">
+                <strong data-i18n="executionPlan">执行计划</strong>
+                <p class="mono" data-i18n="lineRange">第 10–14 行</p>
+              </div>
+              <p class="step-result" data-i18n="located">目标章节已定位</p>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <header class="step-header">
+              <div>
+                <h3><span>02</span> <span data-i18n="patch">修改</span></h3>
+                <span class="mono step-command">patch</span>
+              </div>
+              @@ICON:ArrowRight@@
+            </header>
+            <div class="step-content">
+              <p class="line-number" data-i18n="line12">第 12 行</p>
+              <div class="diff removed">
+                <span aria-hidden="true">−</span
+                ><span data-i18n="diffBefore">验证可读与可改。</span>
+              </div>
+              <div class="diff added">
+                <span aria-hidden="true">+</span
+                ><span data-i18n="diffAfter">验证页面编辑与原文读写。</span>
+              </div>
+              <p class="step-result" data-i18n="updated">第 12 行已更新</p>
+            </div>
+          </article>
+          <article class="pipeline-step">
+            <header class="step-header">
+              <div>
+                <h3><span>03</span> <span data-i18n="validate">校验</span></h3>
+                <span class="mono step-command">validate</span>
+              </div>
+            </header>
+            <div class="step-content">
+              <p class="valid-status">
+                @@ICON:CheckCircle@@<span data-i18n="validated">校验通过</span>
+              </p>
+              <pre>
+revision: 2 → 3
+shell.stable: true
+ok: true</pre>
+              <p class="step-result" data-i18n="shellStable">运行壳保持不变</p>
+            </div>
+          </article>
+        </div>
+        <div class="feature-grid agent-features">
+          <article>
+            <h3 data-i18n="fileFormat">文件格式</h3>
+            <p data-i18n="formatDesc">Markdown 原文与结构索引。</p>
+            <button class="inline-link" data-doc="agent">
+              <span data-i18n="agentGuide">Agent 指南</span>
+              @@ICON:ArrowUpRight@@
+            </button>
+          </article>
+          <article>
+            <h3>CLI</h3>
+            <p data-i18n="cliDesc">预读、局部修改与校验。</p>
+            <button class="quiet-link" data-doc="cli" data-i18n="cliReference">
+              查看使用方法
+            </button>
+          </article>
+          <article>
+            <h3>Skill</h3>
+            <p data-i18n="skillDesc">面向文档任务的操作指引。</p>
+          </article>
+        </div>
+      </section>
+      <section
+        class="section wrap"
+        id="delivery"
+        aria-labelledby="delivery-title"
+      >
+        <div class="section-heading">
+          <p class="eyebrow" data-i18n="navDelivery">交付与复用</p>
+          <h2 id="delivery-title" data-i18n="deliveryTitle">
+            工具可以换，成果接着用。
+          </h2>
+          <p class="lead" data-i18n="deliveryLead">
+            原文与编辑能力随文件保留，交付之后仍可继续修订。
+          </p>
+        </div>
+        <div class="comparison">
+          <article class="comparison-before">
+            <p class="comparison-label" data-i18n="withoutLabel">没有 Yeli</p>
+            <h3 data-i18n="without">多份文件，分别维护。</h3>
+            <div class="format-flow">
+              <div class="flow-node ai-node">
+                @@ICON:CpuChip@@<span>AI</span>
+              </div>
+              <span class="flow-arrow">@@ICON:ArrowRight@@</span>
+              <div class="flow-node md-node">
+                @@ICON:DocumentText@@<span data-i18n="sourceMd">原文 .md</span>
+              </div>
+              <span class="flow-arrow fork-arrow" aria-hidden="true"
+                >@@ICON:ArrowRight@@</span
+              >
+              <div class="formats">
+                <div>@@ICON:CodeBracket@@<span>HTML</span></div>
+                <div>@@ICON:DocumentText@@<span>Word</span></div>
+                <div>@@ICON:DocumentArrowDown@@<span>PDF</span></div>
+              </div>
+            </div>
+            <p class="comparison-caption" data-i18n="withoutDesc">
+              修改原文后，重新转换与交付。
+            </p>
+          </article>
+          <article class="comparison-after">
+            <p class="comparison-label" data-i18n="withLabel">使用 Yeli</p>
+            <h3 data-i18n="with">一份 Yeli，继续工作。</h3>
+            <div class="file-flow">
+              <div class="flow-node ai-node">
+                @@ICON:CpuChip@@<span>AI</span>
+              </div>
+              <span class="flow-arrow">@@ICON:ArrowRight@@</span>
+              <div class="file-package">
+                <div class="file-heading">
+                  @@ICON:DocumentText@@
+                  <div>
+                    <strong data-i18n="oneFile">一份 .yeli.html</strong
+                    ><span data-i18n="trustedTemplate">基于可信 Yeli 模板</span>
+                  </div>
+                </div>
+                <div class="file-parts">
+                  <span class="source-part"
+                    >@@ICON:DocumentText@@<b data-i18n="source">原文</b></span
+                  ><span class="editor-part"
+                    >@@ICON:Cube@@<b data-i18n="navEditor">编辑器</b></span
+                  ><span class="assets-part"
+                    >@@ICON:ArchiveBox@@<b data-i18n="assets">资源</b></span
+                  >
+                </div>
+              </div>
+            </div>
+            <p class="comparison-caption" data-i18n="withDesc">
+              打开可读改，外部 Agent 可接续。
+            </p>
+          </article>
+        </div>
+        <div class="knowledge">
+          <p class="eyebrow" data-i18n="knowledgeLabel">可携带项目知识</p>
+          <h3 data-i18n="knowledgeTitle">把成果与方法，留给下一次任务。</h3>
+          <div class="knowledge-grid">
+            <article>
+              @@ICON:ViewfinderCircle@@
+              <div>
+                <h4 data-i18n="background">背景与目标</h4>
+                <p data-i18n="backgroundDesc">
+                  说明要解决的问题、判断依据与完成标准。
+                </p>
+              </div>
+            </article>
+            <article>
+              @@ICON:DocumentText@@
+              <div>
+                <h4 data-i18n="results">成果与原文</h4>
+                <p data-i18n="resultsDesc">保留关键成果与 Markdown 原文。</p>
+              </div>
+            </article>
+            <article>
+              @@ICON:Cog6Tooth@@
+              <div>
+                <h4 data-i18n="methods">方法与依据</h4>
+                <p data-i18n="methodsDesc">
+                  记录采用的方法、关键参考与验证依据。
+                </p>
+              </div>
+            </article>
+            <article>
+              @@ICON:ClipboardDocumentCheck@@
+              <div>
+                <h4 data-i18n="records">任务与验证</h4>
+                <p data-i18n="recordsDesc">说明任务记录、修改与验证结果。</p>
+              </div>
+            </article>
+          </div>
+          <p class="knowledge-note" data-i18n="reviewNote">
+            把决定、原文、依据和验证结果收在同一份文档里，下一次任务可以直接接着做。
+          </p>
+        </div>
+      </section>
+      <div class="dark-bookend">
+        <section
+          class="section open-section wrap"
+          id="opensource"
+          aria-labelledby="open-title"
+        >
+          <div class="section-heading">
+            <p class="eyebrow" data-i18n="navOpen">开源</p>
+            <h2 id="open-title" data-i18n="openTitle">从这里开始。</h2>
+            <p class="lead" data-i18n="openLead">查看源码，参与共建。</p>
+            <div class="actions bottom-actions">
+              <a
+                class="button primary"
+                data-demo
+                href="sample.zh-CN.yeli.html"
+                target="_blank"
+                rel="noopener"
+                ><span data-i18n="demo">打开示例</span> @@ICON:ArrowRight@@</a
+              ><button class="inline-link" data-doc="start">
+                <span data-i18n="readDocs">阅读文档</span> @@ICON:ArrowUpRight@@
+              </button>
+            </div>
+          </div>
+          <div class="resource-grid">
+            <article>
+              <h3 data-i18n="getStarted">开始使用</h3>
+              <button data-doc="start" data-i18n="quickstart">快速开始</button
+              ><button data-doc="guide" data-i18n="editingGuide">
+                编辑指南
+              </button>
+            </article>
+            <article>
+              <h3 data-i18n="developers">开发者与 Agent</h3>
+              <button data-doc="agent" data-i18n="agentGuide">Agent 指南</button
+              ><button data-doc="cli">
+                CLI <span data-i18n="and">与</span> Skill</button
+              ><button data-doc="format" data-i18n="fileFormat">
+                文件格式
+              </button>
+            </article>
+            <article>
+              <h3 data-i18n="participate">参与开源</h3>
+              <button data-repository>GitHub @@ICON:ArrowUpRight@@</button
+              ><button data-doc="contribute" data-i18n="contributing">
+                贡献说明</button
+              ><button data-doc="status" data-i18n="projectStatus">
+                项目状态</button
+              ><button data-license>
+                <span data-i18n="license">开源许可</span> @@ICON:ArrowUpRight@@
+              </button>
+            </article>
+          </div>
+        </section>
+        <footer class="footer wrap">
+          <a class="brand" href="#top" aria-label="Yeli 首页">@@LOGO@@</a>
+          <p data-i18n="footer">本地文件 · 离线使用 · 资产自主受控</p>
+          <div class="footer-languages">
+            <button data-language="zh-CN">简体中文</button
+            ><span aria-hidden="true">|</span
+            ><button data-language="en">English</button>
+          </div>
+        </footer>
+      </div>
+    </main>
+    <dialog id="docs-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-bar">
+        <div>
+          <p class="eyebrow">Yeli Docs</p>
+          <h2 id="dialog-title"></h2>
+        </div>
+        <button
+          class="icon-button close-dialog"
+          aria-label="关闭文档"
+          data-label="close"
+        >
+          @@ICON:XMark@@
+        </button>
+      </div>
+      <div class="dialog-scroll">
+        <div id="dialog-content" class="prose"></div>
+      </div>
+    </dialog>
+    <script id="embedded-docs" type="application/json">
+      @@DOCS@@
+    </script>
+    <script id="site-config" type="application/json">
+      @@CONFIG@@
+    </script>
+    <script>
+      @@JS@@
+    </script>
+  </body>
+</html>

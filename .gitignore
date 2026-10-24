@@ -1,0 +1,38 @@
+.DS_Store
+reference/
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+output/
+*.tsbuildinfo
+
+# Local working documents; synthetic contract fixtures stay in tests/fixtures/.
+/issues*.html
+
+# Private development evidence moved out of the public tree.
+/.local-archive/
+/session-log.md
+/design-qa.md
+
+# Local configuration and signing material.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Internal product contracts, plans, design evidence and research.
+/intent/
+/spec/
+/docs/plans/
+/docs/design/
+/reports/
+/ideation/
+/docs/research/
+/docs/evaluations/
+/docs/reviews/
+/docs/ideation/
