@@ -251,6 +251,27 @@ a svg {
   margin-top: 18px;
   font-weight: 400;
 }
+.hero-subtitle.agent-invitation {
+  display: block;
+  width: min(660px, 100%);
+  margin-inline: auto;
+}
+.agent-invitation textarea {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  resize: none;
+}
+.agent-invitation textarea:focus-visible {
+  outline: 2px solid #a5caff;
+  outline-offset: 3px;
+}
 .hero-subtitle span {
   display: block;
 }
@@ -2194,8 +2215,9 @@ body:has(dialog[open]) {
   }
 }
 @media (min-width: 721px) and (min-height: 540px) and (max-height: 850px) and (min-aspect-ratio: 1/1) {
-  .hero-subtitle {
-    display: none;
+  .hero-art {
+    height: calc(100% + 54px);
+    margin-top: -54px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

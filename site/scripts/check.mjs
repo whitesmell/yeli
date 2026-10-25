@@ -25,6 +25,14 @@ const englishSample = requireFile("sample.en.yeli.html");
 const chineseSample = requireFile("sample.zh-CN.yeli.html");
 const release = JSON.parse(requireFile("release.json").toString("utf8"));
 
+if (
+  !requireFile("skill.md").equals(
+    fs.readFileSync(path.join(root, "skills/yeli/SKILL.md")),
+  )
+)
+  fail("Agent Skill differs from the canonical source");
+if (release.agentSkill !== "skill.md")
+  fail("release manifest does not expose the Agent Skill");
 if (!requireFile("LICENSE").equals(fs.readFileSync(path.join(root, "LICENSE"))))
   fail("project license differs from the root LICENSE");
 if (!homepage.equals(chineseAlias))

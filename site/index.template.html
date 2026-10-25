@@ -66,25 +66,37 @@
           <span data-i18n="heroLine1">人和 AI，都好用的</span
           ><span data-i18n="heroLine2">Markdown 编辑器。</span>
         </h1>
-        <p class="hero-subtitle">
-          <span data-i18n="heroSub1"
-            >一份 .yeli.html，自带编辑器与 Markdown 原文；</span
-          ><span data-i18n="heroSub2"
-            >离线可读可改，换一个工具也能接着做。</span
+        <div class="hero-subtitle agent-invitation">
+          <label class="sr-only" for="agent-prompt" data-i18n="promptLabel"
+            >把这句指令发给你的 Agent</label
           >
-        </p>
+          <textarea
+            id="agent-prompt"
+            rows="1"
+            readonly
+            spellcheck="false"
+            aria-describedby="agent-copy-status"
+          >
+阅读 https://yeli.zetury.com/skill.md，按指引开始创建和编辑 Yeli 文档。</textarea>
+        </div>
+        <p
+          id="agent-copy-status"
+          class="sr-only"
+          role="status"
+          aria-live="polite"
+        ></p>
         <div class="actions hero-actions">
+          <button id="copy-agent-prompt" class="button primary" disabled>
+            <span data-i18n="copyPrompt">复制指令</span> @@ICON:Clipboard@@
+          </button>
           <a
-            class="button primary"
+            class="button secondary"
             data-demo
             href="sample.zh-CN.yeli.html"
             target="_blank"
             rel="noopener"
             ><span data-i18n="demo">打开示例</span> @@ICON:ArrowRight@@</a
           >
-          <button class="button secondary" data-doc="agent">
-            <span data-i18n="agentGuide">Agent 指南</span> @@ICON:ArrowUpRight@@
-          </button>
         </div>
       </div>
       <figure class="hero-art">

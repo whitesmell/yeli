@@ -11,10 +11,14 @@
     menu: "Open navigation",
     heroLine1: "A Markdown editor.",
     heroLine2: "For you. And AI.",
-    heroSub1:
-      "One .yeli.html file, with the editor and Markdown source inside. ",
-    heroSub2:
-      "Read and edit offline. Keep working, even when your tools change.",
+    heroSub1: "Read https://yeli.zetury.com/skill.md ",
+    heroSub2: "and follow the instructions to create and edit Yeli documents.",
+    promptLabel: "Send this instruction to your Agent",
+    copyPrompt: "Copy instruction",
+    copiedLabel: "Copied",
+    copiedPrompt: "Copied. Paste it into your Agent's conversation.",
+    manualCopy:
+      "Instruction selected. Copy it and paste it into your Agent's conversation.",
     demo: "Open example",
     agentGuide: "Agent guide",
     heroAlt:
@@ -118,9 +122,47 @@
   const menu = document.getElementById("mobile-menu");
   const editorImage = document.querySelector(".editor-link > img");
   const editorImageZh = editorImage.getAttribute("src");
+  const prompt = document.getElementById("agent-prompt");
+  const chinesePrompt = prompt.value;
+  const copyButton = document.getElementById("copy-agent-prompt");
+  const copyLabel = copyButton.querySelector("[data-i18n]");
+  const copyStatus = document.getElementById("agent-copy-status");
+  Object.assign(zh, {
+    heroSub1: chinesePrompt,
+    heroSub2: "",
+    copiedLabel: "已复制",
+    copiedPrompt: "已复制，粘贴到你的 Agent 对话中即可。",
+    manualCopy: "已选中指令，请复制后粘贴到你的 Agent 对话中。",
+  });
+  copyButton.disabled = false;
+  let copyVersion = 0;
   let locale = "zh-CN";
   let currentDoc = "";
   let returnFocus = null;
+
+  function fitPrompt() {
+    prompt.style.height = "auto";
+    prompt.style.height = `${prompt.scrollHeight + 2}px`;
+  }
+  prompt.addEventListener("focus", () => prompt.select());
+  prompt.addEventListener("click", () => prompt.select());
+  copyButton.addEventListener("click", async () => {
+    const version = ++copyVersion;
+    const instruction = prompt.value;
+    const text = locale === "en" ? en : zh;
+    try {
+      await navigator.clipboard.writeText(instruction);
+      if (version !== copyVersion) return;
+      copyLabel.textContent = text.copiedLabel;
+      copyStatus.textContent = text.copiedPrompt;
+    } catch {
+      if (version !== copyVersion) return;
+      copyLabel.textContent = text.copyPrompt;
+      prompt.focus();
+      prompt.select();
+      copyStatus.textContent = text.manualCopy;
+    }
+  });
 
   function closeMenu() {
     menu.hidden = true;
@@ -159,6 +201,10 @@
   function setLanguage(value, remember = true) {
     locale = value === "en" ? "en" : "zh-CN";
     const text = locale === "en" ? en : zh;
+    copyVersion++;
+    copyStatus.textContent = "";
+    prompt.value = locale === "en" ? en.heroSub1 + en.heroSub2 : chinesePrompt;
+    fitPrompt();
     document.documentElement.lang = locale;
     document.querySelectorAll("[data-i18n]").forEach((el) => {
       el.textContent = text[el.dataset.i18n] ?? zh[el.dataset.i18n];
@@ -281,6 +327,7 @@
     currentDoc = "";
   });
   window.addEventListener("resize", () => {
+    fitPrompt();
     if (innerWidth > 720) closeMenu();
   });
   let initial = new URLSearchParams(location.search).get("lang");

@@ -7,7 +7,61 @@ documents through local files. This is the document-use entry point.
 The repository's `AGENTS.md` instead governs development of Yeli itself.
 There is no built-in model, account, or Agent service.
 
-## Install the CLI
+## Start with one instruction
+
+Send this to an Agent that can access the web, run commands, and read and write
+local files:
+
+> Read https://yeli.zetury.com/skill.md and follow the instructions to create and edit Yeli documents.
+
+Then describe your task, for example: "Turn these meeting notes into a new
+`meeting.yeli.html` and return the validated file." The Skill covers tool
+preparation, document creation, narrow edits, and validation.
+
+## Prepare the tools once
+
+Use a new checkout of the official repository, or reuse your trusted checkout:
+
+```sh
+git clone https://github.com/whitesmell/yeli.git
+cd yeli
+nvm use
+npm ci
+npm run setup:agent
+```
+
+Another version manager can select the Node version in `.nvmrc`. The preparation
+command builds the CLI, generic Skill, and both language templates together,
+then validates both templates. It prints JSON and writes `dist/agent/setup.json`.
+Build logs go to stderr; `npm run --silent setup:agent` leaves only the JSON on
+stdout.
+
+| Receipt field                                    | Use                                                       |
+| ------------------------------------------------ | --------------------------------------------------------- |
+| `paths.node`, `paths.cli`                        | Exact executable paths, usable from any working directory |
+| `paths.skill`                                    | Skill for document tasks; read it explicitly              |
+| `paths.guide`, `paths.quickstart`                | Installed operation reference and this guide              |
+| `paths.templates.en`, `paths.templates["zh-CN"]` | Locally built trusted-source templates                    |
+
+Run the CLI as `"<paths.node>" "<paths.cli>" <command>` using actual receipt
+values. No global installation, packaging step, or Agent configuration change
+is needed. Keep the checkout available while using these paths. A template
+built from source inherits trust from that checkout; it is not a signed release.
+
+For a first document, write `notes.md` with the requested material, then from
+the checkout run:
+
+```sh
+node dist/cli/bin/yeli.js import notes.md --template dist/html/starter.en.yeli.html --output notes.yeli.html
+node dist/cli/bin/yeli.js validate notes.yeli.html
+node dist/cli/bin/yeli.js extract notes.yeli.html
+```
+
+Use a new output path. Verify the extracted Markdown matches your source,
+then return the absolute `.yeli.html` path for the human to open and edit.
+For later edits, pre-read first and use the freshness and shell checks below.
+
+## Install the CLI separately (optional)
 
 The CLI needs Node.js `>=24.15.0 <25`; development uses `24.19.0`.
 No public npm package or official download is announced. Do not assume a
@@ -51,9 +105,9 @@ belong to the built package.
 
 ## Create from Markdown
 
-Obtain a trusted `.yeli.html` template separately. For a local experiment,
-the source checkout can build one with `npm run build:single`, producing
-`dist/html/starter.en.yeli.html` or `dist/html/starter.zh-CN.yeli.html`. A successful
+With the standalone package, obtain a trusted `.yeli.html` template separately.
+The source preparation above builds both templates; alternatively use
+`npm run build:single:all`. A successful
 development build does not certify a
 public release or satisfy the final artifact size gate.
 

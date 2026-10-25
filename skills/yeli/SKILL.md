@@ -19,11 +19,46 @@ and `paths.quickstart`. This Skill supports Agent API `1`. Read the full guide
 when using unfamiliar commands, metadata, exports, signature verification,
 or error recovery.
 
-If the executable is unavailable, use the user's trusted local CLI package
-and installation instructions. Report the missing prerequisite if none was
-provided; do not guess a registry package, download a browser template, or
-reimplement the payload writer. The CLI and a browser template are separate
-prerequisites. Skill installation alone does not install either.
+For first use without a CLI, prepare the tools from the official source
+repository, `https://github.com/whitesmell/yeli`, in a new checkout in the
+user's workspace. Reuse an existing trusted checkout when provided. Use
+Node.js `>=24.15.0 <25`, with the development version pinned in `.nvmrc`:
+
+```sh
+git clone https://github.com/whitesmell/yeli.git
+cd yeli
+nvm use
+npm ci
+npm run setup:agent
+```
+
+`nvm` is optional; another version manager can select the pinned Node version.
+If the required runtime or command execution is unavailable, report the
+missing prerequisite. Initial installation needs network access; prepared
+document commands work locally.
+
+`setup:agent` builds the CLI, this Skill, and both starter templates. Read the
+JSON result or `dist/agent/setup.json`: `paths.node` and `paths.cli` give the
+exact command, `paths.skill` this Skill, and `paths.templates` both locally
+built templates. Use `paths.node paths.cli <command>` from any working
+directory; do not assume `yeli` is on `PATH`. This setup does not change
+Agent configuration or install a global command.
+
+Alternatively use the user's trusted local CLI package and installation
+instructions.
+Do not guess a registry package, fetch an arbitrary browser template, or
+reimplement the payload writer. A locally built template inherits trust
+from the source checkout; it is not a signed release. Skill installation
+alone does not install the CLI or a template.
+
+## Complete the first task
+
+Read the Skill at `paths.skill` after setup. Use the user's material and
+requested output location to create a new `.yeli.html`, or make the requested
+edit to an existing file. If no document task was given, report that setup is
+ready and ask what document to create or edit; do not invent content.
+Follow the create or edit workflow below, validate the result and return its
+absolute path. The user can open the file in a browser and continue editing.
 
 ## Read or edit an existing document
 

@@ -1,12 +1,60 @@
 # 让 Agent 使用 Yeli
 
-English · [简体中文](agent-quickstart.md)
+[English](agent-quickstart.md) · 简体中文
 
 本文说明如何让外部 Agent 通过本地文件创建、读取、修改、校验和导出
 `.yeli.html`。仓库根目录的 `AGENTS.md` 则用于指导开发 Yeli 本身。
 Yeli 没有内置模型、账号或 Agent 服务。
 
-## 安装 CLI
+## 一句话开始
+
+把这句指令发给能联网、运行命令并读写本地文件的 Agent：
+
+> 阅读 https://yeli.zetury.com/skill.md，按指引开始创建和编辑 Yeli 文档。
+
+接着描述任务，例如：“把这些会议记录整理成一份新的 `meeting.yeli.html`，
+返回校验后的文件。”Skill 覆盖工具准备、创建文档、局部修改和校验。
+
+## 一次准备工具
+
+新建官方仓库的源码副本，或复用已有的可信副本：
+
+```sh
+git clone https://github.com/whitesmell/yeli.git
+cd yeli
+nvm use
+npm ci
+npm run setup:agent
+```
+
+也可用其他版本管理器选择 `.nvmrc` 指定的 Node 版本。准备命令一起构建 CLI、
+通用 Skill 和两种语言的模板，再校验两个模板。它输出 JSON，并写入
+`dist/agent/setup.json`。构建日志写入 stderr；
+`npm run --silent setup:agent` 的 stdout 只包含 JSON。
+
+| 回执字段                                         | 用途                                 |
+| ------------------------------------------------ | ------------------------------------ |
+| `paths.node`、`paths.cli`                        | 可从任意目录使用的可执行文件绝对路径 |
+| `paths.skill`                                    | 文档任务 Skill，请显式读取           |
+| `paths.guide`、`paths.quickstart`                | 已构建的操作参考与本指南             |
+| `paths.templates.en`、`paths.templates["zh-CN"]` | 基于可信源码构建的模板               |
+
+把回执中的实际路径代入 `"<paths.node>" "<paths.cli>" <command>` 执行命令。
+不需要全局安装、打包或修改 Agent 配置。使用这些路径期间请保留该源码副本。
+模板的信任来自源码副本，不代表已签名发行。
+
+首次创建时，把用户材料写入 `notes.md`，然后在源码副本中执行：
+
+```sh
+node dist/cli/bin/yeli.js import notes.md --template dist/html/starter.zh-CN.yeli.html --output notes.yeli.html
+node dist/cli/bin/yeli.js validate notes.yeli.html
+node dist/cli/bin/yeli.js extract notes.yeli.html
+```
+
+输出使用新路径，确认提取后的 Markdown 与原文一致，再返回 `.yeli.html`
+绝对路径，供用户打开和继续编辑。后续修改应先预读，并遵守下文的新鲜度与壳哈希检查。
+
+## 单独安装 CLI（可选）
 
 CLI 要求 Node.js `>=24.15.0 <25`，开发使用 `24.19.0`。
 目前没有宣布公开 npm 包或官方下载地址，不要把注册表里的同名包当成本项目。
@@ -43,9 +91,9 @@ npm install --prefix ./yeli-tools --ignore-scripts /absolute/path/yeli-0.1.0.tgz
 
 ## 从 Markdown 创建文档
 
-单独取得可信的 `.yeli.html` 模板。本地实验可在源码仓库执行
-`npm run build:single:all`，得到 `dist/html/starter.en.yeli.html` 与
-`dist/html/starter.zh-CN.yeli.html`。开发构建成功不代表
+使用独立安装包时，需单独取得可信的 `.yeli.html` 模板。
+前面的准备命令已构建两个模板，也可执行 `npm run build:single:all`。
+开发构建成功不代表
 公开发行认证，也不代表满足最终体积门槛。
 
 写好 `notes.md` 后创建新文档：

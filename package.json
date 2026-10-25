@@ -11,8 +11,10 @@
   "scripts": {
     "yeli": "node scripts/yeli.ts",
     "build:cli": "node scripts/build-cli.mjs",
+    "setup:agent": "node scripts/setup-agent.mjs",
     "pack:cli": "npm run build:cli && node scripts/pack-cli.mjs",
     "test:cli": "npm run build:cli && node --test tests/cli/*.test.mjs",
+    "test:agent-setup": "node --test tests/agent/setup.test.mjs",
     "check:public": "node --test tests/repository/*.test.mjs && node scripts/check-public-scope.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",

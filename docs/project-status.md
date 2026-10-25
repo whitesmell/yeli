@@ -12,16 +12,16 @@ source boundary.
 
 ## Publication readiness
 
-| Item                           | Current state                                                                 | Required next step                                        |
-| ------------------------------ | ----------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Project name                   | `yeli`                                                                        | Use it in repository/package and community entry points   |
-| Canonical repository           | [whitesmell/yeli](https://github.com/whitesmell/yeli)                         | Maintain the separate clean public history                |
-| Project license                | MIT; owner approved on 2026-10-24; full text in root `LICENSE`                | Retain project and third-party notices in distributions   |
-| Community entry points         | README, documentation, contribution/security guides, issue forms, PR template | Verify their behavior on the published repository         |
-| Languages                      | `zh-CN` / `en` UI, bilingual starter files and public entry documentation     | Keep dictionaries and public usage documentation in sync  |
-| Private security reporting     | GitHub private vulnerability reporting enabled and verified on 2026-10-25     | Use the channel linked in `SECURITY.md`                   |
-| Homepage and tutorials         | Live at `https://yeli.zetury.com` on GitHub Pages; HTTPS enforced              | Keep site checks and deployed-file verification passing   |
-| Public download/stable release | Not announced                                                                 | Satisfy release gates and verify exact public assets      |
+| Item                           | Current state                                                                 | Required next step                                       |
+| ------------------------------ | ----------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Project name                   | `yeli`                                                                        | Use it in repository/package and community entry points  |
+| Canonical repository           | [whitesmell/yeli](https://github.com/whitesmell/yeli)                         | Maintain the separate clean public history               |
+| Project license                | MIT; owner approved on 2026-10-24; full text in root `LICENSE`                | Retain project and third-party notices in distributions  |
+| Community entry points         | README, documentation, contribution/security guides, issue forms, PR template | Verify their behavior on the published repository        |
+| Languages                      | `zh-CN` / `en` UI, bilingual starter files and public entry documentation     | Keep dictionaries and public usage documentation in sync |
+| Private security reporting     | GitHub private vulnerability reporting enabled and verified on 2026-10-25     | Use the channel linked in `SECURITY.md`                  |
+| Homepage and tutorials         | Live at `https://yeli.zetury.com` on GitHub Pages; HTTPS enforced             | Keep site checks and deployed-file verification passing  |
+| Public download/stable release | Not announced                                                                 | Satisfy release gates and verify exact public assets     |
 
 There is no npm publication configuration; `private: true` stays in place.
 Dependency licenses do not select the project's license.

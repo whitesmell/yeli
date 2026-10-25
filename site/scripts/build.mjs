@@ -265,7 +265,7 @@ const tutorialRoutes = {
   docs: "index.html",
 };
 html = html.replace(
-  /<button([^>]*?)data-doc="(start|agent|cli|guide|shortcuts|docs)"([^>]*)>([\s\S]*?)<\/button>/g,
+  /<button([^>]*?)data-doc="(start|agent|cli|guide|shortcuts|docs)"([^>]*)>([\s\S]*?)<\/button\s*>/g,
   (_, before, id, after, content) => {
     const route = /nav-docs|data-i18n="(?:docs|readDocs)"/.test(
       before + after + content,
@@ -278,6 +278,10 @@ html = html.replace(
 fs.rmSync(outputRoot, { recursive: true, force: true });
 fs.mkdirSync(outputRoot, { recursive: true });
 fs.copyFileSync(path.join(root, "LICENSE"), path.join(outputRoot, "LICENSE"));
+fs.copyFileSync(
+  path.join(root, "skills/yeli/SKILL.md"),
+  path.join(outputRoot, "skill.md"),
+);
 fs.writeFileSync(path.join(outputRoot, "index.html"), html);
 fs.writeFileSync(path.join(outputRoot, "Yeli_首页.html"), html);
 fs.rmSync(path.join(outputRoot, "CNAME"), { force: true });
@@ -297,6 +301,7 @@ fs.writeFileSync(
       defaultLocale: "zh-CN",
       samples: samples.map(({ output }) => output),
       documentation: "docs/index.html",
+      agentSkill: "skill.md",
     },
     null,
     2,

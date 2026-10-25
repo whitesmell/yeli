@@ -1,8 +1,9 @@
 # Yeli homepage
 
 This directory is the versioned source for the public Yeli homepage. The
-homepage has no hard-coded production host, so the same build can be deployed
-to any HTTPS static host and domain.
+homepage resources use relative links, so the same build can be deployed
+to any HTTPS static host and domain. The copyable Agent instruction points
+to the public Skill URL.
 
 The homepage build uses the repository's product documentation as embedded
 offline content. It requires the Yeli logo source in `src/brand/` and the
@@ -29,6 +30,17 @@ It also contains the bilingual tutorial center at `docs/zh-CN/index.html`
 and `docs/en/index.html`, with separate Yeli and Markdown learning paths.
 See [tutorial authoring](docs/README.md) for the single-source content and
 editable handbook workflow.
+
+The hero presents a selectable, read-only Agent instruction as a subtitle,
+with the primary Copy instruction action on the left and Open example on the
+right. The field label and copy announcements are available to screen readers.
+Selecting the field selects the whole instruction. The copy button confirms
+success; if clipboard access fails,
+the instruction is selected for manual copying. Language changes update the
+instruction and clear copy feedback. The instruction uses the public Skill
+URL so it can be shared with an Agent from a local preview as well.
+`skill.md` is copied byte-for-byte from `skills/yeli/SKILL.md`; it describes
+first-time tool preparation and document workflows.
 
 To build a verified, host-neutral release archive:
 

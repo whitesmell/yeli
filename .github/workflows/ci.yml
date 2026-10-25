@@ -31,6 +31,7 @@ jobs:
       - run: npm run test:security
       - run: npm run test:agent
       - run: npm run test:cli
+      - run: npm run test:agent-setup
       - run: npm run test:fidelity
       - run: npm run test:browser
       - run: npm run test:quality
