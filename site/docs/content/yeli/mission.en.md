@@ -16,7 +16,7 @@ Asking an Agent to rewrite an entire executable HTML file also risks changing ru
 
 Make a document easy for people to continue writing and for Agents to locate and verify, while keeping it portable. A `.yeli.html` file carries Markdown, its reading and editing environment, and embedded images. Open it offline or export standard Markdown.
 
-This describes the direction of the current experimental version. Everyday use starts with Edit on the page. Use the external CLI and Skill when you need an Agent. There is no built-in model service or shared cloud workspace.
+This describes the direction of the current version. Everyday use starts with Edit on the page. Use the external CLI and Skill when you need an Agent. There is no built-in model service or shared cloud workspace.
 
 ## Choose a delivery format
 

@@ -19,7 +19,7 @@ payload, notices and examples. HTTP gzip/Brotli is a separate transfer metric.
 See `docs/compression.md` for same-source baselines, chosen compression
 parameters, startup costs and compatibility limits.
 
-Status: experimental. Market demand is unvalidated, so public V1/stable
+Market demand is unvalidated, so public V1/stable
 positioning is prohibited. No public release may be tagged until a production
 public key is pinned and every remaining manual evidence row in this document is
 complete.
@@ -197,15 +197,15 @@ manual gates below.
 
 These records must reference the final artifact hash. A blank or pending row blocks a public tag.
 
-| Gate                                   | Required evidence                                             | Status                                                                                                           |
-| -------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Production public key                  | key id, reviewed public record, offline custody owner         | Pending                                                                                                          |
-| Canonical GitHub release channel       | repository URL, release URL, permissions owner                | Pending                                                                                                          |
-| WebKit                                 | exact production flow on supported desktop/mobile runner      | Pending for the current Yeli artifact                                                                            |
-| Physical mobile and real IME/dead keys | device/OS/browser/input method, dated result                  | Pending                                                                                                          |
-| Assistive technology                   | browser + screen reader/key-only result                       | Pending                                                                                                          |
-| Editable attachment                    | named path or explicit experimental UI/documentation fallback | Experimental fallback documented; no attachment profile claimed                                                  |
-| Static host/download                   | named HTTPS host, no-network/static trust result              | Pending                                                                                                          |
-| Five-person first use                  | at least 4/5 participants complete the defined first-use task | Pending                                                                                                          |
-| Target-author demand note              | at least five observed workflows or experimental positioning  | Experimental positioning only; no demand claim                                                                   |
-| Real three-Agent evaluation            | frozen AE13 threshold and archived receipts                   | Pending; no-credential packet export and independent scorer are ready, but no authorized external run is claimed |
+| Gate                                   | Required evidence                                              | Status                                                                                                           |
+| -------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Production public key                  | key id, reviewed public record, offline custody owner          | Pending                                                                                                          |
+| Canonical GitHub release channel       | repository URL, release URL, permissions owner                 | Pending                                                                                                          |
+| WebKit                                 | exact production flow on supported desktop/mobile runner       | Pending for the current Yeli artifact                                                                            |
+| Physical mobile and real IME/dead keys | device/OS/browser/input method, dated result                   | Pending                                                                                                          |
+| Assistive technology                   | browser + screen reader/key-only result                        | Pending                                                                                                          |
+| Editable attachment                    | named path or explicit static-export UI/documentation fallback | Static-export fallback documented; no attachment profile claimed                                                 |
+| Static host/download                   | named HTTPS host, no-network/static trust result               | Pending                                                                                                          |
+| Five-person first use                  | at least 4/5 participants complete the defined first-use task  | Pending                                                                                                          |
+| Target-author demand note              | five observed workflows or a note that demand is unvalidated   | Demand is unvalidated; no demand claim                                                                           |
+| Real three-Agent evaluation            | frozen AE13 threshold and archived receipts                    | Pending; no-credential packet export and independent scorer are ready, but no authorized external run is claimed |

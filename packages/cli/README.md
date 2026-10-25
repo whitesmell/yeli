@@ -5,7 +5,7 @@ opening their executable HTML. This package runs independently of the Yeli
 source checkout and browser application. It shares the application's format
 and document-operation implementation.
 
-Experimental. This package uses the MIT License (included as `LICENSE` in the
+This package uses the MIT License (included as `LICENSE` in the
 installed package) and is not published
 to npm (`private: true`); the name does not establish ownership
 of a public registry package. Install only a locally built or otherwise

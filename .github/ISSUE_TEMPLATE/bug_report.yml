@@ -4,7 +4,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Yeli is experimental. Use a minimal synthetic document.
+        Use a minimal synthetic document.
         Do not include real documents, recovery data, credentials, or private keys.
         For vulnerabilities, follow SECURITY.md instead of posting exploit details.
   - type: input

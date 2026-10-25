@@ -50,7 +50,7 @@ const ui = {
     source: "Markdown 原文",
     downloadsNote:
       "可编辑 HTML 包含代码，仅打开可信来源文件。跨教程链接需把两份同语言手册放在一起。",
-    experimental: `当前实验版本 · ${catalog.updated} 核对`,
+    releaseNote: `当前版本 · ${catalog.updated} 核对`,
     lead: "Yeli 与 Markdown 文档",
     intro: "先了解功能，再按任务学习；常用操作随时速查。",
     routes: ["功能总览", "快速开始", "快捷键速查", "最佳实践"],
@@ -77,7 +77,7 @@ const ui = {
     source: "Markdown source",
     downloadsNote:
       "Editable HTML contains code. Open files only from trusted sources. Keep both handbooks of the same language together for cross-course links.",
-    experimental: `Current experimental version · Checked ${catalog.updated}`,
+    releaseNote: `Current version · Checked ${catalog.updated}`,
     lead: "Yeli and Markdown documentation",
     intro: "Explore features, learn by task and look up everyday actions.",
     routes: [
@@ -432,7 +432,7 @@ export async function buildDocs() {
 <body><a class="skip-link" href="#content">${text.skip}</a>
 <header class="docs-header"><a class="brand" href="${docsRoot}../index.html?lang=${locale}" aria-label="${text.backHome}">${renderYeliLogoSvg()}</a><a href="${prefix}index.html">${text.home}</a><a class="language-peer" data-language-peer hreflang="${other}" lang="${other}" href="${docsRoot}${other}/${file}">${other === "en" ? "English" : "简体中文"}</a></header>
 <div class="docs-layout"><aside class="sidebar"><form hidden class="search-form" role="search"><label for="docs-search">${text.search}</label><input id="docs-search" type="search" autocomplete="off" aria-describedby="search-hint"><p id="search-hint">${text.searchHint}</p></form><p id="search-status" role="status" aria-live="polite"></p><ul id="search-results" hidden></ul><nav aria-label="${text.navigation}">${nav}</nav></aside>
-<main id="content" tabindex="-1"><p class="release-note">${text.experimental}</p>${chapter?.id.startsWith("yeli/") ? `<nav class="reference-links" aria-label="${text.navigation}">${routeIds.map((id, i) => `<a href="${to(id)}"${id === chapter.id ? ' aria-current="page"' : ""}>${text.routes[i]}</a>`).join("")}</nav>` : ""}${toc ? `<details class="compact-toc"><summary>${text.contents}</summary><ol>${toc}</ol></details>` : ""}<article>${body.html}</article>${neighbors}<section class="downloads"><h2>${text.download}</h2>${downloads}<p>${text.downloadsNote}</p></section><noscript><p>${text.noscript}</p></noscript></main>
+<main id="content" tabindex="-1"><p class="release-note">${text.releaseNote}</p>${chapter?.id.startsWith("yeli/") ? `<nav class="reference-links" aria-label="${text.navigation}">${routeIds.map((id, i) => `<a href="${to(id)}"${id === chapter.id ? ' aria-current="page"' : ""}>${text.routes[i]}</a>`).join("")}</nav>` : ""}${toc ? `<details class="compact-toc"><summary>${text.contents}</summary><ol>${toc}</ol></details>` : ""}<article>${body.html}</article>${neighbors}<section class="downloads"><h2>${text.download}</h2>${downloads}<p>${text.downloadsNote}</p></section><noscript><p>${text.noscript}</p></noscript></main>
 <aside class="toc"><nav aria-label="${text.contents}"><p>${text.contents}</p><ol>${toc}</ol></nav></aside></div>
 <footer>Yeli · Markdown · ${text.home}</footer><script id="search-data" type="application/json">${json({ locale, prefix, entries: searchIndex })}</script><script>${js}</script></body></html>`;
     }
@@ -484,7 +484,7 @@ export async function buildDocs() {
         }
         return lines.join("\n");
       });
-      const markdown = `---\ntitle: ${JSON.stringify(title)}\nlang: ${locale}\ndescription: ${JSON.stringify(ui[locale].experimental)}\n---\n\n# ${title}\n\n${text.downloadsNote}\n\n${chunks.join("\n\n")}`;
+      const markdown = `---\ntitle: ${JSON.stringify(title)}\nlang: ${locale}\ndescription: ${JSON.stringify(ui[locale].releaseNote)}\n---\n\n# ${title}\n\n${text.downloadsNote}\n\n${chunks.join("\n\n")}`;
       const templateFile = `dist/html/starter.${locale}.yeli.html`;
       const template = fs.readFileSync(path.join(root, templateFile), "utf8");
       const result = await importMarkdownDocument(

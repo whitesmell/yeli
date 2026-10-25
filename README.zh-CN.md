@@ -14,9 +14,9 @@
 [Agent 指南](docs/agent-quickstart.zh-CN.md) ·
 [参与贡献](CONTRIBUTING.zh-CN.md)
 
-**实验性。** 源码仓库：[whitesmell/yeli](https://github.com/whitesmell/yeli)，
+源码仓库：[whitesmell/yeli](https://github.com/whitesmell/yeli)，
 官网与双语教程已通过 GitHub Pages 上线：`yeli.zetury.com`。
-网站提供实验性示例与离线手册，尚未宣布编辑器稳定版。
+网站提供示例与离线手册，尚未宣布编辑器稳定版。
 剩余发布工作见[项目状态](docs/project-status.zh-CN.md)。
 
 ![Yeli 编辑器示例：目录、文档属性与 Markdown 编辑画布](site/assets/editor.png)
@@ -38,7 +38,7 @@
 
 ## 开始使用
 
-经过审查的公开下载就绪前，可以从可信源码副本构建实验性起始文档。
+经过审查的公开下载就绪前，可以从可信源码副本构建起始文档。
 使用 [`.nvmrc`](.nvmrc) 固定的 Node.js 版本：
 
 ```sh

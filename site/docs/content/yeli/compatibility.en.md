@@ -2,7 +2,7 @@
 
 ## Browser capability is conditional
 
-The current experimental artifacts have automated Chromium and Firefox evidence. That does not certify Safari or every phone. Direct write-back usually depends on a supporting file-access API, the environment and permission; otherwise download a copy. With JavaScript disabled, only a bounded static preview remains. It is not editable and may be stale after Agent edits.
+The current artifacts have automated Chromium and Firefox evidence. That does not certify Safari or every phone. Direct write-back usually depends on a supporting file-access API, the environment and permission; otherwise download a copy. With JavaScript disabled, only a bounded static preview remains. It is not editable and may be stale after Agent edits.
 
 The default build provides page editing and local block Markdown editing. The official enhanced build adds whole-document source and source-plus-preview views. It is a separate composed file, not a way to install arbitrary document plugins, and it does not enable otherwise absent diagram or math rendering.
 

@@ -6,8 +6,8 @@ English · [简体中文](project-status.zh-CN.md)
 
 The owner confirmed `yeli` as the open-source project name. The display name
 remains 页里 / Yeli and the editable extension remains `.yeli.html`.
-The owner approved a clean source snapshot for public contribution; the product
-remains experimental. The [public scope](public-scope.md) records the approved
+The owner approved a clean source snapshot for public contribution.
+The [public scope](public-scope.md) records the approved
 source boundary.
 
 ## Publication readiness
@@ -58,8 +58,8 @@ Remaining release work includes:
 - Pin production signing keys and establish the canonical release channel.
 - Complete the physical/assistive-technology, named transport/static-host,
   five-person first-use, and authorized real three-Agent evidence.
-- Keep experimental positioning until the demand study and scope review permit
-  public V1/stable claims.
+- Complete the demand study and scope review before making public V1/stable
+  claims.
 
 The [release runbook](releasing.md) owns the full checklist and manual evidence.
 This page does not waive those gates or certify current test results.

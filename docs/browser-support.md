@@ -1,6 +1,6 @@
 # Browser and File Lifecycle Support
 
-Status: experimental compressed candidate, 2026-10-23. The `.yeli.html`
+Status: compressed candidate, 2026-10-23. The `.yeli.html`
 artifact is active HTML and should be opened only from a trusted sender or
 origin. Use the script-free static HTML export for untrusted publication.
 The current Chinese starter has SHA-256
@@ -34,7 +34,7 @@ Historical browser results below do not certify this changed shell.
 - JavaScript-disabled viewers retain the bounded static preview. Normal boot
   captures the pristine shell and removes that preview before the first frame.
 - `Save` means direct overwrite only when Yeli holds a writable file handle. Success is reported only after the writable stream closes.
-- Before Save or Save Copy is enabled, the File menu serializes the current complete artifact, reports its exact byte count, active-content trust, secure-context state, and whether it fits the documented 64 MiB local Yeli format profile. Named email/IM attachment profiles are not claimed; the menu labels editable attachment sharing experimental and recommends a static export until dated transport evidence exists.
+- Before Save or Save Copy is enabled, the File menu serializes the current complete artifact, reports its exact byte count, active-content trust, secure-context state, and whether it fits the documented 64 MiB local Yeli format profile. Named email/IM attachment profiles are not claimed; the sharing guidance asks users to confirm that the recipient can receive HTML attachments or use a read-only export.
 - Without a handle, the same menu action is labeled `Download updated copy`. It does not clear the dirty state or delete recovery data.
 - `Save a copy` always creates a new browser-local instance identity. `docId` never selects history, recovery data, or a retained handle.
 - When the connected file fingerprint changed, Yeli writes nothing and offers three explicit human choices: reload the external file, download an Yeli copy, or confirm overwrite.
@@ -50,7 +50,7 @@ Historical browser results below do not certify this changed shell.
 
 ## Release Evidence Still Required
 
-Before any public release, record a dated manual run for at least one named static-host/download path, including screenshots, trust labeling, browser/OS versions, and the resulting artifact hash. Attachment support may be promoted only after a named email/IM path additionally records filename preservation, MIME behavior, trust labeling, and open/edit/save results; until then the exact artifact and this document label editable attachment sharing experimental. Branded Safari, mobile share sheets, real OS IME/dead keys, and assistive technology remain manual evidence rather than inferred support.
+Before any public release, record a dated manual run for at least one named static-host/download path, including screenshots, trust labeling, browser/OS versions, and the resulting artifact hash. Attachment support may be promoted only after a named email/IM path additionally records filename preservation, MIME behavior, trust labeling, and open/edit/save results; until then no named attachment profile is claimed, and users should confirm HTML attachment delivery or use a read-only export. Branded Safari, mobile share sheets, real OS IME/dead keys, and assistive technology remain manual evidence rather than inferred support.
 
 The historical 2026-09-03 candidate (SHA-256
 `bd40b3f0fcdfc654dd509465bb6a5f9c2e882fe2119fa7074016b3206734bd19`)

@@ -2,7 +2,7 @@
 
 English · [简体中文](SECURITY.zh-CN.md)
 
-Yeli is experimental. There is no stable release or published supported-version
+There is no stable release or published supported-version
 schedule. Historical test results apply only to their dated artifact hashes;
 they do not certify the current checkout.
 

@@ -91,12 +91,9 @@ for (const locale of ["zh-CN", "en"] as const) {
     await expect(dialog).toContainText(
       chinese ? "一份文件，随处续写。" : "One file. Keep creating.",
     );
-    await expect(dialog).toContainText(
-      chinese ? "实验性版本" : "Experimental release",
-    );
     await expect(dialog).toContainText("0.1.0");
     await expect(dialog).not.toContainText(
-      /不等于|本版本不包含|内容权威|凭据|built-in AI|credential|content authority|\bV1\b/u,
+      /不等于|本版本不包含|内容权威|凭据|实验性?版本|[Ee]xperimental|built-in AI|credential|content authority|\bV1\b/u,
     );
     await expect(
       dialog.getByRole("heading", {

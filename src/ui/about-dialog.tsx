@@ -83,9 +83,6 @@ export function AboutDialog({
               >
                 {labels.version} {__YELI_VERSION__}
               </button>
-              <span className="about-release-stage">
-                {labels.aboutReleaseStage}
-              </span>
             </p>
           </div>
           <button
@@ -245,7 +242,7 @@ export function AboutDialog({
             </div>
           </dl>
           <p className="about-attachment-note">
-            {labels.disclosureAttachmentExperimental}
+            {labels.disclosureAttachmentSharing}
           </p>
         </details>
       </section>

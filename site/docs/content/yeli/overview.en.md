@@ -68,7 +68,7 @@ Yeli carries Markdown, images and a reading/editing environment in one `.yeli.ht
 
 ## Boundaries to know
 
-This is an experimental version. Browser history is not synchronization or backup; people exchanging copies must agree which is current. Tables do not calculate, task checkboxes do not send reminders, and properties do not trigger workflows.
+Browser history is not synchronization or backup; people exchanging copies must agree which is current. Tables do not calculate, task checkboxes do not send reminders, and properties do not trigger workflows.
 
 Open editable HTML only from trusted sources; choose static outputs for public reading. Direct saves, recovery and attachment transport have environment limits. See [compatibility](compatibility.html) for problems and the [Markdown support table](../markdown/extensions.html) for enabled syntax.
 

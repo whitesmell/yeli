@@ -2,7 +2,7 @@
 
 English: [CONTRIBUTING.md](CONTRIBUTING.md)
 
-Yeli 仍处于实验阶段，采用 [MIT 许可证](LICENSE)，接受公开贡献。
+Yeli 采用 [MIT 许可证](LICENSE)，接受公开贡献。
 正式源码仓库为 [whitesmell/yeli](https://github.com/whitesmell/yeli)。
 源码公开不代表编辑器已发行。当前状态见
 [项目状态](docs/project-status.zh-CN.md)。

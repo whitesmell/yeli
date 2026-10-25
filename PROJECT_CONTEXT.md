@@ -1,6 +1,6 @@
 # Yeli project context
 
-Yeli is an experimental, offline, local-first Markdown editor carried by one
+Yeli is an offline, local-first Markdown editor carried by one
 editable `.yeli.html` file. Markdown including YAML frontmatter is the authored
 authority. Rendered content, outlines, manifests and statistics are derived.
 
@@ -34,7 +34,7 @@ Use [the documentation index](docs/README.md),
 
 The canonical source repository is `https://github.com/whitesmell/yeli`.
 GitHub Pages is selected for `yeli.zetury.com`, with DNS managed in Cloudflare.
-The experimental website is live over HTTPS after its own build and site checks.
+The website is live over HTTPS after its own build and site checks.
 Signed editor distribution remains gated by the release runbook.
 
 Canonical locales are `zh-CN` and `en`; `zh-Hans` is an accepted input alias.

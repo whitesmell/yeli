@@ -1,7 +1,7 @@
 # Yeli Agent Guide (API v1)
 
 This is the normative guide for filesystem Agents working on `.yeli.html`
-documents. Yeli is experimental; API version 1 describes the operation contract,
+documents. API version 1 describes the operation contract,
 not a stable product release. It is Agent-friendly at the file boundary and does not contain
 an AI editor, model API, prompt workflow, credential, or chat surface.
 

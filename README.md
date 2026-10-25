@@ -14,9 +14,9 @@ Export the Markdown and keep working when your tools change.
 [Agent guide](docs/agent-quickstart.md) ·
 [Contribute](CONTRIBUTING.md)
 
-**Experimental.** Source: [whitesmell/yeli](https://github.com/whitesmell/yeli).
+Source: [whitesmell/yeli](https://github.com/whitesmell/yeli).
 The website and bilingual tutorials are live at `yeli.zetury.com` on GitHub Pages.
-The site includes experimental samples and offline handbooks; a stable editor
+The site includes samples and offline handbooks; a stable editor
 release is not announced. See [project status](docs/project-status.md) for the
 remaining release work.
 
@@ -42,7 +42,7 @@ Changing the interface language leaves your document language and text intact.
 
 ## Get started
 
-Until reviewed public downloads are available, build an experimental starter
+Until reviewed public downloads are available, build a starter
 from a trusted source checkout. Use the Node.js version pinned in
 [`.nvmrc`](.nvmrc):
 

@@ -2,7 +2,7 @@
 
 English · [简体中文](CONTRIBUTING.zh-CN.md)
 
-Yeli is experimental and accepts contributions under the [MIT License](LICENSE).
+Yeli accepts contributions under the [MIT License](LICENSE).
 The canonical source repository is [whitesmell/yeli](https://github.com/whitesmell/yeli).
 Source publication does not announce an editor release; see
 [project status](docs/project-status.md).

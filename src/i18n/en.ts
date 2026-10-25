@@ -13,7 +13,6 @@ export const en = {
   aboutPortable: "One portable file",
   aboutProjectedFileCapabilities: "File after saving",
   aboutProjectedSize: "Estimated after saving",
-  aboutReleaseStage: "Experimental release",
   aboutRecovery: "Local recovery",
   aboutRecoveryAvailable: "Local recovery is on",
   aboutRecoveryDescription:
@@ -148,7 +147,7 @@ export const en = {
   convertTask: "Convert to to-do",
   directSaveAvailable:
     "Saving checks whether the original file was changed elsewhere.",
-  disclosureAttachmentExperimental:
+  disclosureAttachmentSharing:
     "Before sharing by email or chat, check that the recipient can receive HTML attachments, or use a read-only export.",
   disclosureBytes: "Complete file size",
   disclosureInsecure: "Some browser features are restricted on this connection",

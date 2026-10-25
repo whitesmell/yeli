@@ -15,7 +15,6 @@ export const zhCN = {
   aboutPortable: "单文件携带",
   aboutProjectedFileCapabilities: "保存后的文件",
   aboutProjectedSize: "保存后预计",
-  aboutReleaseStage: "实验性版本",
   aboutRecovery: "本机恢复",
   aboutRecoveryAvailable: "本机恢复已启用",
   aboutRecoveryDescription: "只保存在当前浏览器，重要修改请及时保存到文件。",
@@ -135,7 +134,7 @@ export const zhCN = {
   convertQuote: "转换为引用",
   convertTask: "转换为待办",
   directSaveAvailable: "保存前会检查原文件是否在其他地方被修改。",
-  disclosureAttachmentExperimental:
+  disclosureAttachmentSharing:
     "通过邮件或聊天工具分享前，请确认对方能接收 HTML 附件；也可改用只读导出。",
   disclosureBytes: "完整文件大小",
   disclosureInsecure: "当前连接限制了部分浏览器功能",
