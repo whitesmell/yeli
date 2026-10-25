@@ -19,7 +19,9 @@ Open it in a browser to read, edit, and present offline.
 
 Copy this instruction into your Agent's conversation:
 
-> Read https://yeli.zetury.com/skill.md and follow the instructions to create and edit Yeli documents.
+```text
+Read https://yeli.zetury.com/skill.md and follow the instructions to create and edit Yeli documents.
+```
 
 Then give it a task: **"Turn these meeting notes into a new `meeting.yeli.html`
 and return the validated file."** Open the result in your browser and keep writing.

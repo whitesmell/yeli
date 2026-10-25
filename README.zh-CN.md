@@ -19,7 +19,9 @@
 
 把这句指令复制到你的 Agent 对话中：
 
-> 阅读 https://yeli.zetury.com/skill.md，按指引开始创建和编辑 Yeli 文档。
+```text
+阅读 https://yeli.zetury.com/skill.md，按指引开始创建和编辑 Yeli 文档。
+```
 
 接着交给它一个任务：**“把这些会议记录整理成一份新的 `meeting.yeli.html`，
 返回校验后的文件。”** 在浏览器打开结果，就能继续写作。
