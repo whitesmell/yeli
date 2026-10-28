@@ -4214,6 +4214,14 @@ h3.block-content-editable {
   }
 }
 
+@media (max-width: 340px) {
+  .topbar-menu-trigger {
+    gap: 0;
+    padding-inline: 9px;
+    font-size: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

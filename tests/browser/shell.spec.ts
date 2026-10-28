@@ -1195,9 +1195,29 @@ test("@quality keeps the primary surface within a narrow viewport", async ({
         () => document.documentElement.scrollWidth - window.innerWidth,
       ),
     ).toBeLessThanOrEqual(1);
+    const menu = page.getByRole("button", {
+      name: locale === "en" ? "Menu" : "菜单",
+      exact: true,
+    });
+    await expect(menu).toHaveCSS("font-size", "0px");
+    await expect(menu.locator("svg")).toBeVisible();
+    await menu.focus();
+    await menu.press("Enter");
+    await expect(page.getByRole("menu")).toBeVisible();
+    await page.keyboard.press("Escape");
     const toggle = page.locator(".topbar-brand");
     await toggle.click();
     await expect(toggle).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator(".outline-panel")).toBeVisible();
   }
+});
+
+test("@quality keeps the labelled menu at 361px", async ({ page }) => {
+  await page.setViewportSize({ width: 361, height: 720 });
+  await page.goto(pathToFileURL(artifactPath).href);
+  await page.getByRole("button", { name: "编辑", exact: true }).click();
+  const menu = page.getByRole("button", { name: "菜单", exact: true });
+  await expect(menu).toHaveCSS("font-size", "12px");
+  await expect(menu).toContainText("菜单");
+  await expect(menu.locator("svg")).toBeVisible();
 });
