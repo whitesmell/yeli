@@ -3,6 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { catalog, chapterSource } from "./build-docs.mjs";
+import { validateWebTemplate } from "../../src/host/web-template.ts";
+import { validateArtifactContentPolicy } from "../../src/integrity/content-policy.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const siteRoot = path.resolve(here, "..");
@@ -116,3 +118,61 @@ for (const locale of catalog.locales) requireFile(`docs/${locale}/index.html`);
 console.log(
   `Checked ${homepage.length.toLocaleString()} byte homepage, bilingual samples, ${docs.chapters.length} tutorial pages, four handbooks and release manifest.`,
 );
+
+const editor = requireFile("editor/index.html").toString("utf8");
+if (!editor.includes('content="https://yeli.zetury.com"'))
+  fail("editor must pin the trusted HTTPS origin");
+if (!editor.includes("connect-src 'none'"))
+  fail("editor must block document network connections");
+if (!homepage.includes('href="editor/"')) fail("homepage must link the editor");
+for (const match of editor.matchAll(/(?:src|href)="([^"#]+)"/g)) {
+  const resource = match[1];
+  if (/^(?:https?:|\/\/)/i.test(resource)) fail("external editor resource");
+  requireFile(path.posix.normalize(path.posix.join("editor", resource)));
+}
+const templateMetadata = release.editor?.template;
+if (
+  release.editor?.path !== "editor/" ||
+  templateMetadata?.path !== "editor/yeli-template.yeli.html"
+)
+  fail("editor export template must have its fixed same-origin path");
+const templateBytes = requireFile(templateMetadata.path);
+if (
+  !templateBytes.equals(
+    fs.readFileSync(path.join(root, "dist/empty/empty.yeli.html")),
+  )
+)
+  fail("editor export template differs from the current empty build");
+const packageVersion = JSON.parse(
+  fs.readFileSync(path.join(root, "package.json"), "utf8"),
+).version;
+if (templateMetadata.hash !== hash(templateBytes))
+  fail("editor template exact SHA-256 differs from release metadata");
+const template = templateBytes.toString("utf8");
+const templateCapability = await validateWebTemplate(
+  template,
+  templateMetadata,
+  packageVersion,
+);
+if (!templateCapability.available)
+  fail(`invalid editor export template: ${templateCapability.reason}`);
+const templatePolicy = validateArtifactContentPolicy(template);
+if (!templatePolicy.ok)
+  fail(`editor template CSP: ${templatePolicy.findings.join("; ")}`);
+if (
+  /<(?:script|link|img|source)[^>]+(?:src|href)=["'](?:https?:|\/\/)/iu.test(
+    template,
+  )
+)
+  fail("editor template contains an external resource");
+const entry = /<script[^>]+src="([^"]+)"/u.exec(editor)?.[1];
+if (!entry) fail("editor entry module is missing");
+const bundle = requireFile(
+  path.posix.normalize(path.posix.join("editor", entry)),
+).toString("utf8");
+if (
+  !bundle.includes(templateBytes.toString("base64")) ||
+  !bundle.includes(templateMetadata.hash) ||
+  !bundle.includes(templateMetadata.shellHash)
+)
+  fail("editor bundle does not embed the exact template and pinned metadata");

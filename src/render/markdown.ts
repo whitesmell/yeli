@@ -3,7 +3,15 @@ import type { DOMPurify as DOMPurifyInstance, WindowLike } from "dompurify";
 import MarkdownIt from "markdown-it";
 import type { Token } from "markdown-it";
 
-import { indexFrontmatter } from "../document/frontmatter.ts";
+import {
+  indexFrontmatter,
+  markdownBodyStart,
+} from "../document/frontmatter.ts";
+import {
+  footnoteMeta,
+  indexFootnotes,
+  installFootnotes,
+} from "../editor/footnotes.ts";
 import {
   projectMarkdown,
   type SourceBlock,
@@ -13,6 +21,29 @@ export interface MarkdownRenderOptions {
   imageUnavailableLabel?: string;
   revision?: number;
   resolveImage?: (destination: string) => string | null;
+  footnoteContext?: InlineFootnoteContext;
+  footnoteSourceFrom?: number;
+  editorFootnotes?: boolean;
+  footnotesSupplementLabel?: string;
+}
+
+interface FootnoteEnvironment {
+  [key: string | symbol]: unknown;
+  footnotes?: {
+    refs?: Record<string, number>;
+    list?: {
+      label?: string;
+      content?: string;
+      count?: number;
+      tokens?: Token[];
+    }[];
+  };
+}
+
+export interface InlineFootnoteContext {
+  environment: FootnoteEnvironment;
+  source: string;
+  inline: Map<number, { content: string; tokens: Token[] }>;
 }
 
 export interface MarkdownRenderSegments {
@@ -52,8 +83,95 @@ function rendererFor(options: MarkdownRenderOptions) {
     html: false,
     linkify: false,
     typographer: false,
-  });
+  }).use(installFootnotes);
   const seenHeadings = new Map<string, number>();
+  const supplementaryHeadingIds = new WeakMap<Token, string>();
+  let extraDefinitions: { label: string; tokens: Token[] }[] = [];
+
+  renderer.core.ruler.before(
+    "footnote_tail",
+    "yeli_footnote_definitions",
+    (state) => {
+      const definitions: typeof extraDefinitions = [];
+      for (let index = 0; index < state.tokens.length; index += 1) {
+        const token = state.tokens[index]!;
+        if (token.type !== "footnote_reference_open") continue;
+        const start = index + 1;
+        while (
+          index < state.tokens.length &&
+          state.tokens[index]!.type !== "footnote_reference_close"
+        )
+          index += 1;
+        definitions.push({
+          label: footnoteMeta(token).label!,
+          tokens: state.tokens.slice(start, index),
+        });
+      }
+      const environment = state.env as FootnoteEnvironment;
+      const used = new Set(
+        environment.footnotes?.list?.map((item) => item.label),
+      );
+      extraDefinitions = definitions.filter(
+        (definition, index) =>
+          !used.has(definition.label) ||
+          definitions.some(
+            (next, nextIndex) =>
+              nextIndex > index && next.label === definition.label,
+          ),
+      );
+    },
+  );
+  renderer.core.ruler.after(
+    "footnote_tail",
+    "yeli_footnote_supplement",
+    (state) => {
+      if (!extraDefinitions.length) return;
+      const token = new state.Token("html_block", "", 0);
+      const escape = renderer.utils.escapeHtml;
+      token.content = `<section class="footnotes footnotes-supplement" aria-label="${escape(options.footnotesSupplementLabel ?? "Additional footnotes")}">${extraDefinitions
+        .map((definition, definitionIndex) => {
+          let headingIndex = 0;
+          for (const token of definition.tokens) {
+            if (token.type !== "heading_open") continue;
+            // Supplements render during parsing, before the main document.
+            // Their IDs must never consume its outline heading counters.
+            supplementaryHeadingIds.set(
+              token,
+              `yeli:fnextra:${definitionIndex + 1}:heading:${++headingIndex}`,
+            );
+          }
+          return `<div class="footnote-extra" data-footnote-label="${escape(definition.label)}"><p class="footnote-label">${escape(`[^${definition.label}]`)}</p>${renderer.renderer.render(definition.tokens, renderer.options, state.env)}</div>`;
+        })
+        .join("")}</section>\n`;
+      state.tokens.push(token);
+    },
+  );
+  renderer.renderer.rules.footnote_ref = (tokens, index) => {
+    const meta = footnoteMeta(tokens[index]!);
+    const number = (meta.id ?? 0) + 1;
+    const occurrence = (meta.subId ?? 0) + 1;
+    if (options.editorFootnotes && meta.source) {
+      return `<sup class="footnote-ref footnote-atom" contenteditable="false" data-footnote-source="${renderer.utils.escapeHtml(meta.source)}"><span>${number}</span></sup>`;
+    }
+    return `<sup class="footnote-ref"><a href="#yeli:fn:${number}" id="yeli:fnref:${number}:${occurrence}">[${number}]</a></sup>`;
+  };
+  renderer.renderer.rules.footnote_open = (
+    tokens,
+    index,
+    rendererOptions,
+    _,
+    self,
+  ) => {
+    const token = tokens[index]!;
+    token.tag = "li";
+    token.attrSet("id", `yeli:fn:${(footnoteMeta(token).id ?? 0) + 1}`);
+    token.attrSet("class", "footnote-item");
+    return self.renderToken(tokens, index, rendererOptions);
+  };
+  renderer.renderer.rules.footnote_anchor = (tokens, index) => {
+    const meta = footnoteMeta(tokens[index]!);
+    return ` <a href="#yeli:fnref:${(meta.id ?? 0) + 1}:${(meta.subId ?? 0) + 1}" class="footnote-backref">\u21a9\uFE0E</a>`;
+  };
 
   renderer.core.ruler.after("inline", "yeli_task_lists", (state) => {
     for (let index = 0; index < state.tokens.length; index += 1) {
@@ -82,6 +200,11 @@ function rendererFor(options: MarkdownRenderOptions) {
     _,
     self,
   ) => {
+    const supplementaryId = supplementaryHeadingIds.get(tokens[index]!);
+    if (supplementaryId) {
+      tokens[index]!.attrSet("id", supplementaryId);
+      return self.renderToken(tokens, index, rendererOptions);
+    }
     const inline = tokens[index + 1];
     const base = slugify(inline?.content ?? "section");
     const count = (seenHeadings.get(base) ?? 0) + 1;
@@ -156,6 +279,7 @@ function sanitize(html: string): string {
       "aria-disabled",
       "target",
       "rel",
+      "contenteditable",
     ],
   });
 }
@@ -164,8 +288,7 @@ function documentBodyRange(source: string): {
   body: string;
   bodyStart: number;
 } {
-  const frontmatter = indexFrontmatter(source);
-  const bodyStart = frontmatter.status === "safe" ? frontmatter.bodyStart : 0;
+  const bodyStart = markdownBodyStart(source);
   return { body: source.slice(bodyStart), bodyStart };
 }
 
@@ -205,7 +328,32 @@ function annotateReadBlocks(
     else blocksByStart.set(block.range.from, [block]);
   }
   const used = new Set<string>();
+  const definitions = new Map(
+    indexFootnotes(source).map((definition) => [definition.label, definition]),
+  );
+  const bind = (token: Token, block: SourceBlock) => {
+    token.attrSet("data-read-block-id", block.id);
+    token.attrSet("data-source-from", String(block.range.from));
+    token.attrSet("data-source-to", String(block.range.to));
+    token.attrSet("data-source-kind", block.kind);
+    token.attrSet("data-source-revision", String(revision));
+  };
   for (const token of tokens) {
+    if (token.type === "footnote_open") {
+      const label = footnoteMeta(token).label;
+      const definition =
+        label === undefined ? undefined : definitions.get(label);
+      const block =
+        definition &&
+        blocksByStart
+          .get(definition.from)
+          ?.find((block) => block.kind === "footnote");
+      if (block) {
+        bind(token, block);
+        used.add(block.id);
+      }
+      continue;
+    }
     if (!token.map) continue;
     const from = lineStarts[token.map[0]];
     const to = lineStarts[token.map[1]] ?? source.length;
@@ -222,11 +370,7 @@ function annotateReadBlocks(
       );
     if (!block) continue;
     used.add(block.id);
-    token.attrSet("data-read-block-id", block.id);
-    token.attrSet("data-source-from", String(block.range.from));
-    token.attrSet("data-source-to", String(block.range.to));
-    token.attrSet("data-source-kind", block.kind);
-    token.attrSet("data-source-revision", String(revision));
+    bind(token, block);
   }
 }
 
@@ -293,5 +437,64 @@ export function renderSafeInlineMarkdown(
   source: string,
   options: MarkdownRenderOptions = {},
 ): string {
-  return sanitize(rendererFor(options).renderInline(source));
+  const renderer = rendererFor(options);
+  const context = options.footnoteContext;
+  const position = options.footnoteSourceFrom;
+  const content = source.replaceAll("\r\n", "\n");
+  const entry =
+    context && position !== undefined
+      ? context.inline.get(context.source.lastIndexOf("\n", position - 1) + 1)
+      : context &&
+        [...context.inline.values()].find((entry) => entry.content === content);
+  const children = entry?.content === content ? entry.tokens : undefined;
+  if (children && context)
+    return sanitize(
+      renderer.renderer.renderInline(
+        children,
+        renderer.options,
+        context.environment,
+      ),
+    );
+  const environment: FootnoteEnvironment = {
+    ...(context?.environment.footnotes
+      ? {
+          footnotes: {
+            refs: { ...context.environment.footnotes.refs },
+            list:
+              context.environment.footnotes.list?.map((item) => ({
+                ...item,
+                count: 0,
+              })) ?? [],
+          },
+        }
+      : {}),
+  };
+  const tokens: Token[] = [];
+  renderer.inline.parse(source, renderer, environment, tokens);
+  return sanitize(
+    renderer.renderer.renderInline(tokens, renderer.options, environment),
+  );
+}
+
+export function createInlineFootnoteContext(
+  source: string,
+): InlineFootnoteContext | undefined {
+  if (!source.includes("[^") && !source.includes("^[")) return undefined;
+  const renderer = rendererFor({});
+  const environment: FootnoteEnvironment = {};
+  const bodyStart = markdownBodyStart(source);
+  const tokens = renderer.parse(source.slice(bodyStart), environment);
+  const lineStarts = [bodyStart];
+  for (let offset = bodyStart; offset < source.length; offset += 1) {
+    if (source[offset] === "\n") lineStarts.push(offset + 1);
+  }
+  const inline: InlineFootnoteContext["inline"] = new Map();
+  for (const token of tokens) {
+    if (token.type === "inline" && token.children && token.map)
+      inline.set(lineStarts[token.map[0]]!, {
+        content: token.content,
+        tokens: token.children,
+      });
+  }
+  return { environment, source, inline };
 }

@@ -37,7 +37,7 @@ test("U7 opens the exact artifact offline and presents eligible Read sections wi
   await page.keyboard.press("Control+Shift+Enter");
   await expect(page.getByRole("dialog", { name: "演示文稿" })).toHaveCount(0);
 
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: /演示/u }).click();
   const dialog = page.getByRole("dialog", { name: "演示文稿" });
   await expect(dialog).toBeVisible();
@@ -59,12 +59,14 @@ test("U7 opens the exact artifact offline and presents eligible Read sections wi
   expect(previousBox?.width).toBeLessThanOrEqual(132);
   await dialog.getByRole("button", { name: "下一页" }).click();
   await expect(dialog.getByRole("heading", { name: "核心能力" })).toBeVisible();
-  await page.getByRole("button", { name: "更多" }).focus();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).focus();
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "更多" })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: /^(?:更多|菜单)$/u }),
+  ).toBeFocused();
 
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.getByRole("menuitem", { name: "高级视图" })).toHaveCount(0);
   await expect(page.locator(".cm-editor")).toHaveCount(0);
   expect(remoteRequests).toEqual([]);
@@ -76,10 +78,12 @@ for (const locale of ["zh-CN", "en"] as const) {
   }) => {
     const chinese = locale === "zh-CN";
     await page.goto(pathToFileURL(artifactPath).href);
-    await page.getByRole("button", { name: "更多" }).click();
+    await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
     if (!chinese) {
       await page.getByRole("menuitem", { name: "English" }).click();
-      await page.getByRole("button", { name: "More", exact: true }).click();
+      await page
+        .getByRole("button", { name: /^(?:More|Menu)$/u, exact: true })
+        .click();
     }
     await page
       .getByRole("menuitem", { name: chinese ? "关于 页里" : "About Yeli" })

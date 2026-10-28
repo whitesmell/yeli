@@ -61,7 +61,9 @@ test("typed metadata survives save/reopen with narrow source changes and shell f
   await expect(panel.getByLabel("project", { exact: true })).toHaveCount(0);
   if ((page.viewportSize()?.width ?? 0) <= 820) {
     await panel.getByRole("button", { name: "收起属性面板" }).click();
-    await page.getByRole("button", { name: "更多", exact: true }).click();
+    await page
+      .getByRole("button", { name: /^(?:更多|菜单)$/u, exact: true })
+      .click();
     await page.locator('[data-command-id="document.undo"]:visible').click();
     await page
       .getByRole("button", { name: "添加文档属性", exact: true })
@@ -74,7 +76,9 @@ test("typed metadata survives save/reopen with narrow source changes and shell f
   );
 
   await panel.getByRole("button", { name: "收起属性面板" }).click();
-  await page.getByRole("button", { name: "更多", exact: true }).click();
+  await page
+    .getByRole("button", { name: /^(?:更多|菜单)$/u, exact: true })
+    .click();
   const pending = page.waitForEvent("download");
   await page.locator('[data-menu-action="save-copy"]').click();
   const saved = testInfo.outputPath("properties.yeli.html");
@@ -184,7 +188,9 @@ test("creates each property type with its portable YAML value", async ({
     "one, two\nthree",
   );
   await panel.getByRole("button", { name: "收起属性面板" }).click();
-  await page.getByRole("button", { name: "更多", exact: true }).click();
+  await page
+    .getByRole("button", { name: /^(?:更多|菜单)$/u, exact: true })
+    .click();
   const pending = page.waitForEvent("download");
   await page.locator('[data-menu-action="save-copy"]').click();
   const saved = testInfo.outputPath("created-types.yeli.html");

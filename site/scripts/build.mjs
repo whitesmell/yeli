@@ -2,8 +2,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { execFileSync } from "node:child_process";
 import { renderYeliLogoSvg } from "../../src/brand/yeli-logo.ts";
+import { build as buildWebEditor } from "vite";
 import { buildDocs } from "./build-docs.mjs";
+import {
+  describeWebTemplate,
+  validateWebTemplate,
+} from "../../src/host/web-template.ts";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const siteRoot = path.resolve(here, "..");
@@ -32,6 +38,39 @@ for (const { source } of samples) {
     throw new Error(`Missing ${source}; run npm run build:single:all first.`);
   }
 }
+// Build the shell from this checkout, never from a document or remote template.
+execFileSync(
+  process.execPath,
+  [
+    path.join(root, "node_modules/vite/bin/vite.js"),
+    "build",
+    "--config",
+    path.join(root, "vite.config.ts"),
+  ],
+  {
+    cwd: root,
+    env: {
+      ...process.env,
+      YELI_SINGLE_FILE: "1",
+      YELI_EMPTY_RELEASE: "1",
+      YELI_ADVANCED_PLUGIN: "0",
+      YELI_COMPRESS: "1",
+      YELI_STARTER_LOCALE: "zh-CN",
+    },
+    stdio: "inherit",
+  },
+);
+const emptyTemplatePath = path.join(root, "dist/empty/empty.yeli.html");
+const emptyTemplate = fs.readFileSync(emptyTemplatePath, "utf8");
+const packageVersion = JSON.parse(
+  fs.readFileSync(path.join(root, "package.json"), "utf8"),
+).version;
+const templateMetadata = describeWebTemplate(emptyTemplate, packageVersion);
+if (
+  !(await validateWebTemplate(emptyTemplate, templateMetadata, packageVersion))
+    .available
+)
+  throw new Error("The freshly built empty web export template is invalid");
 
 const documentSpecs = {
   start: ["README.zh-CN.md", "README.md", "快速开始", "Quick start"],
@@ -277,6 +316,11 @@ html = html.replace(
 );
 fs.rmSync(outputRoot, { recursive: true, force: true });
 fs.mkdirSync(outputRoot, { recursive: true });
+fs.mkdirSync(path.join(outputRoot, "editor"), { recursive: true });
+fs.copyFileSync(
+  emptyTemplatePath,
+  path.join(outputRoot, "editor/yeli-template.yeli.html"),
+);
 fs.copyFileSync(path.join(root, "LICENSE"), path.join(outputRoot, "LICENSE"));
 fs.copyFileSync(
   path.join(root, "skills/yeli/SKILL.md"),
@@ -302,12 +346,20 @@ fs.writeFileSync(
       samples: samples.map(({ output }) => output),
       documentation: "docs/index.html",
       agentSkill: "skill.md",
+      editor: {
+        path: "editor/",
+        template: {
+          path: "editor/yeli-template.yeli.html",
+          ...templateMetadata,
+        },
+      },
     },
     null,
     2,
   ) + "\n",
 );
 await buildDocs();
+await buildWebEditor({ configFile: path.join(root, "vite.web.config.ts") });
 console.log(
   `Built bilingual self-contained homepage: ${(Buffer.byteLength(html) / 1024 / 1024).toFixed(2)} MiB, ${Object.keys(docs).length} embedded resources.`,
 );

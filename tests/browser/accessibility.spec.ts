@@ -78,7 +78,7 @@ test("@quality traps subordinate-dialog focus, restores its origin, and honors r
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(pathToFileURL(artifactPath).href);
-  const more = page.getByRole("button", { name: "更多" });
+  const more = page.getByRole("button", { name: /^(?:更多|菜单)$/u });
   await more.click();
   await page.getByRole("menuitem", { name: "关于 页里" }).click();
   const dialog = page.getByRole("dialog", { name: "关于 页里" });

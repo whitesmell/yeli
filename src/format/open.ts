@@ -1,17 +1,8 @@
-import type { YeliDocumentPayload } from "../document/model.ts";
-import type { DerivedFreshness } from "../document/freshness.ts";
-import { parseYeliArtifact, type ParseArtifactResult } from "./parse.ts";
+import type { HostOpenResult, OpenedYeliDocument } from "../host/contracts.ts";
+import { parseYeliArtifact } from "./parse.ts";
 import { fingerprintArtifact } from "./save.ts";
 
-export interface OpenedYeliDocument {
-  artifact: string;
-  artifactKind: "yeli" | "markdown";
-  fingerprint: string;
-  freshness: DerivedFreshness;
-  markdown: string;
-  payload: YeliDocumentPayload;
-  releaseTemplate: string;
-}
+export type { OpenedYeliDocument } from "../host/contracts.ts";
 
 export function createFreshOpenedDocument(
   opened: Omit<OpenedYeliDocument, "freshness">,
@@ -34,15 +25,6 @@ export function createFreshOpenedDocument(
     },
   };
 }
-
-export type OpenEmbeddedResult =
-  | { document: OpenedYeliDocument; ok: true }
-  | {
-      error: string;
-      ok: false;
-      recovery?: Extract<ParseArtifactResult, { ok: false }>;
-      releaseTemplate?: string;
-    };
 
 function serializeDoctype(ownerDocument: Document): string {
   const doctype = ownerDocument.doctype;
@@ -71,7 +53,7 @@ export function reconstructReleaseTemplate(
 export async function openYeliArtifact(
   artifact: string,
   releaseTemplate = artifact,
-): Promise<OpenEmbeddedResult> {
+): Promise<HostOpenResult> {
   const parsed = await parseYeliArtifact(artifact);
   if (!parsed.ok) {
     return {
@@ -97,7 +79,7 @@ export async function openYeliArtifact(
 
 export async function openEmbeddedYeli(
   ownerDocument: Document = document,
-): Promise<OpenEmbeddedResult> {
+): Promise<HostOpenResult> {
   try {
     const releaseTemplate = reconstructReleaseTemplate(ownerDocument);
     return openYeliArtifact(releaseTemplate, releaseTemplate);

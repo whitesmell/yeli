@@ -37,6 +37,9 @@ function serializeNode(node: Node): string {
     return escapeMarkdownText(node.textContent ?? "");
   }
   if (!(node instanceof HTMLElement)) return "";
+  if (node.matches(".footnote-atom[data-footnote-source]")) {
+    return node.getAttribute("data-footnote-source") ?? "";
+  }
 
   const children = serializeChildren(node);
   switch (node.tagName) {
@@ -82,6 +85,9 @@ export function serializeInlineDom(root: HTMLElement): string {
 function plainTextNode(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? "";
   if (!(node instanceof HTMLElement)) return "";
+  if (node.matches(".footnote-atom[data-footnote-source]")) {
+    return node.getAttribute("data-footnote-source") ?? "";
+  }
   if (node.tagName === "BR") return "\n";
   if (node.tagName === "IMG") return "";
   return [...node.childNodes].map((child) => plainTextNode(child)).join("");

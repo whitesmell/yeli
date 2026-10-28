@@ -15,6 +15,7 @@
 | Inline code            | `` `value` ``                      | Protects enclosed markers                       |
 | Thematic break         | `***`                              | Put on its own line                             |
 | Link                   | `[name](https://example.com)`      | Separate label and destination                  |
+| Footnote               | `text[^1]`, `[^1]: note`           | Editing, reading and export supported           |
 | Image                  | `![description](image.png)`        | Embed for offline Yeli use                      |
 | Escape                 | `\*literal stars\*`                | Display marker characters                       |
 
@@ -34,6 +35,6 @@ A language after a code fence is a label, not a guarantee of highlighting. Table
 
 ## Check before using extensions
 
-Footnotes `[^1]`, heading IDs `{#id}`, definition lists, `==highlight==`, sub/superscripts, math and Mermaid depend on the implementation. They are not enabled rendering extensions in current Yeli. Bare URLs are not automatically linked either; use explicit link syntax. See the [extension table](extensions.html).
+Heading IDs `{#id}`, definition lists, `==highlight==`, sub/superscripts, math and Mermaid depend on the implementation. They are not enabled rendering extensions in current Yeli. Bare URLs are not automatically linked either; use explicit link syntax. See the [extension table](extensions.html) for footnote references and continuation lines.
 
 For a guided path, start with [headings and paragraphs](headings-paragraphs.html). Bookmark this page for reference.

@@ -316,7 +316,8 @@ test(
                 await first.press("Tab");
                 await page
                   .getByRole("button", {
-                    name: locale === "en" ? "More" : "更多",
+                    name:
+                      locale === "en" ? /^(?:More|Menu)$/u : /^(?:更多|菜单)$/u,
                     exact: true,
                   })
                   .click();

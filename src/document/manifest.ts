@@ -1,4 +1,5 @@
-import { indexFrontmatter } from "./frontmatter.ts";
+import { indexFrontmatter, markdownBodyStart } from "./frontmatter.ts";
+import { indexFootnotes } from "../editor/footnotes.ts";
 import { sha256Text } from "./freshness.ts";
 import { setextHeadingLevel } from "../editor/markdown-lines.ts";
 import type {
@@ -67,13 +68,14 @@ function scanMarkdownStructure(source: string): {
 } {
   const lines = source.length === 0 ? [] : source.split("\n");
   if (source.endsWith("\n")) lines.pop();
-  const frontmatter = indexFrontmatter(source);
-  const frontmatterPrefix = source.slice(0, frontmatter.bodyStart);
+  const frontmatterPrefix = source.slice(0, markdownBodyStart(source));
   const contentStartsAt =
-    frontmatter.status === "absent"
-      ? 1
-      : frontmatterPrefix.split("\n").length +
-        (frontmatterPrefix.endsWith("\n") ? 0 : 1);
+    (frontmatterPrefix.match(/\n/gu)?.length ?? 0) +
+    1 +
+    (frontmatterPrefix && !frontmatterPrefix.endsWith("\n") ? 1 : 0);
+  const notes = indexFootnotes(source);
+  let noteIndex = 0;
+  let sourceOffset = 0;
   const rawHeadings: Omit<ManifestHeading, "anchor" | "sectionEndLine">[] = [];
   const links: ManifestLink[] = [];
   const tasks: ManifestTask[] = [];
@@ -82,6 +84,10 @@ function scanMarkdownStructure(source: string): {
   let fence: { marker: string; width: number } | null = null;
 
   for (let index = 0; index < lines.length; index += 1) {
+    const offset = sourceOffset;
+    sourceOffset += lines[index]!.length + 1;
+    while (notes[noteIndex] && notes[noteIndex]!.to <= offset) noteIndex += 1;
+    const inFootnote = notes[noteIndex] && notes[noteIndex]!.from <= offset;
     const lineNumber = index + 1;
     if (lineNumber < contentStartsAt) continue;
     const line = lines[index]!;
@@ -104,14 +110,14 @@ function scanMarkdownStructure(source: string): {
     if (fence) continue;
 
     const atx = /^\s{0,3}(#{1,6})\s+(.+?)(?:\s+#+\s*)?$/u.exec(line);
-    if (atx) {
+    if (atx && !inFootnote) {
       rawHeadings.push({
         level: atx[1]!.length,
         lineStart: lineNumber,
         lineEnd: lineNumber,
         text: atx[2]!.trim(),
       });
-    } else if (index > 0) {
+    } else if (index > 0 && !inFootnote) {
       const setextLevel = setextHeadingLevel(lines[index - 1]!, line);
       if (setextLevel !== null) {
         rawHeadings.push({
@@ -149,7 +155,7 @@ function scanMarkdownStructure(source: string): {
     }
 
     const reference = /^\s{0,3}\[([^\]]+)\]:\s*(\S+)/u.exec(line);
-    if (reference) {
+    if (reference && !reference[1]!.startsWith("^")) {
       const destination = reference[2]!.replace(/^<(.+)>$/u, "$1");
       links.push({
         destination,

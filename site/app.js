@@ -1,6 +1,9 @@
 (() => {
   "use strict";
   const en = {
+    onlineEditor: "Edit online",
+    onlineEditorGuide:
+      "Create or open a local Markdown file. Content is not uploaded.",
     skip: "Skip to product",
     navigation: "Main navigation",
     navEditor: "Editor",
@@ -42,9 +45,9 @@
     seeShortcuts: "View shortcuts",
     readEdit: "Read. Or edit.",
     readEditDesc: "Tools when you write. Focus when you read.",
-    agentTitle: "Context your Agent can work with.",
+    agentTitle: "Your Agent delivers. You keep writing.",
     agentLead:
-      "Help Agents locate the right context and change only the source they need.",
+      "Meeting notes, research reports and project plans, delivered with the editor inside.",
     pipeline: "Pre-read, patch, then validate",
     preRead: "Pre-read",
     executionPlan: "Execution plan",
@@ -62,7 +65,7 @@
     formatDesc: "Markdown source and a structural index.",
     cliDesc: "Pre-read, patch and validate.",
     cliReference: "See how it works",
-    skillDesc: "Practical guidance for document tasks.",
+    skillDesc: "From first-time setup to a finished document.",
     deliveryTitle: "New tools. The same work.",
     deliveryLead:
       "The source and editor travel with your file, ready for the next revision.",

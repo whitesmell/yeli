@@ -21,6 +21,7 @@ import { imageBlockDetails } from "./image-block.ts";
 import { DocumentProperties } from "./document-properties.tsx";
 
 interface InspectorProps {
+  canEmbedImages?: boolean;
   labels: Labels;
   onClose: () => void;
   onClearSelection: () => void;
@@ -86,6 +87,7 @@ function InspectorSection({
 }
 
 export function Inspector({
+  canEmbedImages = true,
   labels,
   onClose,
   onClearSelection,
@@ -257,6 +259,7 @@ export function Inspector({
                 type="file"
                 accept="image/png,image/jpeg,image/gif,image/webp"
                 aria-label={labels.replaceImage}
+                disabled={!canEmbedImages}
                 onChange={(event) => {
                   const file = event.currentTarget.files?.[0];
                   event.currentTarget.value = "";
@@ -273,6 +276,9 @@ export function Inspector({
                 }}
               />
             </label>
+            {!canEmbedImages ? (
+              <p>{labels.imageEmbeddingUnavailableMarkdown}</p>
+            ) : null}
           </InspectorSection>
 
           <InspectorSection

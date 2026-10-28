@@ -33,11 +33,11 @@ jobs:
       - run: npm run test:cli
       - run: npm run test:agent-setup
       - run: npm run test:fidelity
+      - run: npm run build:site
       - run: npm run test:browser
       - run: npm run test:quality
       - run: npm run validate:single
       - run: npm run validate:single -- --locale en
-      - run: npm run build:site
       - run: npm run check:site
       - run: npm run test:site
 

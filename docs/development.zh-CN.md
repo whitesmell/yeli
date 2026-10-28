@@ -52,6 +52,11 @@ npm run dev
 
 ## CLI 与 Skill 分发
 
+首次让 Agent 使用源码副本时，安装依赖后运行 `npm run setup:agent`。
+它一起构建 CLI、Skill 与两种语言的默认模板，校验模板，并把绝对路径写入
+`dist/agent/setup.json`，不修改全局 CLI 或 Agent 配置。
+见 [Agent 快速入门](agent-quickstart.zh-CN.md)。
+
 ```sh
 npm run build:cli
 npm run pack:cli

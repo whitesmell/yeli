@@ -178,7 +178,7 @@ test("switching to Read closes local history and removes its entry", async ({
 }) => {
   await page.goto(pathToFileURL(artifactPath).href);
   await page.getByRole("button", { name: "编辑", exact: true }).click();
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "历史版本" }).click();
   await expect(
     page.getByRole("complementary", { name: "历史版本" }),
@@ -306,7 +306,7 @@ test("preserves a safe reading selection, block position, focus, and source on E
     (element) => element.parentElement!.getBoundingClientRect().top,
   );
   expect(Math.abs(editTop - readTop)).toBeLessThanOrEqual(2);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.locator("#more-save-state-description")).toHaveText(
     "已保存",
   );
@@ -329,7 +329,7 @@ test("announces a block fallback for an ambiguous cross-block selection", async 
   expect(
     await page.evaluate(() => window.getSelection()?.toString()),
   ).not.toContain("一份文件，随处续写。");
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.locator("#more-save-state-description")).toHaveText(
     "已保存",
   );
@@ -426,7 +426,7 @@ Code target
 
   await expect(page.locator(".cm-editor")).toHaveCount(0);
   const downloadPromise = page.waitForEvent("download");
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "导出 Markdown" }).click();
   const download = await downloadPromise;
   const downloadPath = await download.path();

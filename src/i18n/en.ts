@@ -6,6 +6,10 @@ export const en = {
   aboutDetails: "File & safety details",
   aboutEnvironment: "Connection status",
   aboutEnvironmentUnavailable: "Connection status unavailable",
+  aboutMarkdownIncludes:
+    "Includes the complete Markdown source and document properties.",
+  aboutMarkdownTrust:
+    "Share .md files with other Markdown readers and editors. Review links and external resources before opening them.",
   aboutFileCapabilities: "Current file",
   aboutFileSizeUnavailable: "File size is currently unavailable.",
   aboutOffline: "Works offline",
@@ -48,6 +52,22 @@ export const en = {
     "Saving did not finish. Try again, or export Markdown to keep your changes.",
   exportFailed:
     "The export could not be created. Try again, or export Markdown to keep your content.",
+  exportStale:
+    "The document changed while preparing the export. Export again to use the latest content.",
+  exportYeli: "Export editable .yeli.html",
+  webTemplateMissing:
+    "Editable Yeli export is unavailable because its template is missing. Reload the official editor; Markdown, read-only HTML and browser printing remain available.",
+  webTemplateHash:
+    "Editable Yeli export is unavailable because its template failed the byte check. Reload the official editor; Markdown, read-only HTML and browser printing remain available.",
+  webTemplateFormat:
+    "Editable Yeli export is unavailable because its template format is incompatible. Reload the official editor; Markdown, read-only HTML and browser printing remain available.",
+  webTemplateVersion:
+    "Editable Yeli export is unavailable because its template belongs to another version. Reload the official editor; Markdown, read-only HTML and browser printing remain available.",
+  webTemplateNonempty:
+    "Editable Yeli export is unavailable because its template is not empty. Reload the official editor; Markdown, read-only HTML and browser printing remain available.",
+  webTemplateShell:
+    "Editable Yeli export is unavailable because its editor shell failed validation. Reload the official editor; Markdown, read-only HTML and browser printing remain available.",
+  webPrintDocument: "PDF via browser print…",
   printFailed:
     "Print preview could not be opened. Try again, or export read-only HTML and print that file.",
   imageNotLoaded: "Image not loaded",
@@ -149,6 +169,8 @@ export const en = {
     "Saving checks whether the original file was changed elsewhere.",
   disclosureAttachmentSharing:
     "Before sharing by email or chat, check that the recipient can receive HTML attachments, or use a read-only export.",
+  disclosureMarkdownAttachmentSharing:
+    "Markdown files can be sent as ordinary text attachments or opened in any Markdown editor.",
   disclosureBytes: "Complete file size",
   disclosureInsecure: "Some browser features are restricted on this connection",
   disclosureLocalFits: "Within the file size limit",
@@ -262,6 +284,8 @@ export const en = {
   imageActions: "Image actions",
   imageDetails: "Image description",
   imageEmbedded: "Image embedded in this Yeli file",
+  imageEmbeddingUnavailableMarkdown:
+    "Embedding image files is unavailable in Markdown mode because .md files cannot include their bytes. Existing image links can still be kept.",
   imageSource: "Image address",
   imageTitle: "Image title",
   imageTooLarge:
@@ -300,6 +324,9 @@ export const en = {
   markIncomplete: "Mark incomplete",
   metadataUnsafe: "Document properties cannot be edited yet",
   more: "More",
+  menu: "Menu",
+  footnote: "Footnote",
+  footnotesSupplement: "Additional footnotes",
   moreSettingsAndHelp: "Settings & help",
   moreView: "View",
   noNetworkExport: "Read-only file · Read offline",
@@ -341,7 +368,7 @@ export const en = {
   presentationUnavailable:
     "Present needs at least two H1 sections, or two H2 sections when there is no H1.",
   previousPage: "Previous page",
-  read: "Preview",
+  read: "Read",
   readOnlyExportNotice:
     "Share this file for reading. Keep the original .yeli.html file to continue editing.",
   readEditSelectionFallback:
@@ -381,6 +408,10 @@ export const en = {
   saveCopy: "Save a copy",
   saveDownloaded:
     "A new copy is ready. Check that your browser has finished downloading it.",
+  saveDownloadedFallback:
+    "The original file could not be changed. A Markdown download is ready; check that it finishes. Your changes remain unsaved on this page.",
+  saveMarkdownAssetsUnsupported:
+    "This document contains embedded files that .md cannot preserve. Saving is blocked; your changes and embedded files remain on this page. Remove the embedded files before saving as Markdown.",
   saveFile: "Save",
   saveStateClean: "Saved",
   saveStateFailed: "Save failed",
@@ -455,6 +486,47 @@ export const en = {
   validation: "Document checks",
   version: "Version",
   writeConflict: "This passage has new changes. Reopen it before editing.",
+  webLocalDocuments: "Local documents",
+  webNewDocument: "New Markdown",
+  webDownloadMarkdown: "Download Markdown",
+  webSaveOriginal: "Save to original Markdown",
+  webIntro: "Markdown stays on this device. Nothing is uploaded.",
+  webGuidance: "Local editing guidance",
+  webDismissGuidance: "Dismiss local editing guidance",
+  webPersistence:
+    "Drafts and history are stored in this browser. Keep a file backup; clearing browser data removes them.",
+  webSaveIntro:
+    "A connected file saves to the original after permission; otherwise save downloads Markdown. The open tab works offline; reopening needs the website assets.",
+  webEmptyDocuments: "No local documents yet. Create one or open Markdown.",
+  webHasDraft: "Local draft available",
+  webBaselineOnly: "Saved baseline",
+  webContinue: "Continue",
+  webSwitchTitle: "Switch documents?",
+  webSwitchDescription:
+    "The current document has unsaved changes. Continue keeps its local draft when storage is available. A download does not confirm that the original file was saved.",
+  webSwitchContinue: "Keep draft and switch",
+  webWaitSaving:
+    "Wait for the current save to finish before switching documents.",
+  webHandleNotRetained:
+    "This browser could not retain the file connection. Save downloads Markdown; select the file again to reconnect. Local drafts remain available.",
+  webHandleUnavailable:
+    "The original file cannot be read now. The local baseline, draft and history remain available; save downloads Markdown.",
+  webDiskTitle: "The disk file has changed",
+  webDiskDescription:
+    "Choose the disk version as a new local document, or continue the previous local baseline and draft. Both remain in Local documents. Continuing the draft keeps its original conflict check before overwriting.",
+  webUseDisk: "Open disk version separately",
+  webUseDraft: "Continue local version",
+  webLoading: "Opening local document…",
+  webReconnectDescription:
+    "These records match the file bytes. Choose one to reconnect its draft and history, or open an independent copy. A filename never selects history.",
+  webDiscardTitle: "Discard the local recovery draft?",
+  webDiscardDescription:
+    "This removes the recovery draft for this local document. History remains available.",
+  webAboutDescription:
+    "Edit Markdown with the same Yeli editor. Documents are opened and saved on your device; no file is uploaded.",
+  webDiscardSwitch: "Discard changes and switch",
+  webDiscardSwitchDescription:
+    "Local storage is unavailable. Download Markdown before switching to keep your changes. Continuing discards unsaved edits in this tab.",
 } as const;
 
 export type Labels = { [Key in keyof typeof en]: string };

@@ -145,9 +145,9 @@ test("@quality keeps a 1 MiB history summary and inert preview below the 100 ms 
     .locator('[data-block-kind="heading"] [contenteditable="true"]')
     .filter({ hasText: "Before history" })
     .fill("After history");
-  await page.getByRole("button", { name: "更多" }).focus();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).focus();
   await page.waitForTimeout(900);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "历史版本" }).click();
   const panel = page.getByRole("complementary", { name: "历史版本" });
   const review = panel.getByRole("button", { name: "查看版本" });

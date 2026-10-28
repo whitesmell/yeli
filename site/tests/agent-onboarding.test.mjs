@@ -89,6 +89,16 @@ test(
                 await expect(copy).toHaveText(
                   locale === "en" ? "Copy instruction" : "复制指令",
                 );
+                const online = page.locator(".hero-actions .primary");
+                await expect(online).toHaveAttribute("href", "editor/");
+                await expect(online).toHaveText(
+                  locale === "en" ? "Edit online" : "在线编辑",
+                );
+                await expect(page.locator("#online-editor-guide")).toHaveText(
+                  locale === "en"
+                    ? "Create or open a local Markdown file. Content is not uploaded."
+                    : "新建或打开本地 Markdown，内容不上传。",
+                );
                 assert.deepEqual(
                   await page
                     .locator(".hero-actions > *")
@@ -99,12 +109,12 @@ test(
                       ]),
                     ),
                   [
-                    ["BUTTON", true],
-                    ["A", false],
+                    ["A", true],
+                    ["BUTTON", false],
                   ],
                 );
                 await expect(
-                  page.locator(".hero-actions [data-demo]"),
+                  page.locator(".hero-start-note [data-demo]"),
                 ).toHaveAttribute("href", `sample.${locale}.yeli.html`);
                 await prompt.click();
                 assert.deepEqual(

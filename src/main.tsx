@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./app";
 import { openEmbeddedYeli } from "./format/open.ts";
+import { createArtifactHost } from "./host/host.ts";
 import "./styles.css";
 
 const root = document.getElementById("root");
@@ -12,11 +13,15 @@ if (!root) {
 }
 
 const embedded = await openEmbeddedYeli();
+const releaseTemplate = embedded.ok
+  ? embedded.document.releaseTemplate
+  : (embedded.releaseTemplate ?? "");
+const host = createArtifactHost(embedded, releaseTemplate);
 const staticPreview = document.getElementById("yeli-static-preview");
 staticPreview?.remove();
 
 createRoot(root).render(
   <StrictMode>
-    <App initialResult={embedded} />
+    <App host={host} />
   </StrictMode>,
 );

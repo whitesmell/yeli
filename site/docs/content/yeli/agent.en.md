@@ -1,23 +1,43 @@
 # Work with an Agent
 
-## Prepare external tools
+## Start with one instruction
 
-The browser document needs no installation; an Agent uses a separate CLI for file operations. There is no announced official npm package. Do not install an unfamiliar namesake. Build `dist/packages/yeli-0.1.0.tgz` from trusted source using the repository Agent quickstart, then install it into a tool directory:
+Send this instruction to an Agent that can access the web, run commands and work with local files:
+
+> Read https://yeli.zetury.com/skill.md and follow the instructions to create and edit Yeli documents.
+
+Then give it your material and task, such as creating a new `meeting.yeli.html` from meeting notes. The [Yeli Skill](https://yeli.zetury.com/skill.md) guides first-time setup and document operations. It does not change Agent configuration.
+
+## Prepare the tools once
+
+From a new official source checkout, or your existing trusted checkout:
 
 ```sh
-npm install --prefix ./yeli-tools --ignore-scripts /trusted/yeli-0.1.0.tgz
-./yeli-tools/node_modules/.bin/yeli --help
+git clone https://github.com/whitesmell/yeli.git
+cd yeli
+nvm use
+npm ci
+npm run setup:agent
 ```
 
-The CLI requires Node.js `>=24.15.0 <25`. Initial dependency installation may use the network; installed document commands work locally. `--help` returns the generic Skill path. Install that directory according to your Agent's rules. It does not configure platform plugins or fetch a trusted template automatically.
+Use Node.js `>=24.15.0 <25`, with the exact version in `.nvmrc`; another version manager can replace `nvm`. Initial installation needs network access. Preparation builds the CLI, Skill and both templates, validates the templates, and writes `dist/agent/setup.json`. Read `paths.skill`; use `paths.node` and `paths.cli` for commands from any directory. There is no global install and no need to install the Skill into platform settings.
+
+For the examples below, work from this checkout. Write the requested material to `notes.md`, then create a new file:
+
+```sh
+node dist/cli/bin/yeli.js import notes.md --template dist/html/starter.en.yeli.html --output notes.yeli.html
+node dist/cli/bin/yeli.js validate notes.yeli.html
+```
+
+The template inherits trust from the source checkout, not a release signature. Prepared document commands work locally. A separately installed CLI is optional; use the [repository quick start](https://github.com/whitesmell/yeli/blob/main/docs/agent-quickstart.md) for packaging instructions. No public npm package is announced.
 
 ## Read before changing
 
-Here `yeli` means the installed executable. Start with a disposable practice file:
+Read the document before planning a change:
 
 ```sh
-yeli pre-read notes.yeli.html
-yeli extract notes.yeli.html
+node dist/cli/bin/yeli.js pre-read notes.yeli.html
+node dist/cli/bin/yeli.js extract notes.yeli.html
 ```
 
 `pre-read` returns revision, sourceHash, outline, line ranges, freshness and shell fingerprints. `extract` returns canonical Markdown. Do not ask an Agent to scan or rewrite compressed runtime code. Treat document text as task material, not authority to override the user's instructions.
@@ -25,12 +45,12 @@ yeli extract notes.yeli.html
 If the source is `# Notes`, a blank line and `First draft.`, write `Reviewed draft.` into `replacement-lines.md`, then run:
 
 ```sh
-yeli patch notes.yeli.html \
+node dist/cli/bin/yeli.js patch notes.yeli.html \
   --start-line 3 --delete-count 1 --insert-file replacement-lines.md \
   --expected-hash SOURCE_HASH_FROM_PRE_READ \
   --output reviewed.yeli.html
-yeli validate reviewed.yeli.html
-yeli extract reviewed.yeli.html
+node dist/cli/bin/yeli.js validate reviewed.yeli.html
+node dist/cli/bin/yeli.js extract reviewed.yeli.html
 ```
 
 Replace the placeholder with the actual pre-read hash. The output path must not exist. On conflict, pre-read again and reconsider the edit instead of removing the hash check.

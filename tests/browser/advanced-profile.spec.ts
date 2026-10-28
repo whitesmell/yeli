@@ -15,7 +15,7 @@ test("official enhanced profile loads and edits through CodeMirror", async ({
 }) => {
   expect(existsSync(artifactPath)).toBe(true);
   await page.goto(pathToFileURL(artifactPath).href);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "高级视图" }).click();
 
   const source = page.locator(".cm-content");
@@ -37,7 +37,7 @@ test("official enhanced profile waits for IME composition before committing", as
   page,
 }) => {
   await page.goto(pathToFileURL(artifactPath).href);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "高级视图" }).click();
   await page.getByRole("button", { name: "源码 + 预览" }).click();
 

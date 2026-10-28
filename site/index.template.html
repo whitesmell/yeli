@@ -20,12 +20,15 @@
       <nav class="nav wrap" aria-label="主导航" data-label="navigation">
         <a class="brand" href="#top" aria-label="Yeli 首页">@@LOGO@@</a>
         <div class="nav-sections">
-          <a href="#editor" data-i18n="navEditor">编辑器</a>
           <a href="#agent">Agent</a>
+          <a href="#editor" data-i18n="navEditor">编辑器</a>
           <a href="#delivery" data-i18n="navDelivery">交付与复用</a>
           <a href="#opensource" data-i18n="navOpen">开源</a>
         </div>
         <div class="nav-utilities">
+          <a class="nav-online" href="editor/" data-i18n="onlineEditor"
+            >在线编辑</a
+          >
           <button class="text-button nav-docs" data-doc="start">
             <span data-i18n="docs">文档</span> @@ICON:ArrowUpRight@@
           </button>
@@ -53,8 +56,9 @@
         </div>
       </nav>
       <div id="mobile-menu" class="mobile-menu" hidden>
-        <a href="#editor" data-i18n="navEditor">编辑器</a
-        ><a href="#agent">Agent</a>
+        <a href="editor/" data-i18n="onlineEditor">在线编辑</a>
+        <a href="#agent">Agent</a>
+        <a href="#editor" data-i18n="navEditor">编辑器</a>
         <a href="#delivery" data-i18n="navDelivery">交付与复用</a
         ><a href="#opensource" data-i18n="navOpen">开源</a>
         <button data-doc="start" data-i18n="docs">文档</button>
@@ -86,18 +90,29 @@
           aria-live="polite"
         ></p>
         <div class="actions hero-actions">
-          <button id="copy-agent-prompt" class="button primary" disabled>
+          <a
+            class="button primary"
+            href="editor/"
+            aria-describedby="online-editor-guide"
+            ><span data-i18n="onlineEditor">在线编辑</span>
+            @@ICON:ArrowRight@@</a
+          >
+          <button id="copy-agent-prompt" class="button secondary" disabled>
             <span data-i18n="copyPrompt">复制指令</span> @@ICON:Clipboard@@
           </button>
+        </div>
+        <p class="hero-start-note">
+          <span id="online-editor-guide" data-i18n="onlineEditorGuide"
+            >新建或打开本地 Markdown，内容不上传。</span
+          >
           <a
-            class="button secondary"
             data-demo
             href="sample.zh-CN.yeli.html"
             target="_blank"
             rel="noopener"
-            ><span data-i18n="demo">打开示例</span> @@ICON:ArrowRight@@</a
+            ><span data-i18n="demo">打开示例</span> @@ICON:ArrowUpRight@@</a
           >
-        </div>
+        </p>
       </div>
       <figure class="hero-art">
         <div class="hero-scene">
@@ -187,10 +202,10 @@
         <div class="section-heading">
           <p class="eyebrow">Agent</p>
           <h2 id="agent-title" data-i18n="agentTitle">
-            给 Agent，可读写的上下文。
+            Agent 交付，你接着写。
           </h2>
           <p class="lead" data-i18n="agentLead">
-            让 Agent 快速定位上下文，按需局部修改原文。
+            从会议记录、调研报告到项目方案，让 Agent 交付自带编辑器的文档。
           </p>
         </div>
         <div
@@ -276,7 +291,10 @@ ok: true</pre>
           </article>
           <article>
             <h3>Skill</h3>
-            <p data-i18n="skillDesc">面向文档任务的操作指引。</p>
+            <p data-i18n="skillDesc">从首次准备到交付文档的操作指引。</p>
+            <a class="quiet-link" href="skill.md" data-i18n="readSkill"
+              >查看 Skill</a
+            >
           </article>
         </div>
       </section>

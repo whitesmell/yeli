@@ -90,6 +90,14 @@ function embeddedDocument() {
             : "React, markdown-it",
         )
         .replace(
+          "markdown-it, DOMPurify",
+          `markdown-it, markdown-it-footnote, DOMPurify`,
+        )
+        .replace(
+          DOCUMENT_SLOT,
+          `<!-- markdown-it-footnote 4.0.0\n${readFileSync(resolve("node_modules/markdown-it-footnote/LICENSE"), "utf8")}-->\n${DOCUMENT_SLOT}`,
+        )
+        .replace(
           DOCUMENT_SLOT,
           `${YELI_AGENT_PREAMBLE}\n${serializePayloadBlock(payload)}`,
         )

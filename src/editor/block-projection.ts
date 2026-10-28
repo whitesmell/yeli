@@ -1,5 +1,6 @@
 import {
   indexFrontmatter,
+  markdownBodyStart,
   patchFrontmatter,
   type MetadataValue,
 } from "../document/frontmatter.ts";
@@ -10,6 +11,7 @@ import {
   type SourceRange,
 } from "./source-ranges.ts";
 import { setextHeadingLevel } from "./markdown-lines.ts";
+import { indexFootnotes } from "./footnotes.ts";
 
 export type SourceBlockKind =
   | "blank"
@@ -289,13 +291,39 @@ export function projectMarkdown(
       ),
     );
     start = frontmatter.bodyStart;
+  } else {
+    start = markdownBodyStart(source);
+    if (start > 0) {
+      blocks.push(
+        block(
+          source,
+          "frontmatter",
+          { from: 0, to: start },
+          revision,
+          hash,
+          false,
+          "ambiguous-frontmatter",
+        ),
+      );
+    }
   }
 
   const lines = linesFrom(source, start);
+  const footnotes = new Map(
+    indexFootnotes(source).map((note) => [note.from, note]),
+  );
   let index = 0;
   while (index < lines.length) {
     const line = lines[index]!;
     const content = line.content;
+
+    const footnote = footnotes.get(line.from);
+    if (footnote) {
+      blocks.push(block(source, "footnote", footnote, revision, hash, true));
+      while (index < lines.length && lines[index]!.from < footnote.to)
+        index += 1;
+      continue;
+    }
 
     if (content.trim().length === 0) {
       blocks.push(block(source, "blank", line, revision, hash, true));
@@ -648,7 +676,11 @@ function absoluteRange(
 }
 
 function lineContentEnd(text: string): number {
-  return text.endsWith("\n") ? text.length - 1 : text.length;
+  return text.endsWith("\r\n")
+    ? text.length - 2
+    : text.endsWith("\n")
+      ? text.length - 1
+      : text.length;
 }
 
 function blockContentRange(sourceBlock: SourceBlock): SourceRange {
@@ -664,10 +696,10 @@ function blockContentRange(sourceBlock: SourceBlock): SourceRange {
   }
   const end = lineContentEnd(text);
   const prefixByKind: Partial<Record<SourceBlockKind, RegExp>> = {
-    heading: /^ {0,3}#{1,6}\s+/u,
-    "list-item": /^\s*(?:[-+*]|\d+[.)])\s+/u,
-    task: /^\s*(?:[-+*]|\d+[.)])\s+\[[ xX]\]\s*/u,
-    quote: /^ {0,3}>\s?/u,
+    heading: /^ {0,3}#{1,6}[ \t]+/u,
+    "list-item": /^[ \t]*(?:[-+*]|\d+[.)])[ \t]+/u,
+    task: /^[ \t]*(?:[-+*]|\d+[.)])[ \t]+\[[ xX]\][ \t]*/u,
+    quote: /^ {0,3}>[ \t]?/u,
   };
   const prefix = prefixByKind[sourceBlock.kind]?.exec(text)?.[0].length ?? 0;
   return absoluteRange(sourceBlock, prefix, end);
@@ -1055,7 +1087,7 @@ export function createSplitInlineBlockPatch(
 ): SourcePatch {
   const ending = sourceBlock.expectedText.endsWith("\n") ? "\n" : "";
   if (sourceBlock.kind === "list-item") {
-    const prefix = /^(\s*(?:[-+*]|\d+[.)])\s+)/u.exec(
+    const prefix = /^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)/u.exec(
       sourceBlock.expectedText,
     )?.[1];
     if (!prefix) throw new Error("List marker is ambiguous");
@@ -1066,7 +1098,7 @@ export function createSplitInlineBlockPatch(
     );
   }
   if (sourceBlock.kind === "task") {
-    const match = /^(\s*(?:[-+*]|\d+[.)])\s+)(\[[ xX]\]\s*)/u.exec(
+    const match = /^([ \t]*(?:[-+*]|\d+[.)])[ \t]+)(\[[ xX]\][ \t]*)/u.exec(
       sourceBlock.expectedText,
     );
     if (!match) throw new Error("Task marker is ambiguous");
@@ -1107,7 +1139,7 @@ export function createFrontmatterPropertyPatch(
     block(
       projection.source,
       "frontmatter",
-      { from: 0, to: 0 },
+      before,
       projection.revision,
       projection.sourceHash,
       true,

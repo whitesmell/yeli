@@ -390,7 +390,6 @@ describe("source-mapped block projection", () => {
     expect(projection.status).toBe("degraded");
     const unsafeKinds = new Set([
       "reference-definition",
-      "footnote",
       "raw-html",
       "mermaid",
       "math",
@@ -717,7 +716,7 @@ describe("source-mapped block projection", () => {
     for (const sourceBlock of projection.blocks.filter(
       (item) => item.kind !== "blank",
     )) {
-      expect(sourceBlock.editable).toBe(false);
+      expect(sourceBlock.editable).toBe(sourceBlock.kind === "footnote");
       expect(
         unsupported.slice(sourceBlock.range.from, sourceBlock.range.to),
       ).toBe(sourceBlock.expectedText);

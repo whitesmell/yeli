@@ -13,6 +13,12 @@ trusted tarball.
 
 ## Install a trusted local package
 
+For first-time use from a source checkout, `npm run setup:agent` prepares the
+CLI, Skill, and both starter templates together. Read `dist/agent/setup.json`
+for their exact paths; no package installation is needed for that route.
+See [the quick start](docs/agent-quickstart.md). The steps below install the
+CLI separately when a trusted tarball is preferred.
+
 Use Node.js `>=24.15.0 <25`; the development version is `24.19.0`.
 
 ```sh

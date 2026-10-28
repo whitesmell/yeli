@@ -48,7 +48,7 @@ test("keeps Advanced View out of the default release", async ({ page }) => {
   await expect(page.locator(".edit-document")).toBeVisible();
   await expect(page.locator(".cm-editor")).toHaveCount(0);
 
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.getByRole("menuitem", { name: "高级视图" })).toHaveCount(0);
   await expect(page.locator('[data-command-id="view.advanced"]')).toHaveCount(
     0,
@@ -158,7 +158,10 @@ test("groups the brand and document title without a persistent version badge", a
 
 test("opens About from More and returns focus to More", async ({ page }) => {
   await page.goto(pathToFileURL(artifactPath).href);
-  const more = page.getByRole("button", { name: "更多", exact: true });
+  const more = page.getByRole("button", {
+    name: /^(?:更多|菜单)$/u,
+    exact: true,
+  });
   await more.click();
   await page.getByRole("menuitem", { name: "关于 页里", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "关于 页里" });
@@ -183,7 +186,9 @@ test("edits the toolbar title with narrow source changes, cancel and undo", asyn
     name: "original-file.md",
   });
   const exportSource = async () => {
-    await page.getByRole("button", { name: "更多", exact: true }).click();
+    await page
+      .getByRole("button", { name: /^(?:更多|菜单)$/u, exact: true })
+      .click();
     const downloaded = page.waitForEvent("download");
     await page
       .getByRole("menuitem", { name: "导出 Markdown", exact: true })
@@ -234,7 +239,9 @@ test("edits the toolbar title with narrow source changes, cancel and undo", asyn
     source.replace("title: Original title", "title: Renamed title"),
   );
 
-  await page.getByRole("button", { name: "更多", exact: true }).focus();
+  await page
+    .getByRole("button", { name: /^(?:更多|菜单)$/u, exact: true })
+    .focus();
   await page.keyboard.press("Control+z");
   await expect(input).toHaveValue("Original title");
   expect(await exportSource()).toBe(source);
@@ -263,7 +270,7 @@ test("switches one page-width preference across Read and Edit", async ({
       .evaluate((element) => element.getBoundingClientRect().width);
   expect(await documentWidth()).toBe(690);
 
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   const widthTrigger = page.getByRole("menuitem", { name: /页面宽度/u });
   await widthTrigger.hover();
   const widthMenu = page.getByRole("menu", { name: "页面宽度" });
@@ -290,7 +297,7 @@ test("switches one page-width preference across Read and Edit", async ({
   await page.getByRole("button", { name: "编辑", exact: true }).click();
   await page.getByRole("button", { name: "目录" }).click();
   expect(await documentWidth()).toBe(960);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.locator("#more-save-state-description")).toHaveText(
     "已保存",
   );
@@ -315,7 +322,7 @@ test("persists the reading font size separately from page width", async ({
   page,
 }) => {
   await page.goto(pathToFileURL(artifactPath).href);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "字体大小", exact: true }).hover();
 
   const fontSizeMenu = page.getByRole("menu", { name: "字体大小" });
@@ -354,7 +361,7 @@ test("presents slides in and out of native fullscreen", async ({
   page,
 }) => {
   await page.goto(pathToFileURL(artifactPath).href);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "演示", exact: true }).click();
 
   const presentation = page.getByRole("dialog", { name: "演示文稿" });
@@ -405,7 +412,7 @@ test("keeps history in Edit and flattens file actions into a prioritized More me
     page.getByRole("button", { name: "编辑", exact: true }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "预览" })).toHaveCount(0);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.getByRole("menuitem", { name: "历史版本" })).toHaveCount(0);
   await page.keyboard.press("Escape");
 
@@ -447,7 +454,7 @@ test("keeps history in Edit and flattens file actions into a prioritized More me
     await expect(page.locator(".topbar-tools")).toBeHidden();
   }
 
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(
     page.getByRole("menuitem", { name: "打开文件", exact: true }),
   ).toBeVisible();
@@ -526,7 +533,7 @@ test("keeps history in Edit and flattens file actions into a prioritized More me
   await expect(page.locator(".topbar-action-cluster")).toBeVisible();
   await expect(page.locator('.outline-panel:has-text("历史")')).toHaveCount(0);
 
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "历史版本" }).click();
   const history = page.getByRole("complementary", { name: "历史版本" });
   await expect(history).toContainText(
@@ -543,7 +550,9 @@ test("keeps history in Edit and flattens file actions into a prioritized More me
   );
 
   await history.getByRole("button", { name: "关闭" }).click();
-  await expect(page.getByRole("button", { name: "更多" })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: /^(?:更多|菜单)$/u }),
+  ).toBeFocused();
   await page.getByRole("button", { name: "预览" }).click();
   await expect(
     page.getByRole("button", { name: "编辑", exact: true }),
@@ -1097,19 +1106,21 @@ test("localizes top navigation without changing the document", async ({
 }) => {
   await page.goto(pathToFileURL(artifactPath).href);
 
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "English" }).click();
 
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.getByRole("button", { name: "Edit" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "More" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^(?:More|Menu)$/u }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Edit" }).click();
   await expect(page.getByLabel("Document editor")).toBeVisible();
   await page
     .getByRole("button", { name: "Document properties", exact: true })
     .click();
   await expect(page.getByPlaceholder("Add a short summary")).toBeVisible();
-  await page.getByRole("button", { name: "More" }).click();
+  await page.getByRole("button", { name: /^(?:More|Menu)$/u }).click();
   await expect(page.getByRole("button", { name: "Advanced View" })).toHaveCount(
     0,
   );
@@ -1119,7 +1130,7 @@ test("localizes top navigation without changing the document", async ({
 test("remembers the selected UI language across reloads", async ({ page }) => {
   await page.goto(pathToFileURL(artifactPath).href);
 
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "English" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
 

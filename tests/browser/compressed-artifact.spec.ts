@@ -22,7 +22,7 @@ test("reopens a downloaded compressed copy offline with its shell intact", async
   });
   await page.goto(pathToFileURL(artifactPath).href);
   await page.getByRole("button", { name: "编辑", exact: true }).click();
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("menuitem", { name: "下载更新副本" }).click();
   const outputPath = testInfo.outputPath("offline-saved-copy.yeli.html");

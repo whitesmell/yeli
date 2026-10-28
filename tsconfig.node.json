@@ -15,6 +15,7 @@
   },
   "include": [
     "vite.config.ts",
+    "vite.web.config.ts",
     "vitest.config.ts",
     "playwright.config.ts",
     "eslint.config.js",
@@ -27,6 +28,8 @@
     "src/document/starter-en.ts",
     "src/document/starter-locale.ts",
     "src/editor/markdown-lines.ts",
+    "src/editor/footnotes.ts",
+    "src/editor/source-ranges.ts",
     "src/format/assets.ts",
     "src/format/base86.ts",
     "src/format/compress-artifact.ts",
@@ -35,8 +38,11 @@
     "src/format/parse.ts",
     "src/format/serialize.ts",
     "src/format/static-shell-preview.ts",
+    "src/host/web-template.ts",
+    "src/integrity/shell-projection.ts",
     "src/i18n/locale.ts",
     "src/integrity/content-policy.ts",
-    "src/types/jsdom.d.ts"
+    "src/types/jsdom.d.ts",
+    "src/types/markdown-it-footnote.d.ts"
   ]
 }

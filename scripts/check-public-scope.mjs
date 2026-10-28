@@ -39,6 +39,7 @@ const publicRootFiles = new Set([
   "tsconfig.json",
   "tsconfig.node.json",
   "vite.config.ts",
+  "vite.web.config.ts",
   "vitest.config.ts",
 ]);
 const publicDocumentationFiles = new Set([

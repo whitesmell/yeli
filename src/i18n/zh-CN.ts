@@ -8,6 +8,9 @@ export const zhCN = {
   aboutDetails: "文件与安全详情",
   aboutEnvironment: "连接状态",
   aboutEnvironmentUnavailable: "无法读取连接状态",
+  aboutMarkdownIncludes: "大小包含完整的 Markdown 原文和文档属性。",
+  aboutMarkdownTrust:
+    "可将 .md 文件分享给其他 Markdown 阅读器或编辑器用户。打开链接和外部资源前请先检查来源。",
   aboutFileCapabilities: "当前文件",
   aboutFileSizeUnavailable: "当前无法读取文件大小。",
   aboutOffline: "离线使用",
@@ -42,6 +45,21 @@ export const zhCN = {
   saveWriteFailed: "无法写入原文件，请使用“保存副本”保留本次修改。",
   saveFailedNotice: "保存未完成，请重试；也可导出 Markdown 保留修改。",
   exportFailed: "无法生成导出文件。请重试，或导出 Markdown 保留内容。",
+  exportStale: "准备导出时文档已更改。请重新导出，以使用最新内容。",
+  exportYeli: "导出可编辑 .yeli.html",
+  webTemplateMissing:
+    "缺少导出模板，暂无法导出可编辑页里文件。请重新加载官方编辑器；Markdown、只读 HTML 和浏览器打印仍可使用。",
+  webTemplateHash:
+    "导出模板未通过字节校验，暂无法导出可编辑页里文件。请重新加载官方编辑器；Markdown、只读 HTML 和浏览器打印仍可使用。",
+  webTemplateFormat:
+    "导出模板格式不兼容，暂无法导出可编辑页里文件。请重新加载官方编辑器；Markdown、只读 HTML 和浏览器打印仍可使用。",
+  webTemplateVersion:
+    "导出模板版本不匹配，暂无法导出可编辑页里文件。请重新加载官方编辑器；Markdown、只读 HTML 和浏览器打印仍可使用。",
+  webTemplateNonempty:
+    "导出模板含有非空内容，暂无法导出可编辑页里文件。请重新加载官方编辑器；Markdown、只读 HTML 和浏览器打印仍可使用。",
+  webTemplateShell:
+    "导出模板的编辑器外壳未通过校验，暂无法导出可编辑页里文件。请重新加载官方编辑器；Markdown、只读 HTML 和浏览器打印仍可使用。",
+  webPrintDocument: "通过浏览器打印导出 PDF…",
   printFailed: "无法打开打印预览，请重试或先导出只读 HTML 再打印。",
   imageNotLoaded: "图片未加载",
   exportImageUnavailable:
@@ -136,6 +154,8 @@ export const zhCN = {
   directSaveAvailable: "保存前会检查原文件是否在其他地方被修改。",
   disclosureAttachmentSharing:
     "通过邮件或聊天工具分享前，请确认对方能接收 HTML 附件；也可改用只读导出。",
+  disclosureMarkdownAttachmentSharing:
+    "Markdown 文件可作为普通文本附件发送，也可用任何 Markdown 编辑器打开。",
   disclosureBytes: "完整文件大小",
   disclosureInsecure: "当前连接限制了部分浏览器功能",
   disclosureLocalFits: "未超过文件大小上限",
@@ -241,6 +261,8 @@ export const zhCN = {
   imageActions: "图片操作",
   imageDetails: "图片说明",
   imageEmbedded: "图片已嵌入当前 页里 文件",
+  imageEmbeddingUnavailableMarkdown:
+    "Markdown 模式暂不支持嵌入图片文件，因为 .md 文件无法包含图片数据。已有的图片链接仍可保留。",
   imageSource: "图片地址",
   imageTitle: "图片标题",
   imageTooLarge:
@@ -279,6 +301,9 @@ export const zhCN = {
   markIncomplete: "标记为未完成",
   metadataUnsafe: "文档属性暂不可修改",
   more: "更多",
+  menu: "菜单",
+  footnote: "脚注",
+  footnotesSupplement: "其他脚注",
   moreSettingsAndHelp: "设置与帮助",
   moreView: "视图",
   noNetworkExport: "只读文件 · 离线阅读",
@@ -320,7 +345,7 @@ export const zhCN = {
   presentationUnavailable:
     "演示需要至少两个一级标题；没有一级标题时，需要至少两个二级标题。",
   previousPage: "上一页",
-  read: "预览",
+  read: "阅读",
   readOnlyExportNotice: "适合分享阅读；继续编辑请保留原来的 .yeli.html 文件。",
   readEditSelectionFallback:
     "已打开所选文字所在的段落，请重新选择要修改的文字。",
@@ -355,6 +380,10 @@ export const zhCN = {
   saveComplete: "已保存到原文件",
   saveCopy: "保存副本",
   saveDownloaded: "已准备新副本，请确认浏览器已完成下载。",
+  saveDownloadedFallback:
+    "无法修改原文件，已准备 Markdown 下载副本，请确认下载完成。本页修改仍未保存。",
+  saveMarkdownAssetsUnsupported:
+    "文档含有 .md 无法保留的内嵌文件，已阻止保存。修改和内嵌文件仍保留在本页；请先移除内嵌文件，再保存为 Markdown。",
   saveFile: "保存",
   saveStateClean: "已保存",
   saveStateFailed: "保存失败",
@@ -422,4 +451,43 @@ export const zhCN = {
   validation: "文档检查",
   version: "版本",
   writeConflict: "这段内容刚有新的修改，请重新打开后编辑。",
+  webLocalDocuments: "本机文档",
+  webNewDocument: "新建 Markdown",
+  webDownloadMarkdown: "下载 Markdown",
+  webSaveOriginal: "保存到原 Markdown",
+  webIntro: "Markdown 仅留在本机，不上传文件。",
+  webGuidance: "本地编辑说明",
+  webDismissGuidance: "关闭本地编辑说明",
+  webPersistence:
+    "草稿和历史保存在当前浏览器；清理浏览器数据会删除，请另存文件备份。",
+  webSaveIntro:
+    "连接文件后，经授权可写回原文件，否则下载 Markdown。当前页面可离线编辑，重新打开页面需加载网站资源。",
+  webEmptyDocuments: "暂无本机文档，可新建或打开 Markdown。",
+  webHasDraft: "有本机草稿",
+  webBaselineOnly: "本机基线",
+  webContinue: "继续",
+  webSwitchTitle: "切换文档？",
+  webSwitchDescription:
+    "当前文档仍有未保存的修改。继续时会在存储可用的情况下保留本机草稿；下载不代表已保存到原文件。",
+  webSwitchContinue: "保留草稿并切换",
+  webWaitSaving: "请等待当前保存完成后再切换文档。",
+  webHandleNotRetained:
+    "浏览器未能保留文件连接；保存将下载 Markdown，可重新选择文件连接。本机草稿仍可使用。",
+  webHandleUnavailable:
+    "暂时无法读取原文件；本机基线、草稿和历史仍可使用，保存将下载 Markdown。",
+  webDiskTitle: "磁盘文件已更改",
+  webDiskDescription:
+    "可将磁盘版本作为新的本机文档打开，或继续原来的本机基线与草稿。两份记录都保留在“本机文档”；继续草稿后写回仍需通过原有冲突检查。",
+  webUseDisk: "单独打开磁盘版本",
+  webUseDraft: "继续本机版本",
+  webLoading: "正在打开本机文档…",
+  webReconnectDescription:
+    "以下记录与文件字节完全一致。请选择一份续接草稿和历史，或作为独立副本打开；文件名不会自动选择历史。",
+  webDiscardTitle: "丢弃本机恢复草稿？",
+  webDiscardDescription: "将删除这份本机文档的恢复草稿，历史版本仍保留。",
+  webAboutDescription:
+    "使用同一页里编辑器编辑 Markdown，文件在本机打开与保存，不上传到云端。",
+  webDiscardSwitch: "放弃修改并切换",
+  webDiscardSwitchDescription:
+    "本机存储不可用。请先下载 Markdown 保存修改；继续将放弃当前页面中尚未保存的修改。",
 } as const satisfies Labels;

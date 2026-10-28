@@ -4,6 +4,8 @@
 
 Get a `.yeli.html` from a source you trust, download it and open it in a browser. No account or server is required. Attachment previews may disable interaction; download the file before editing instead of working inside a thumbnail viewer.
 
+You can also start from the website's “Online editor” entry: Markdown stays in this browser, files are not uploaded, and saving on the web downloads `.md`. If you later need one complete file you can keep editing offline, export editable `.yeli.html` there, then reopen it using the steps below.
+
 ## Complete the first round trip
 
 1. Choose Edit in the preview. Click a paragraph and write “My first Yeli document”.

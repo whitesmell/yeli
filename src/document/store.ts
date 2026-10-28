@@ -256,7 +256,7 @@ export class DocumentStore {
   undo(): DocumentTransactionResult | null {
     const transaction = this.#undo.pop();
     if (!transaction) return null;
-    const result = applyDocumentTransaction(this.#snapshot, transaction);
+    const result = this.#applyHistoryTransaction(transaction);
     if (!result.ok) {
       this.#undo.push(transaction);
       return result;
@@ -269,7 +269,7 @@ export class DocumentStore {
   redo(): DocumentTransactionResult | null {
     const transaction = this.#redo.pop();
     if (!transaction) return null;
-    const result = applyDocumentTransaction(this.#snapshot, transaction);
+    const result = this.#applyHistoryTransaction(transaction);
     if (!result.ok) {
       this.#redo.push(transaction);
       return result;
@@ -305,6 +305,36 @@ export class DocumentStore {
       revision,
       source,
       sourceHash: projection.sourceHash,
+    });
+  }
+
+  #applyHistoryTransaction(
+    transaction: DocumentTransaction,
+  ): DocumentTransactionResult {
+    // Validate the original binding before rebasing store-owned history.
+    for (const patch of transaction.patches) {
+      if (
+        patch.revision !== transaction.expectedRevision ||
+        patch.sourceHash !== transaction.expectedSourceHash
+      ) {
+        return {
+          assets: this.#snapshot.assets,
+          code:
+            patch.revision !== transaction.expectedRevision
+              ? "STALE_REVISION"
+              : "STALE_SOURCE_HASH",
+          ok: false,
+          source: this.#snapshot.source,
+        };
+      }
+    }
+    return applyDocumentTransaction(this.#snapshot, {
+      ...transaction,
+      expectedRevision: this.#snapshot.revision,
+      patches: transaction.patches.map((patch) => ({
+        ...patch,
+        revision: this.#snapshot.revision,
+      })),
     });
   }
 

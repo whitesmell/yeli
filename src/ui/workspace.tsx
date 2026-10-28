@@ -10,7 +10,9 @@ import {
   ChatBubbleBottomCenterTextIcon,
   CheckIcon,
   CheckCircleIcon,
+  ChevronDownIcon,
   ChevronLeftIcon,
+  ChevronUpIcon,
   ClockIcon,
   CodeBracketIcon,
   DocumentCheckIcon,
@@ -34,6 +36,7 @@ import {
   Squares2X2Icon,
   TableCellsIcon,
   CodeBracketSquareIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import {
   type CSSProperties,
@@ -63,7 +66,8 @@ import {
   type CommandId,
 } from "../editor/command-registry.ts";
 import type { TableDimensions } from "../editor/table-commands.ts";
-import type { OpenEmbeddedResult } from "../format/open.ts";
+import type { YeliHost } from "../host/contracts.ts";
+import { saveKindForHost } from "../host/host.ts";
 import { en } from "../i18n/en.ts";
 import {
   LOCALE_STORAGE_KEY,
@@ -72,6 +76,10 @@ import {
 } from "../i18n/locale.ts";
 import { zhCN } from "../i18n/zh-CN.ts";
 import { advancedModePlugin } from "#advanced-mode";
+import {
+  WebChoiceDialog,
+  WebDocumentsDialog,
+} from "./web-documents-dialog.tsx";
 import { AboutDialog } from "./about-dialog.tsx";
 import { ConflictDialog } from "./conflict-dialog.tsx";
 import { EditCanvas } from "./edit-canvas.tsx";
@@ -99,6 +107,7 @@ type PageWidthMode = "default" | "full" | "wide";
 
 const FONT_SIZE_STORAGE_KEY = "yeli:font-size";
 const PAGE_WIDTH_STORAGE_KEY = "yeli:page-width";
+const WEB_GUIDANCE_DISMISSED_STORAGE_KEY = "yeli:web-guidance-dismissed";
 const FONT_SIZE_MODES: FontSizeMode[] = ["small", "default", "large"];
 const PAGE_WIDTH_MODES: PageWidthMode[] = ["default", "wide", "full"];
 
@@ -165,6 +174,28 @@ function writePageWidthPreference(mode: PageWidthMode): void {
   }
 }
 
+function readWebGuidanceDismissedPreference(): boolean {
+  try {
+    return (
+      window.localStorage.getItem(WEB_GUIDANCE_DISMISSED_STORAGE_KEY) === "1"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function writeWebGuidanceDismissedPreference(dismissed: boolean): void {
+  try {
+    if (dismissed) {
+      window.localStorage.setItem(WEB_GUIDANCE_DISMISSED_STORAGE_KEY, "1");
+    } else {
+      window.localStorage.removeItem(WEB_GUIDANCE_DISMISSED_STORAGE_KEY);
+    }
+  } catch {
+    // View preferences remain usable for the current session without storage.
+  }
+}
+
 interface SelectedBlockBinding {
   from: number;
   id: string;
@@ -186,11 +217,8 @@ function InsertCommandIcon({ id }: { id: CommandId }) {
   return <PencilSquareIcon aria-hidden="true" />;
 }
 
-export function Workspace({
-  initialResult,
-}: {
-  initialResult: OpenEmbeddedResult;
-}) {
+export function Workspace({ host }: { host: YeliHost }) {
+  const { initialResult } = host;
   const initialDocument = initialResult.ok ? initialResult.document : undefined;
   const [store] = useState(
     () =>
@@ -207,6 +235,9 @@ export function Workspace({
   const [outlineOpen, setOutlineOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  const [webGuidanceDismissed, setWebGuidanceDismissed] = useState(
+    () => host.kind === "web" && readWebGuidanceDismissedPreference(),
+  );
   const [insertOpen, setInsertOpen] = useState(false);
   const [tableSizeOpen, setTableSizeOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -226,6 +257,7 @@ export function Workspace({
   const [fontSize, setFontSize] = useState<FontSizeMode>(
     readFontSizePreference,
   );
+  const [discardWebRecovery, setDiscardWebRecovery] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [efficiencyGuideOpen, setEfficiencyGuideOpen] = useState(false);
   const [presentationOpen, setPresentationOpen] = useState(false);
@@ -257,6 +289,7 @@ export function Workspace({
     window.requestAnimationFrame(() => trigger?.isConnected && trigger.focus());
   };
   const moreButtonRef = useRef<HTMLButtonElement>(null);
+  const webGuidanceCloseRef = useRef<HTMLButtonElement>(null);
   const aboutReturnRef = useRef<HTMLElement | null>(null);
   const fontSizeTriggerRef = useRef<HTMLButtonElement>(null);
   const pageWidthTriggerRef = useRef<HTMLButtonElement>(null);
@@ -291,13 +324,39 @@ export function Workspace({
     setSelectedBlockBinding(null);
   }, []);
   const lifecycle = useFileLifecycle({
-    initialResult,
+    host,
     labels,
     notify,
     snapshot,
     store,
   });
   const { openHistory, setHistoryOpen, setInvalidFile } = lifecycle;
+  const webWorkspaceBlocked =
+    host.kind === "web" &&
+    (!lifecycle.webHasActiveDocument ||
+      lifecycle.webWorking ||
+      lifecycle.localDocuments !== null ||
+      lifecycle.switchRequest ||
+      lifecycle.diskChoice !== null ||
+      lifecycle.webReconnect !== null);
+  const dismissWebGuidance = () => {
+    setWebGuidanceDismissed(true);
+    writeWebGuidanceDismissedPreference(true);
+    window.requestAnimationFrame(() => {
+      const trigger = moreButtonRef.current;
+      if (trigger?.isConnected) trigger.focus();
+    });
+  };
+  const reopenWebGuidance = () => {
+    setWebGuidanceDismissed(false);
+    writeWebGuidanceDismissedPreference(false);
+    setMoreOpen(false);
+    setFocusMode(false);
+    window.requestAnimationFrame(() => {
+      const close = webGuidanceCloseRef.current;
+      if (close?.isConnected) close.focus();
+    });
+  };
   const closeInvalidFile = useCallback(() => {
     setInvalidFile(null);
   }, [setInvalidFile]);
@@ -578,6 +637,15 @@ export function Workspace({
   useEffect(() => {
     const handleShortcut = (event: globalThis.KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+      if (
+        host.kind === "web" &&
+        (webWorkspaceBlocked ||
+          document.querySelector('[role="dialog"][aria-modal="true"]'))
+      ) {
+        if (matchesCommandShortcut("document.save", event))
+          event.preventDefault();
+        return;
+      }
       const target = event.target;
       const editing =
         target instanceof HTMLElement &&
@@ -638,11 +706,13 @@ export function Workspace({
   }, [
     cycleFontSize,
     cyclePageWidth,
+    host.kind,
     openSearch,
     store,
     toggleEfficiencyGuide,
     toggleOutline,
     togglePresentation,
+    webWorkspaceBlocked,
   ]);
 
   useEffect(() => {
@@ -805,12 +875,13 @@ export function Workspace({
           : labels.saveStateClean;
   const saveReady =
     lifecycle.saveDisclosure !== null && !lifecycle.saveDisclosureLoading;
+  const saveKind = saveKindForHost(host);
 
   return (
     <div
-      className={`workspace-shell is-width-${pageWidth} is-font-${fontSize}${isRead ? " is-read" : " is-edit"}${focusMode ? " is-focus" : ""}`}
+      className={`workspace-shell${host.kind === "web" ? " is-web" : ""} is-width-${pageWidth} is-font-${fontSize}${isRead ? " is-read" : " is-edit"}${focusMode ? " is-focus" : ""}`}
     >
-      <header className="workspace-topbar">
+      <header className="workspace-topbar" inert={webWorkspaceBlocked}>
         <div className="topbar-leading">
           <button
             className="icon-button rail-toggle topbar-brand"
@@ -1068,11 +1139,14 @@ export function Workspace({
           </nav>
           <div className="toolbar-popover-anchor">
             <button
-              className="icon-button"
+              className={
+                isRead ? "icon-button" : "tool-button topbar-menu-trigger"
+              }
               ref={moreButtonRef}
               type="button"
-              aria-label={labels.more}
+              aria-label={isRead ? labels.more : labels.menu}
               aria-expanded={moreOpen}
+              aria-haspopup="menu"
               data-more-trigger=""
               onClick={() => {
                 const next = !moreOpen;
@@ -1091,7 +1165,18 @@ export function Workspace({
                 setInsertOpen(false);
               }}
             >
-              <EllipsisVerticalIcon aria-hidden="true" />
+              {isRead ? (
+                <EllipsisVerticalIcon aria-hidden="true" />
+              ) : (
+                <>
+                  {labels.menu}
+                  {moreOpen ? (
+                    <ChevronUpIcon aria-hidden="true" />
+                  ) : (
+                    <ChevronDownIcon aria-hidden="true" />
+                  )}
+                </>
+              )}
             </button>
             {moreOpen ? (
               <div
@@ -1155,6 +1240,34 @@ export function Workspace({
                 <div className="more-menu-section-label" role="presentation">
                   {labels.file}
                 </div>
+                {host.kind === "web" ? (
+                  <>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      data-menu-action="local-documents"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        void lifecycle.openLocalDocuments();
+                      }}
+                    >
+                      <FolderOpenIcon aria-hidden="true" />
+                      {labels.webLocalDocuments}
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
+                      data-menu-action="new-markdown"
+                      onClick={() => {
+                        setMoreOpen(false);
+                        void lifecycle.newWebDocument();
+                      }}
+                    >
+                      <DocumentPlusIcon aria-hidden="true" />
+                      {labels.webNewDocument}
+                    </button>
+                  </>
+                ) : null}
                 <button
                   data-menu-action="open"
                   type="button"
@@ -1186,9 +1299,13 @@ export function Workspace({
                   ) : (
                     <ArrowDownTrayIcon aria-hidden="true" />
                   )}
-                  {lifecycle.canDirectSave
-                    ? labels.saveFile
-                    : labels.downloadUpdatedCopy}
+                  {host.kind === "web"
+                    ? lifecycle.canDirectSave
+                      ? labels.webSaveOriginal
+                      : labels.webDownloadMarkdown
+                    : lifecycle.canDirectSave
+                      ? labels.saveFile
+                      : labels.downloadUpdatedCopy}
                   <span
                     className={`save-state is-${lifecycle.saveStatus}${snapshot.dirty ? " is-dirty" : ""}`}
                     title={saveStateLabel}
@@ -1239,6 +1356,36 @@ export function Workspace({
                 <div className="more-menu-section-label" role="presentation">
                   {labels.exportActions}
                 </div>
+                {host.kind === "web" ? (
+                  <>
+                    <button
+                      data-menu-action="export-yeli"
+                      type="button"
+                      role="menuitem"
+                      disabled={!lifecycle.canExportYeli}
+                      aria-describedby={
+                        lifecycle.yeliExportUnavailable
+                          ? "yeli-export-unavailable"
+                          : undefined
+                      }
+                      onClick={() => {
+                        setMoreOpen(false);
+                        void lifecycle.exportYeli();
+                      }}
+                    >
+                      <ArrowDownTrayIcon aria-hidden="true" />
+                      {labels.exportYeli}
+                    </button>
+                    {lifecycle.yeliExportUnavailable ? (
+                      <small
+                        id="yeli-export-unavailable"
+                        className="menu-explanation"
+                      >
+                        {lifecycle.yeliExportUnavailable}
+                      </small>
+                    ) : null}
+                  </>
+                ) : null}
                 <button
                   data-menu-action="export-markdown"
                   type="button"
@@ -1273,7 +1420,9 @@ export function Workspace({
                   }}
                 >
                   <PrinterIcon aria-hidden="true" />
-                  {labels.printDocument}
+                  {host.kind === "web"
+                    ? labels.webPrintDocument
+                    : labels.printDocument}
                 </button>
                 <div className="popover-separator" role="separator" />
                 <div className="more-menu-section-label" role="presentation">
@@ -1526,6 +1675,17 @@ export function Workspace({
                   <QuestionMarkCircleIcon aria-hidden="true" />
                   {labels.efficiencyGuideMenu}
                 </button>
+                {host.kind === "web" ? (
+                  <button
+                    data-menu-action="web-guidance"
+                    type="button"
+                    role="menuitem"
+                    onClick={reopenWebGuidance}
+                  >
+                    <InformationCircleIcon aria-hidden="true" />
+                    {labels.webGuidance}
+                  </button>
+                ) : null}
                 <button
                   data-menu-action="about"
                   type="button"
@@ -1541,7 +1701,33 @@ export function Workspace({
         </div>
       </header>
 
+      {host.kind === "web" && !webGuidanceDismissed && !focusMode ? (
+        <aside className="web-session-note" aria-label={labels.webGuidance}>
+          <span>
+            <strong>{labels.webIntro}</strong>{" "}
+            {lifecycle.recoveryAvailable ? <>{labels.webPersistence} </> : null}
+            {labels.webSaveIntro}
+          </span>
+          <button
+            className="icon-button web-guidance-close"
+            ref={webGuidanceCloseRef}
+            type="button"
+            aria-label={labels.webDismissGuidance}
+            title={labels.webDismissGuidance}
+            disabled={webWorkspaceBlocked}
+            onClick={dismissWebGuidance}
+          >
+            <XMarkIcon aria-hidden="true" />
+          </button>
+        </aside>
+      ) : null}
+      {host.kind === "web" && !lifecycle.recoveryAvailable ? (
+        <aside className="web-storage-warning" role="status">
+          {labels.recoveryUnavailable}
+        </aside>
+      ) : null}
       <div
+        inert={webWorkspaceBlocked}
         className={`workspace-body${outlineOpen && !focusMode ? " has-outline" : ""}${((!isRead && inspectorOpen) || lifecycle.historyOpen || efficiencyGuideOpen) && !focusMode ? " has-inspector" : ""}`}
       >
         {outlineOpen && !focusMode ? (
@@ -1611,6 +1797,7 @@ export function Workspace({
 
         {!isRead && inspectorOpen && !focusMode ? (
           <Inspector
+            canEmbedImages={lifecycle.canEmbedImages}
             labels={labels}
             onClose={closeInspector}
             onClearSelection={closeInspector}
@@ -1691,7 +1878,7 @@ export function Workspace({
         ref={fileInputRef}
         className="sr-only"
         type="file"
-        accept=".yeli.html,.html,.md,text/html,text/markdown"
+        accept={host.fileAdapter.accept}
         tabIndex={-1}
         onChange={(event) => {
           const file = event.currentTarget.files?.[0];
@@ -1700,6 +1887,136 @@ export function Workspace({
         }}
       />
 
+      {lifecycle.webWorking ? (
+        <WebChoiceDialog
+          title={labels.webLoading}
+          description={labels.webIntro}
+        >
+          <p role="status">{labels.webLoading}</p>
+        </WebChoiceDialog>
+      ) : null}
+      {lifecycle.localDocuments &&
+      !lifecycle.webWorking &&
+      !lifecycle.switchRequest &&
+      !lifecycle.diskChoice &&
+      !lifecycle.webReconnect ? (
+        <WebDocumentsDialog
+          documents={lifecycle.localDocuments}
+          labels={labels}
+          locale={locale}
+          description={
+            lifecycle.recoveryAvailable
+              ? labels.webPersistence
+              : labels.recoveryUnavailable
+          }
+          onSelect={(session) => void lifecycle.selectLocalDocument(session)}
+          {...(lifecycle.webHasActiveDocument
+            ? {
+                onClose: () => {
+                  lifecycle.closeLocalDocuments();
+                  window.requestAnimationFrame(() =>
+                    moreButtonRef.current?.focus(),
+                  );
+                },
+              }
+            : {})}
+          onNew={() => void lifecycle.newWebDocument()}
+          onOpen={() => {
+            void lifecycle.chooseFile(() => fileInputRef.current?.click());
+          }}
+        />
+      ) : null}
+      {lifecycle.webReconnect && !lifecycle.webWorking ? (
+        <WebDocumentsDialog
+          documents={lifecycle.webReconnect.candidates}
+          labels={labels}
+          locale={locale}
+          description={labels.webReconnectDescription}
+          newLabel={labels.reconnectSeparate}
+          onSelect={lifecycle.reconnectWebSession}
+          onNew={() => void lifecycle.separateWebSession()}
+        />
+      ) : null}
+      {lifecycle.switchRequest && !lifecycle.webWorking ? (
+        <WebChoiceDialog
+          title={labels.webSwitchTitle}
+          description={
+            lifecycle.recoveryAvailable
+              ? labels.webSwitchDescription
+              : labels.webDiscardSwitchDescription
+          }
+          onClose={lifecycle.cancelWebSwitch}
+        >
+          <div className="web-document-actions">
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={lifecycle.cancelWebSwitch}
+            >
+              {labels.cancel}
+            </button>
+            <button
+              type="button"
+              className="primary-action"
+              onClick={() => void lifecycle.confirmWebSwitch()}
+            >
+              {lifecycle.recoveryAvailable
+                ? labels.webSwitchContinue
+                : labels.webDiscardSwitch}
+            </button>
+          </div>
+        </WebChoiceDialog>
+      ) : null}
+      {lifecycle.diskChoice && !lifecycle.webWorking ? (
+        <WebChoiceDialog
+          title={labels.webDiskTitle}
+          description={labels.webDiskDescription}
+        >
+          <div className="web-document-actions">
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={() => void lifecycle.useDiskVersion()}
+            >
+              {labels.webUseDisk}
+            </button>
+            <button
+              type="button"
+              className="primary-action"
+              onClick={() => void lifecycle.useLocalDraft()}
+            >
+              {labels.webUseDraft}
+            </button>
+          </div>
+        </WebChoiceDialog>
+      ) : null}
+      {discardWebRecovery ? (
+        <WebChoiceDialog
+          title={labels.webDiscardTitle}
+          description={labels.webDiscardDescription}
+          onClose={() => setDiscardWebRecovery(false)}
+        >
+          <div className="web-document-actions">
+            <button
+              type="button"
+              className="secondary-action"
+              onClick={() => setDiscardWebRecovery(false)}
+            >
+              {labels.cancel}
+            </button>
+            <button
+              type="button"
+              className="primary-action"
+              onClick={() => {
+                setDiscardWebRecovery(false);
+                void lifecycle.discardRecovery();
+              }}
+            >
+              {labels.recoveryDiscard}
+            </button>
+          </div>
+        </WebChoiceDialog>
+      ) : null}
       {lifecycle.exportPreview ? (
         <ExportPreview
           artifact={lifecycle.exportPreview}
@@ -1712,10 +2029,14 @@ export function Workspace({
         />
       ) : null}
 
-      {lifecycle.recovery ? (
+      {lifecycle.recovery && !discardWebRecovery && !lifecycle.webWorking ? (
         <RecoveryDialog
           labels={labels}
-          onDiscard={() => void lifecycle.discardRecovery()}
+          onDiscard={() =>
+            host.kind === "web"
+              ? setDiscardWebRecovery(true)
+              : void lifecycle.discardRecovery()
+          }
           onRestore={lifecycle.restoreRecovery}
           recovery={lifecycle.recovery}
         />
@@ -1788,6 +2109,7 @@ export function Workspace({
           locale={locale}
           labels={labels}
           recoveryAvailable={lifecycle.recoveryAvailable}
+          saveKind={saveKind}
           saveDisclosure={lifecycle.saveDisclosure}
           saveDisclosureLoading={lifecycle.saveDisclosureLoading}
           onClose={() => {

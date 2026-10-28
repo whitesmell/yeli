@@ -32,8 +32,9 @@ See [tutorial authoring](docs/README.md) for the single-source content and
 editable handbook workflow.
 
 The hero presents a selectable, read-only Agent instruction as a subtitle,
-with the primary Copy instruction action on the left and Open example on the
-right. The field label and copy announcements are available to screen readers.
+with Edit online as the primary action and Copy instruction as the secondary
+action. Supporting text explains local Markdown editing and includes the
+Open example link. The field label and copy announcements are available to screen readers.
 Selecting the field selects the whole instruction. The copy button confirms
 success; if clipboard access fails,
 the instruction is selected for manual copying. Language changes update the
@@ -88,9 +89,12 @@ For each release:
    and the unknown-path fallback on the deployed origin.
 
 The `publish-site` workflow under `.github/workflows/pages.yml` is manually
-triggered on `main`. It runs the reusable full CI workflow for the same commit
-before building and deploying `dist/site/` to GitHub Pages. Source pushes do
-not deploy the website. Dispatch it only after the editor distribution gates
+triggered on `main`. It builds, checks and tests the site before deploying
+`dist/site/` to GitHub Pages; it does not call the full CI workflow.
+Before dispatch, require a successful `deterministic-ci` run for the exact
+candidate commit and confirm that `main` still points to that commit.
+After dispatch, verify that the Pages run uses the same commit.
+Source pushes do not deploy the website. Dispatch it only after the editor distribution gates
 in `docs/releasing.md` are satisfied: the website includes executable samples
 and handbooks. The selected custom domain is `yeli.zetury.com`; configure it in
 GitHub Pages settings, with Cloudflare managing DNS. Do not add `CNAME` to the

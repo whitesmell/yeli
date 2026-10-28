@@ -90,7 +90,7 @@ Needle code
   await expect(dialog).toHaveCount(0);
   await expect(edit).toBeFocused();
   await edit.click();
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.locator("#more-save-state-description")).toHaveText(
     "已保存",
   );
@@ -159,7 +159,7 @@ Needle again
   await expect(page.getByText("Needle", { exact: true })).toBeVisible();
   await expect(page.getByText("Found again", { exact: true })).toBeVisible();
 
-  await page.getByRole("button", { name: "更多" }).focus();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).focus();
   await page.keyboard.press("Meta+z");
   await expect(page.getByText("Needle plain", { exact: true })).toBeVisible();
   await expect(page.getByText("Needle again", { exact: true })).toBeVisible();

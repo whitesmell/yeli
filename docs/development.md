@@ -62,6 +62,12 @@ measurement procedure.
 
 ## CLI and Skill distribution
 
+For first-time Agent use from a checkout with dependencies installed, run
+`npm run setup:agent`. It builds the CLI, Skill and both default starter
+templates, validates the templates, and writes their absolute paths to
+`dist/agent/setup.json`. It changes no global CLI or Agent configuration.
+See the [Agent quick start](agent-quickstart.md).
+
 ```sh
 npm run build:cli
 npm run pack:cli

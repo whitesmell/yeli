@@ -19,7 +19,10 @@ function artifactFile(locale: string) {
 
 async function openAbout(page: Page, chinese: boolean) {
   await page
-    .getByRole("button", { name: chinese ? "更多" : "More", exact: true })
+    .getByRole("button", {
+      name: chinese ? /^(?:更多|菜单)$/u : /^(?:More|Menu)$/u,
+      exact: true,
+    })
     .click();
   await page
     .getByRole("menuitem", { name: chinese ? "关于 页里" : "About Yeli" })
@@ -158,7 +161,9 @@ test("About brand keyboard interaction preserves save and export content", async
   ).toEqual(brandContentDigests);
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "编辑", exact: true }).click();
-  await page.getByRole("button", { name: "更多", exact: true }).click();
+  await page
+    .getByRole("button", { name: /^(?:更多|菜单)$/u, exact: true })
+    .click();
   const downloaded = page.waitForEvent("download");
   await page.getByRole("menuitem", { name: "下载更新副本" }).click();
   const savedPath = testInfo.outputPath("brand-copy.yeli.html");
@@ -179,7 +184,9 @@ test("About brand keyboard interaction preserves save and export content", async
     dialog = await openAbout(reopened, true);
     await expect(dialog.locator(".about-brand-detail")).toHaveCount(0);
     await reopened.keyboard.press("Escape");
-    await reopened.getByRole("button", { name: "更多", exact: true }).click();
+    await reopened
+      .getByRole("button", { name: /^(?:更多|菜单)$/u, exact: true })
+      .click();
     await reopened.getByRole("menuitem", { name: "导出只读 HTML" }).click();
     const preview = reopened.getByRole("dialog", { name: "导出预览" });
     const html = await preview.locator("iframe").getAttribute("srcdoc");

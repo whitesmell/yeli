@@ -15,5 +15,5 @@
     "noEmitOnError": true,
     "types": ["node"]
   },
-  "files": ["scripts/yeli.ts"]
+  "files": ["scripts/yeli.ts", "src/types/markdown-it-footnote.d.ts"]
 }

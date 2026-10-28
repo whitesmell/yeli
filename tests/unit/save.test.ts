@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { createDocumentPayload } from "../../src/document/model.ts";
 import { sha256BytesFallback } from "../../src/document/freshness.ts";
@@ -217,14 +217,135 @@ describe("YELI save generation", () => {
     );
   });
 
-  it("prints only through a sandboxed static-output frame", () => {
-    printStaticHtml("<!doctype html><title>Print</title>");
+  it("prints only through a sandboxed static-output frame and removes it afterward", async () => {
+    vi.useFakeTimers();
+    const pending = printStaticHtml("<!doctype html><title>Print</title>");
 
-    const frame = document.querySelector<HTMLIFrameElement>(".print-frame");
-    expect(frame?.getAttribute("sandbox")).toBe(
+    const frame = document.querySelector<HTMLIFrameElement>(".print-frame")!;
+    expect(frame.getAttribute("sandbox")).toBe(
       "allow-modals allow-same-origin",
     );
-    expect(frame?.srcdoc).not.toContain("<script");
-    frame?.remove();
+    expect(frame.srcdoc).not.toContain("<script");
+    vi.spyOn(frame.contentWindow!, "focus").mockImplementation(() => {});
+    const print = vi
+      .spyOn(frame.contentWindow!, "print")
+      .mockImplementation(() => {});
+    frame.dispatchEvent(new Event("load"));
+    await expect(pending).resolves.toBe("requested");
+    expect(print).toHaveBeenCalledOnce();
+    vi.advanceTimersByTime(500);
+    expect(frame.isConnected).toBe(false);
+    vi.useRealTimers();
   });
+
+  it("uses the owner document window timers for printing", async () => {
+    const ownerSetTimeout = vi.fn<
+      (callback: () => void, delay?: number) => number
+    >(() => 17);
+    const ownerClearTimeout = vi.fn<(timer: number) => void>(() => {});
+    const contentWindow = {
+      focus: vi.fn(),
+      print: vi.fn(),
+    };
+    const ownerWindow = {
+      setTimeout: ownerSetTimeout,
+      clearTimeout: ownerClearTimeout,
+    };
+    const globalSetTimeout = vi.spyOn(window, "setTimeout");
+    const globalClearTimeout = vi.spyOn(window, "clearTimeout");
+    const ownerDocument = document.implementation.createHTMLDocument("Print");
+    Object.defineProperty(ownerDocument, "defaultView", {
+      configurable: true,
+      value: ownerWindow,
+    });
+    const pending = printStaticHtml(
+      "<!doctype html><title>Owner print</title>",
+      ownerDocument,
+    );
+    const frame =
+      ownerDocument.querySelector<HTMLIFrameElement>(".print-frame")!;
+    Object.defineProperty(frame, "contentWindow", {
+      configurable: true,
+      value: contentWindow,
+    });
+
+    frame.dispatchEvent(new Event("load"));
+
+    await expect(pending).resolves.toBe("requested");
+    expect(contentWindow.print).toHaveBeenCalledOnce();
+    expect(ownerSetTimeout).toHaveBeenNthCalledWith(
+      1,
+      expect.any(Function),
+      30_000,
+    );
+    expect(ownerSetTimeout).toHaveBeenNthCalledWith(
+      2,
+      expect.any(Function),
+      500,
+    );
+    expect(ownerClearTimeout).toHaveBeenCalledWith(17);
+    expect(globalSetTimeout).not.toHaveBeenCalled();
+    expect(globalClearTimeout).not.toHaveBeenCalled();
+    const cleanup = ownerSetTimeout.mock.calls[1]?.[0];
+    cleanup?.();
+    expect(frame.isConnected).toBe(false);
+  });
+
+  it("fails and cleans up without global timers when the owner window is unavailable", async () => {
+    const ownerDocument = document.implementation.createHTMLDocument("Print");
+    expect(ownerDocument.defaultView).toBeNull();
+    const globalSetTimeout = vi.spyOn(window, "setTimeout");
+    const globalClearTimeout = vi.spyOn(window, "clearTimeout");
+
+    await expect(
+      printStaticHtml("<!doctype html><title>No owner</title>", ownerDocument),
+    ).rejects.toThrow("Print frame owner window is unavailable");
+
+    expect(ownerDocument.querySelector(".print-frame")).toBeNull();
+    expect(globalSetTimeout).not.toHaveBeenCalled();
+    expect(globalClearTimeout).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "throw",
+    "missing-window",
+    "load-error",
+    "stale",
+    "timeout",
+  ] as const)(
+    "cleans up a %s print frame and returns an observable result",
+    async (failure) => {
+      vi.useFakeTimers();
+      const pending = printStaticHtml(
+        "<!doctype html><title>Static</title>",
+        document,
+        () => failure !== "stale",
+      );
+      const frame = document.querySelector<HTMLIFrameElement>(".print-frame")!;
+      const target = frame.contentWindow!;
+      vi.spyOn(target, "focus").mockImplementation(() => {});
+      const print = vi.spyOn(target, "print").mockImplementation(() => {
+        if (failure === "throw") throw new Error("Native print rejected");
+      });
+      if (failure === "missing-window")
+        Object.defineProperty(frame, "contentWindow", { value: null });
+      const result =
+        failure === "stale"
+          ? expect(pending).resolves.toBe("stale")
+          : expect(pending).rejects.toThrow();
+      if (failure === "timeout") vi.advanceTimersByTime(30_000);
+      else
+        frame.dispatchEvent(
+          new Event(failure === "load-error" ? "error" : "load"),
+        );
+      await result;
+      expect(frame.isConnected).toBe(false);
+      expect(print).toHaveBeenCalledTimes(failure === "throw" ? 1 : 0);
+      // A late load after a failure cannot issue another print.
+      frame.dispatchEvent(new Event("load"));
+      expect(print).toHaveBeenCalledTimes(failure === "throw" ? 1 : 0);
+      expect(vi.getTimerCount()).toBe(0);
+      vi.useRealTimers();
+    },
+  );
 });

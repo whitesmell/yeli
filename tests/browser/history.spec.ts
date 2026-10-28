@@ -94,11 +94,11 @@ Old two
     await expect(paragraphs.filter({ hasText: currentText })).toBeVisible();
     await waitForStoredVersions(page, ++versionCount);
   }
-  await page.getByRole("button", { name: "更多" }).focus();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).focus();
 }
 
 async function openHistoryPanel(page: Page) {
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "历史版本" }).click();
 }
 
@@ -262,7 +262,9 @@ test("history opens from More in the right rail, never the outline", async ({
   await expect(page.locator(".workspace-body > .history-panel")).toHaveCount(1);
   await expect(page.locator(".overlay-backdrop .history-panel")).toHaveCount(0);
   await panel.getByRole("button", { name: "关闭" }).click();
-  await expect(page.getByRole("button", { name: "更多" })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: /^(?:更多|菜单)$/u }),
+  ).toBeFocused();
 
   const outlineToggle = page.getByRole("button", { name: "目录" });
   if ((await outlineToggle.getAttribute("aria-pressed")) !== "true") {
@@ -351,7 +353,9 @@ test("reviews an inert lightweight summary before one confirmed undoable restore
   await expect(restore).toBeEnabled();
   await restore.click();
   await expect(panel).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "更多" })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: /^(?:更多|菜单)$/u }),
+  ).toBeFocused();
   await expect(page.locator(".edit-document")).toContainText("Old one");
   await expect(page.locator(".edit-document")).not.toContainText("Current one");
 

@@ -28,7 +28,9 @@ test("English starter reads, edits, exports and switches language offline", asyn
   const title = page.locator(".document-title-input");
   await title.fill("English offline edit");
   await title.blur();
-  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page
+    .getByRole("button", { name: /^(?:More|Menu)$/u, exact: true })
+    .click();
   const downloaded = page.waitForEvent("download");
   await page
     .getByRole("menuitem", { name: "Export Markdown", exact: true })
@@ -40,7 +42,9 @@ test("English starter reads, edits, exports and switches language offline", asyn
   expect(markdown).toContain("title: English offline edit");
   expect(markdown).toContain("lang: en");
   expect(markdown).toContain("## Core capabilities");
-  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page
+    .getByRole("button", { name: /^(?:More|Menu)$/u, exact: true })
+    .click();
   await page.getByRole("menuitem", { name: "简体中文" }).click();
   await expect(page.locator("html")).toHaveAttribute("lang", "zh-CN");
   await expect(title).toHaveValue("English offline edit");

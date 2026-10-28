@@ -1,4 +1,4 @@
-import { indexFrontmatter } from "../document/frontmatter.ts";
+import { markdownBodyStart } from "../document/frontmatter.ts";
 import { setextHeadingLevel } from "./markdown-lines.ts";
 
 export interface OutlineItem {
@@ -48,11 +48,7 @@ function addOutlineItem(
 }
 
 export function deriveOutline(source: string): OutlineItem[] {
-  const frontmatter = indexFrontmatter(source);
-  const body =
-    frontmatter.status === "safe"
-      ? source.slice(frontmatter.bodyStart)
-      : source;
+  const body = source.slice(markdownBodyStart(source));
   const seen = new Map<string, number>();
   const items: OutlineItem[] = [];
   const lines = body.split("\n");

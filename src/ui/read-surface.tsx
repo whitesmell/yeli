@@ -37,11 +37,18 @@ export function ReadSurface({
     () =>
       renderDocumentMarkdownSegments(source, {
         imageUnavailableLabel: labels.imageNotLoaded,
+        footnotesSupplementLabel: labels.footnotesSupplement,
         revision,
         resolveImage: (destination) =>
           resolveWorkspaceImage(destination, assets),
       }),
-    [assets, labels.imageNotLoaded, revision, source],
+    [
+      assets,
+      labels.imageNotLoaded,
+      labels.footnotesSupplement,
+      revision,
+      source,
+    ],
   );
   // Stable innerHTML props preserve image nodes and their focus when dialogs
   // or other parent state changes without changing the rendered Markdown.

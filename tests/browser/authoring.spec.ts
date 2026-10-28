@@ -19,7 +19,7 @@ async function expectSaveState(
   page: import("@playwright/test").Page,
   label: string,
 ) {
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.locator("#more-save-state-description")).toHaveText(label);
   await page.keyboard.press("Escape");
 }
@@ -28,7 +28,7 @@ async function documentShortcut(
   page: import("@playwright/test").Page,
   shortcut: "Meta+Shift+z" | "Meta+z",
 ) {
-  await page.getByRole("button", { name: "更多" }).focus();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).focus();
   await page.keyboard.press(shortcut);
 }
 
@@ -180,7 +180,7 @@ test("commits one rendered paragraph and reflects it in Read", async ({
   await page.locator(".document-heading").click();
 
   await expectSaveState(page, "未保存");
-  await page.getByRole("button", { name: "预览" }).click();
+  await page.getByRole("button", { name: "阅读", exact: true }).click();
   await expect(page.locator(".markdown-document")).toContainText(
     "这是一次直接的所见即所得修改。",
   );
@@ -227,7 +227,7 @@ test("normalizes rich paste through the production WYSIWYG surface", async ({
   await expect(paragraph).toContainText("first");
   await paragraph.blur();
 
-  await page.getByRole("button", { name: "预览" }).click();
+  await page.getByRole("button", { name: "阅读", exact: true }).click();
   await expect(page.locator(".markdown-document")).toContainText("first");
   await expect(page.locator(".markdown-document")).toContainText("second");
   await expect(
@@ -284,7 +284,7 @@ test("declarative templates insert plain Markdown", async ({ page }) => {
   await page.goto(pathToFileURL(artifactPath).href);
   await page.getByRole("button", { name: "编辑", exact: true }).click();
   if ((page.viewportSize()?.width ?? 0) <= 820) {
-    await page.getByRole("button", { name: "更多" }).click();
+    await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   } else {
     await page.getByRole("button", { name: "插入", exact: true }).click();
   }
@@ -645,12 +645,14 @@ test("shows searchable shortcuts and Markdown syntax in the right rail", async (
   await expect(edit).toBeFocused();
 
   await edit.click();
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await page.getByRole("menuitem", { name: "快捷键", exact: true }).click();
   await expect(guide).toBeVisible();
   await expect(guide.getByText("编辑", { exact: true }).first()).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("button", { name: "更多" })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: /^(?:更多|菜单)$/u }),
+  ).toBeFocused();
 });
 
 test("shows formatting controls only for a real selection and supports inline-code shortcut", async ({
@@ -836,7 +838,7 @@ test("duplicates a selected image through one source-bounded action", async ({
     page.getByRole("button", { name: /选择图片.*图片区块示例/u }),
   ).toHaveCount(2);
   await expect(inspector).toHaveCount(0);
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.locator("#more-save-state-description")).toHaveText(
     "未保存",
   );
@@ -867,7 +869,7 @@ test("double-clicking an editable image previews it without changing the documen
   await expect(preview.locator("img")).toHaveAttribute("src", source ?? "");
   await preview.getByRole("button", { name: "关闭" }).click();
   await expect(image).toBeFocused();
-  await page.getByRole("button", { name: "更多" }).click();
+  await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.locator("#more-save-state-description")).toHaveText(
     "未保存",
   );

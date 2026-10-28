@@ -77,15 +77,17 @@ function finding(
 }
 
 function findFrontmatterBounds(source: string): FrontmatterBounds | null {
-  if (!source.startsWith("---\n")) return null;
-  let lineStart = 4;
+  const start = source.startsWith("\ufeff") ? 1 : 0;
+  if (!source.startsWith("---\n", start)) return null;
+  const bodyStart = start + 4;
+  let lineStart = bodyStart;
   while (lineStart <= source.length) {
     const lineEnd = source.indexOf("\n", lineStart);
     const contentEnd = lineEnd === -1 ? source.length : lineEnd;
     const line = source.slice(lineStart, contentEnd);
     if (line === "---" || line === "...") {
       return {
-        bodyStart: 4,
+        bodyStart,
         bodyEnd: lineStart,
         closingStart: lineStart,
         closingEnd: lineEnd === -1 ? contentEnd : lineEnd + 1,
@@ -95,6 +97,21 @@ function findFrontmatterBounds(source: string): FrontmatterBounds | null {
     lineStart = lineEnd + 1;
   }
   return null;
+}
+
+/** Display-only boundary, including CRLF; structured edits keep their own gate. */
+export function markdownBodyStart(source: string): number {
+  const opening = /^\ufeff?---\r?\n/u.exec(source);
+  if (!opening) return 0;
+  const closing = /^(?:---|\.\.\.)\r?$/gmu;
+  closing.lastIndex = opening[0].length;
+  const match = closing.exec(source);
+  if (!match) return 0;
+  return (
+    match.index +
+    match[0].length +
+    (source[match.index + match[0].length] === "\n" ? 1 : 0)
+  );
 }
 
 function nodeRange(node: Node | null | undefined): [number, number] | null {
@@ -156,19 +173,27 @@ function propertyValue(node: Node | null): MetadataValue | undefined {
 export function indexFrontmatter(source: string): FrontmatterIndex {
   const bounds = findFrontmatterBounds(source);
   if (!bounds) {
+    const start = source.startsWith("\ufeff") ? 1 : 0;
+    const unterminated = source.startsWith("---\n", start);
+    const unsupportedLineEndings =
+      start === 1 && source.startsWith("---\r\n", start);
     return {
       bodyStart: 0,
       entries: {},
       findings: [],
       metadata: {},
       properties: [],
-      status: source.startsWith("---\n") ? "unsafe" : "absent",
-      ...(source.startsWith("---\n")
+      status: unterminated || unsupportedLineEndings ? "unsafe" : "absent",
+      ...(unterminated || unsupportedLineEndings
         ? {
             findings: [
               finding(
-                "FRONTMATTER_UNTERMINATED",
-                "YAML frontmatter has no closing delimiter",
+                unsupportedLineEndings
+                  ? "FRONTMATTER_LINE_ENDINGS_UNSUPPORTED"
+                  : "FRONTMATTER_UNTERMINATED",
+                unsupportedLineEndings
+                  ? "YAML frontmatter with BOM and CRLF requires source editing"
+                  : "YAML frontmatter has no closing delimiter",
               ),
             ],
           }
@@ -301,7 +326,8 @@ export function indexFrontmatter(source: string): FrontmatterIndex {
     closingRange: [bounds.closingStart, bounds.closingEnd],
     entries,
     findings,
-    frontmatterRange: [0, bounds.closingEnd],
+    // Keep the BOM outside the block so whole-block edits preserve it.
+    frontmatterRange: [bounds.bodyStart - 4, bounds.closingEnd],
     metadata,
     properties,
     status: findings.length === 0 ? "safe" : "unsafe",
@@ -374,10 +400,11 @@ function createFrontmatterEdit(
   }
   if (value === undefined) {
     if (!property) {
+      const start = index.frontmatterRange?.[0] ?? 0;
       return {
         ok: true,
         source,
-        changedRange: { before: [0, 0], after: [0, 0] },
+        changedRange: { before: [start, start], after: [start, start] },
         findings: [],
       };
     }
@@ -400,15 +427,16 @@ function createFrontmatterEdit(
     };
   }
   if (index.status === "absent") {
+    const start = source.startsWith("\ufeff") ? 1 : 0;
     const inserted = `---\n${plainString(key)}: ${serializeValue(value)}\n---\n`;
     return {
       changedRange: {
-        before: [0, 0],
-        after: [0, inserted.length],
+        before: [start, start],
+        after: [start, start + inserted.length],
       },
       findings: [],
       ok: true,
-      source: `${inserted}${source}`,
+      source: `${source.slice(0, start)}${inserted}${source.slice(start)}`,
     };
   }
 

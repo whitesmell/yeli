@@ -15,6 +15,7 @@ import {
 import { pathToFileURL } from "node:url";
 import path from "node:path";
 
+import { parseYeliArtifact } from "../../src/format/parse.ts";
 import { projectShell } from "../../src/integrity/shell-projection.ts";
 
 const artifactPath = path.resolve("dist/html/starter.zh-CN.yeli.html");
@@ -210,7 +211,7 @@ test("dismisses an invalid-file sheet safely and returns focus to More", async (
     await expect(dialog).toBeVisible();
     return dialog;
   };
-  const moreButton = page.getByRole("button", { name: "更多" });
+  const moreButton = page.getByRole("button", { name: /^(?:更多|菜单)$/u });
 
   let dialog = await openInvalidFile();
   await dialog.locator(".recovery-file-detail").click();
@@ -279,7 +280,7 @@ test("restores a newer local recovery as one undoable change", async ({
   await expect(page.getByText(/本地恢复验证/u)).toBeVisible();
   await page.getByRole("button", { name: "编辑", exact: true }).click();
   if ((page.viewportSize()?.width ?? 1_000) <= 820) {
-    await page.getByRole("button", { name: "更多" }).click();
+    await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   }
   const undo = page.getByRole("button", { name: "撤销" });
   await expect(undo).toBeEnabled();
@@ -564,6 +565,66 @@ test("imports plain Markdown without introducing a source editor", async ({
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toMatch(/\.md$/u);
 });
+
+for (const { action, label } of [
+  { action: "Download updated copy", label: "下载更新副本" },
+  { action: "Save Copy", label: "保存副本" },
+]) {
+  test(`artifact-host Markdown import saves full .yeli.html through ${action}`, async ({
+    page,
+  }, testInfo) => {
+    const launchArtifact = readFileSync(artifactPath, "utf8");
+    const source =
+      '---\ntitle: Imported save regression\nlang: zh-CN\ncustom: "keep: this" # untouched\ntags: [portable, markdown]\n---\n\n# Imported note\n\nKeep  deliberate spacing.\n\n- [ ] Preserve this task\n';
+    await page.goto(pathToFileURL(artifactPath).href);
+    await page.locator('input[type="file"]').setInputFiles({
+      name: "imported-save.md",
+      mimeType: "text/markdown",
+      buffer: Buffer.from(source, "utf8"),
+    });
+    await expect(page.locator("#document-title")).toHaveText(
+      "Imported save regression",
+    );
+
+    await openMoreMenu(page);
+    const saveAction = page.getByRole("menuitem", {
+      name: label,
+      exact: true,
+    });
+    await expect(saveAction).toBeEnabled();
+    const downloadPromise = page.waitForEvent("download");
+    await saveAction.click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe(
+      "Imported save regression.yeli.html",
+    );
+    const downloadedPath = await saveDownload(
+      download,
+      testInfo,
+      "imported-save.yeli.html",
+    );
+    const savedArtifact = readFileSync(downloadedPath, "utf8");
+    const parsed = await parseYeliArtifact(savedArtifact);
+
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      throw new Error(
+        `Imported Markdown save is not a valid Yeli artifact: ${JSON.stringify(parsed.findings)}`,
+      );
+    }
+    expect(parsed.payload.format).toBe("yeli/document");
+    expect(parsed.payload.version).toBe(1);
+    expect(parsed.markdown).toBe(source);
+    expect(parsed.payload.manifest.metadata.title).toBe(
+      "Imported save regression",
+    );
+    expect(savedArtifact).toContain('id="yeli-runtime"');
+    expect(savedArtifact).toContain('data-yeli-runtime="deflate-b86"');
+    expect(projectShell(savedArtifact).hash).toBe(
+      projectShell(launchArtifact).hash,
+    );
+  });
+}
 
 test("requires an explicit choice before overwriting an external change", async ({
   page,

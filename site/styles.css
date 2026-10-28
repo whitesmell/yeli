@@ -12,6 +12,7 @@
     sans-serif;
   --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
+
 * {
   box-sizing: border-box;
 }
@@ -149,6 +150,16 @@ a svg {
   align-items: center;
   font-size: 14px;
 }
+.nav-online {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid #dbe8ff70;
+  border-radius: 100px;
+  white-space: nowrap;
+}
 .nav a,
 .nav button {
   transition: opacity 0.18s;
@@ -284,6 +295,25 @@ a svg {
 .hero-actions {
   justify-content: center;
   margin-top: 22px;
+}
+.hero-start-note {
+  margin-top: 12px;
+  color: #dce7f6;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.hero-start-note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 10px;
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.hero-start-note a svg {
+  width: 14px;
+  height: 14px;
 }
 .button {
   display: inline-flex;
@@ -1593,6 +1623,10 @@ body:has(dialog[open]) {
   }
   .nav {
     height: 66px;
+    gap: 12px;
+  }
+  .nav-online {
+    padding-inline: 10px;
   }
   .nav-sections {
     display: none;
@@ -1630,6 +1664,17 @@ body:has(dialog[open]) {
   .hero-actions {
     margin-top: 20px;
     gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 260px;
+    margin-inline: auto;
+  }
+  .hero-start-note {
+    max-width: 320px;
+    margin-inline: auto;
+  }
+  .hero-start-note a {
+    margin-left: 0;
   }
   .button {
     font-size: 14px;
@@ -1972,6 +2017,11 @@ body:has(dialog[open]) {
   .menu-toggle {
     display: grid;
     margin-right: -10px;
+  }
+}
+@media (max-width: 360px) {
+  .nav-utilities > .nav-online {
+    display: none;
   }
 }
 @media (max-width: 400px) {

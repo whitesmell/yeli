@@ -14,6 +14,55 @@ const fixture = readFileSync(
 );
 
 describe("frontmatter range index", () => {
+  it("indexes and edits BOM-prefixed frontmatter without moving the BOM or custom fields", () => {
+    const source = `\ufeff${fixture}`;
+    const index = indexFrontmatter(source);
+    expect(index.status).toBe("safe");
+    expect(index.metadata.title).toBe("Old title");
+    expect(index.frontmatterRange).toEqual([1, source.indexOf("\n# Body")]);
+    expect(
+      index.properties.find((property) => property.key === "custom-safe"),
+    ).toMatchObject({ value: "keep  two  spaces" });
+    expect(index.entries.title?.valueRange).toEqual([
+      source.indexOf('"Old title"'),
+      source.indexOf('"Old title"') + '"Old title"'.length,
+    ]);
+
+    const result = patchFrontmatter(source, "title", "New title");
+
+    expect(result).toMatchObject({
+      ok: true,
+      source: source.replace('"Old title"', '"New title"'),
+    });
+    if (!result.ok) return;
+    expect(result.changedRange.before).toEqual(index.entries.title?.valueRange);
+    expect(result.source[0]).toBe("\ufeff");
+    expect(result.source.slice(1).match(/^---$/gmu)).toHaveLength(2);
+    expect(indexFrontmatter(result.source).metadata.title).toBe("New title");
+  });
+
+  it("inserts the first metadata block after a BOM and preserves the body", () => {
+    expect(patchFrontmatter("\ufeff# Body\n", "title", "Title")).toMatchObject({
+      ok: true,
+      changedRange: { before: [1, 1] },
+      source: "\ufeff---\ntitle: Title\n---\n# Body\n",
+    });
+  });
+
+  it.each([
+    "\ufeff---\ntitle: Unclosed\n",
+    "\ufeff---\r\ntitle: Windows\r\n---\r\nBody\r\n",
+  ])(
+    "rejects unsupported BOM frontmatter edits without changing source %j",
+    (source) => {
+      expect(indexFrontmatter(source).status).toBe("unsafe");
+      expect(patchFrontmatter(source, "title", "Changed")).toMatchObject({
+        ok: false,
+        source,
+      });
+    },
+  );
+
   it("indexes core metadata while retaining concrete source spans", () => {
     const index = indexFrontmatter(fixture);
 

@@ -12,6 +12,7 @@ import {
 test("admits essential public sources, documentation and synthetic fixtures", () => {
   for (const file of [
     "LICENSE",
+    "vite.web.config.ts",
     "src/ui/workspace.tsx",
     "packages/cli/README.md",
     "skills/yeli/SKILL.md",

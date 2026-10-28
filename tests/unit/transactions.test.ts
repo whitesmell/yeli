@@ -53,6 +53,60 @@ function patch(
 }
 
 describe("document transactions", () => {
+  it("keeps missing-property removal inside the BOM frontmatter block", () => {
+    const source = "\ufeff---\ntitle: Original\n---\nBody\n";
+    const store = new DocumentStore(source);
+
+    expect(store.patchMetadata("missing", undefined)).toMatchObject({
+      ok: true,
+      source,
+      changedRanges: [
+        { before: { from: 1, to: 1 }, after: { from: 1, to: 1 } },
+      ],
+    });
+    expect(store.getSnapshot().source).toBe(source);
+  });
+
+  it("edits a BOM frontmatter title with a narrow diff and restores exact bytes on undo", () => {
+    const source =
+      '\ufeff---\n# keep\ntitle: "Old title" # note\ncustom-safe: "keep  two  spaces"\n---\n\n# Body\n\nUntouched body.\n';
+    const store = new DocumentStore(source, 4);
+    const start = source.indexOf('"Old title"');
+    const end = start + '"Old title"'.length;
+    const result = store.patchMetadata("title", "New title");
+
+    expect(result).toMatchObject({
+      ok: true,
+      changedRanges: [
+        { before: { from: start, to: end }, after: { from: start, to: end } },
+      ],
+      source: source.replace('"Old title"', '"New title"'),
+    });
+    expect(store.getSnapshot().source[0]).toBe("\ufeff");
+    expect(store.getSnapshot().source.slice(1).match(/^---$/gmu)).toHaveLength(
+      2,
+    );
+    expect(store.undo()?.ok).toBe(true);
+    expect(store.getSnapshot().source).toBe(source);
+    expect(store.redo()?.ok).toBe(true);
+    expect(store.getSnapshot().source).toBe(
+      source.replace('"Old title"', '"New title"'),
+    );
+  });
+
+  it("creates frontmatter after a leading BOM as one undoable insertion", () => {
+    const source = "\ufeff# Body\n";
+    const store = new DocumentStore(source);
+
+    expect(store.patchMetadata("title", "Title")).toMatchObject({
+      ok: true,
+      changedRanges: [expect.objectContaining({ before: { from: 1, to: 1 } })],
+      source: "\ufeff---\ntitle: Title\n---\n# Body\n",
+    });
+    expect(store.undo()?.ok).toBe(true);
+    expect(store.getSnapshot().source).toBe(source);
+  });
+
   it("applies multiple source patches against one snapshot as one revision", () => {
     const current = state("alpha beta gamma");
     const result = applyDocumentTransaction(current, {

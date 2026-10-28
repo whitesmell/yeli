@@ -1,8 +1,8 @@
 # Find your way around
 
-## Preview and Edit
+## Read and Edit
 
-Preview is for reading and offers Edit. Edit is for writing and offers Preview. Only the action for switching to the other state is shown. Export Preview checks a deliverable; it is not a third everyday mode.
+Read offers Edit. Edit is for writing and offers Read. Only the action for switching to the other state is shown. Export Preview checks a deliverable; it is not a third everyday mode.
 
 When you enter Edit after reading a passage, Yeli tries to retain your location. You should not need to search from the start just to change a sentence.
 
@@ -26,14 +26,14 @@ When you enter Edit after reading a passage, Yeli tries to retain your location.
 | Find text or replace it                  | Top Search                            | Replacement needs Edit; outline filtering does not search the body       |
 | Edit description or custom properties    | Document button in Edit               | The right rail switches by task rather than showing every panel together |
 
-## The More menu
+## The menu entry
 
-The trailing More menu groups File, Export, View, and Settings & help. History appears only in Edit. About Yeli shows the complete file size and actual save and recovery status; expand its details for environment and attachment information.
+Edit shows a labelled Menu button at the top right; Read uses the three-dot entry. The menu groups File, Export, View, and Settings & help. History appears only in Edit. About Yeli shows the complete file size and actual save and recovery status; expand its details for environment and attachment information.
 
-Those names are section labels, not intermediate submenus. Open More and choose Save or Download updated copy directly; choose History directly to inspect versions. Page width and Font size expand to their settings.
+Those names are section labels, not intermediate submenus. Open Menu and choose Save or Download updated copy directly; choose History directly to inspect versions. Page width and Font size expand to their settings.
 
 Switch English / 简体中文 near the end of the menu. Changing interface language does not translate the body or rewrite YAML `lang`. The tutorial's language switch changes only the tutorial page.
 
 ## When an action is unavailable
 
-Check Preview versus Edit, then select a target. Bold being unavailable without a selection is expected. Use the [overview](overview.html) to find a feature, [shortcuts](shortcuts.html) for keys, and [complete commands](commands.html) for all actions and conditions.
+Check Read versus Edit, then select a target. Bold being unavailable without a selection is expected. Use the [overview](overview.html) to find a feature, [shortcuts](shortcuts.html) for keys, and [complete commands](commands.html) for all actions and conditions.

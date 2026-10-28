@@ -24,9 +24,12 @@ import {
 import { HeartIcon } from "@heroicons/react/24/solid";
 import { createPortal } from "react-dom";
 import {
+  createContext,
+  useContext,
   useCallback,
   useEffect,
   useMemo,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -39,11 +42,17 @@ import {
   type RefObject,
 } from "react";
 
-import type { DocumentSnapshot, DocumentStore } from "../document/store.ts";
+import { DocumentStore, type DocumentSnapshot } from "../document/store.ts";
+import {
+  createFootnoteBodyPatch,
+  indexFootnotes,
+  type FootnoteDefinition,
+} from "../editor/footnotes.ts";
 import type { YeliAsset } from "../document/model.ts";
 import {
   createConstructPatch,
   createSplitInlineBlockPatch,
+  projectMarkdown,
   projectTableRows,
   resolveReadEditTarget,
   type ReadEditFallbackReason,
@@ -77,6 +86,8 @@ import {
 import type { Labels } from "../i18n/en.ts";
 import {
   renderSafeInlineMarkdown,
+  createInlineFootnoteContext,
+  type InlineFootnoteContext,
   usesFirstQuoteCallout,
 } from "../render/markdown.ts";
 import { MetadataInline } from "./metadata-inline.tsx";
@@ -84,6 +95,18 @@ import { imageBlockDetails } from "./image-block.ts";
 import type { ImagePreviewTarget } from "./image-preview.tsx";
 import { resolveWorkspaceImage } from "./starter-assets.ts";
 import { TableSizePicker } from "./table-size-picker.tsx";
+import { useDocumentStore } from "./use-document-store.ts";
+
+const FootnoteContext = createContext<InlineFootnoteContext | undefined>(
+  undefined,
+);
+const FootnoteEditorContext = createContext<
+  | {
+      scope: string;
+      sourceOffset: (offset: number) => number;
+    }
+  | undefined
+>(undefined);
 
 interface EditCanvasProps {
   assets: readonly YeliAsset[];
@@ -237,11 +260,18 @@ function createNarrowInlinePatch(block: SourceBlock, replacement: string) {
   );
 }
 
-function focusProjectedBlock(block: SourceBlock, atEnd = false) {
+function focusProjectedBlock(
+  block: SourceBlock,
+  atEnd = false,
+  scope?: string,
+) {
   window.requestAnimationFrame(() => {
-    const shell = document.querySelector<HTMLElement>(
-      `[data-source-block-id="${block.id}"]`,
-    );
+    const root = scope ? document.querySelector(scope) : document;
+    const shell = [
+      ...(root?.querySelectorAll<HTMLElement>(
+        `[data-block-from="${block.range.from}"]`,
+      ) ?? []),
+    ].find((candidate) => scope || !candidate.closest(".footnote-body"));
     const editable = shell?.matches(".block-content-editable")
       ? shell
       : shell?.querySelector<HTMLElement>(".block-content-editable");
@@ -506,7 +536,7 @@ function EditableInlineBlock({
   const suppressSelectionKeyUpRef = useRef(false);
   const composingRef = useRef(false);
   const slashMenuRef = useRef<HTMLDivElement>(null);
-  const slashMenuId = `slash-commands-${block.range.from}`;
+  const slashMenuId = `slash-commands-${useId()}`;
   const [active, setActive] = useState(false);
   const [selectionPosition, setSelectionPosition] = useState<{
     left: number;
@@ -515,9 +545,20 @@ function EditableInlineBlock({
   const [conflict, setConflict] = useState(false);
   const [blockMenuOpen, setBlockMenuOpen] = useState(false);
   const content = blockContent(block);
-  const inline = renderSafeInlineMarkdown(content, {
-    imageUnavailableLabel: labels.imageNotLoaded,
-  });
+  const footnoteContext = useContext(FootnoteContext);
+  const footnoteEditor = useContext(FootnoteEditorContext);
+  const footnoteSourceFrom =
+    footnoteEditor?.sourceOffset(block.range.from) ?? block.range.from;
+  const inline = useMemo(
+    () =>
+      renderSafeInlineMarkdown(content, {
+        imageUnavailableLabel: labels.imageNotLoaded,
+        ...(footnoteContext ? { footnoteContext } : {}),
+        editorFootnotes: true,
+        footnoteSourceFrom,
+      }),
+    [content, footnoteContext, footnoteSourceFrom, labels.imageNotLoaded],
+  );
   const setEditableRef = (node: HTMLElement | null) => {
     editableRef.current = node;
   };
@@ -551,6 +592,20 @@ function EditableInlineBlock({
     editableRef.current?.setAttribute("aria-activedescendant", activeOption.id);
     if (scroll) activeOption.scrollIntoView({ block: "nearest" });
   };
+
+  useLayoutEffect(() => {
+    const editable = editableRef.current;
+    if (
+      !editable ||
+      editable === document.activeElement ||
+      dirtyRef.current ||
+      conflict
+    )
+      return;
+    // React must not own the editable children: toolbar and selection renders
+    // would otherwise replace native edits before the blur transaction.
+    if (editable.innerHTML !== inline) editable.innerHTML = inline;
+  }, [inline, active, conflict]);
 
   useLayoutEffect(() => {
     if (!active || !selectionPosition || !selectionRef.current) return;
@@ -730,7 +785,10 @@ function EditableInlineBlock({
       dirtyRef.current = false;
       setSelectionPosition(null);
       window.requestAnimationFrame(() => {
-        const next = document.querySelector<HTMLElement>(
+        const scope = footnoteEditor
+          ? document.querySelector(footnoteEditor.scope)
+          : document;
+        const next = scope?.querySelector<HTMLElement>(
           `.editable-block[data-block-from="${block.range.from}"] .block-content-editable`,
         );
         if (!next) return;
@@ -834,14 +892,17 @@ function EditableInlineBlock({
       }
       dirtyRef.current = false;
       setSelectionPosition(null);
-      const nextBlock = store
-        .getSnapshot()
-        .projection.blocks.find(
-          (candidate) =>
-            candidate.range.from > block.range.from &&
-            candidate.kind === block.kind,
-        );
-      if (nextBlock) focusProjectedBlock(nextBlock);
+      const updated = store.getSnapshot();
+      const nextBlock = projectMarkdown(
+        updated.source,
+        updated.revision,
+      ).blocks.find(
+        (candidate) =>
+          candidate.range.from > block.range.from &&
+          candidate.kind === block.kind,
+      );
+      if (nextBlock)
+        focusProjectedBlock(nextBlock, false, footnoteEditor?.scope);
       return;
     }
     if (
@@ -859,12 +920,18 @@ function EditableInlineBlock({
         setConflict(true);
         return;
       }
-      const after = store.getSnapshot().projection.blocks;
+      const updated = store.getSnapshot();
+      const after = projectMarkdown(updated.source, updated.revision).blocks;
       const target =
         event.key === "Backspace"
           ? after[Math.max(0, index - 1)]
           : after[Math.min(index, after.length - 1)];
-      if (target) focusProjectedBlock(target, event.key === "Backspace");
+      if (target)
+        focusProjectedBlock(
+          target,
+          event.key === "Backspace",
+          footnoteEditor?.scope,
+        );
       return;
     }
     if (block.kind === "heading" && event.key === "Enter") {
@@ -877,7 +944,6 @@ function EditableInlineBlock({
     "aria-label": `${labels.editBlock}: ${block.kind}`,
     className: "block-content-editable",
     contentEditable: true,
-    dangerouslySetInnerHTML: { __html: inline },
     onBlur: commit,
     onCompositionEnd: (event: CompositionEvent<HTMLElement>) => {
       composingRef.current = false;
@@ -1946,6 +2012,7 @@ function TableBlock({
   onSelectBlock: (block: SourceBlock) => void;
   store: DocumentStore;
 }) {
+  const footnoteEditor = useContext(FootnoteEditorContext);
   const rows = projectTableRows(block.expectedText);
   const tableRef = useRef<HTMLDivElement>(null);
   const [blockMenuOpen, setBlockMenuOpen] = useState(false);
@@ -1964,10 +2031,11 @@ function TableBlock({
   const focusCell = (row: number, column: number) => {
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
+        const scope = footnoteEditor?.scope ?? ".block-canvas";
         const selector = `[data-table-row="${row}"][data-table-column="${column}"]`;
         document
           .querySelector<HTMLTextAreaElement>(
-            `[data-source-from="${block.range.from}"] ${selector}`,
+            `${scope} > [data-block-kind="table"][data-source-from="${block.range.from}"] ${selector}`,
           )
           ?.focus();
       });
@@ -2284,6 +2352,141 @@ function SourceSafeBlock({
   );
 }
 
+function FootnoteBlock({
+  block,
+  definition,
+  labels,
+  locale,
+  source,
+  store,
+}: {
+  block: SourceBlock;
+  definition: FootnoteDefinition;
+  labels: Labels;
+  locale: "en" | "zh-CN";
+  source: string;
+  store: DocumentStore;
+}) {
+  const bodyStore = useMemo(() => {
+    const buffer = new DocumentStore(definition.body, block.revision, []);
+    buffer.setPrimaryMode("edit");
+    return buffer;
+  }, [block.revision, definition.body]);
+  const bodySnapshot = useDocumentStore(bodyStore);
+  const [conflict, setConflict] = useState(false);
+  useEffect(() => {
+    let previous = definition.body;
+    return bodyStore.subscribe(() => {
+      const body = bodyStore.getSnapshot().source;
+      if (body === previous) return;
+      previous = body;
+      const patch = createFootnoteBodyPatch(source, definition, body, block);
+      if (patch) setConflict(!store.applyPatch(patch).ok);
+    });
+  }, [block, bodyStore, definition, source, store]);
+  const selectBody = () => undefined;
+  return (
+    <section
+      className="footnote-block"
+      data-block-kind="footnote"
+      data-footnote-label={definition.label}
+      data-source-block-id={block.id}
+      data-source-from={block.range.from}
+      data-source-to={block.range.to}
+      aria-label={`${labels.footnote}: ${definition.label}`}
+      onKeyDownCapture={(event) => {
+        const undo = matchesCommandShortcut("document.undo", event);
+        const redo = matchesCommandShortcut("document.redo", event);
+        if (!undo && !redo) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.target instanceof HTMLElement) event.target.blur();
+        if (undo) store.undo();
+        else store.redo();
+      }}
+    >
+      <div className="footnote-label">
+        {labels.footnote} <span>[^{definition.label}]</span>
+      </div>
+      <FootnoteEditorContext.Provider
+        value={{
+          scope: `.footnote-block[data-source-from="${definition.from}"] .footnote-body`,
+          sourceOffset: (offset) =>
+            definition.offsets[offset] ?? definition.bodyRange.to,
+        }}
+      >
+        <div className="footnote-body">
+          {bodySnapshot.projection.blocks.map((bodyBlock) => {
+            if (!bodyBlock.editable || bodyBlock.kind === "footnote") {
+              return (
+                <SourceSafeBlock
+                  key={bodyBlock.id}
+                  block={bodyBlock}
+                  labels={labels}
+                  store={bodyStore}
+                />
+              );
+            }
+            if (bodyBlock.kind === "code-fence")
+              return (
+                <CodeFenceBlock
+                  key={bodyBlock.id}
+                  block={bodyBlock}
+                  labels={labels}
+                  onSelectBlock={selectBody}
+                  store={bodyStore}
+                />
+              );
+            if (bodyBlock.kind === "table")
+              return (
+                <TableBlock
+                  key={bodyBlock.id}
+                  block={bodyBlock}
+                  labels={labels}
+                  locale={locale}
+                  onSelectBlock={selectBody}
+                  store={bodyStore}
+                />
+              );
+            if (bodyBlock.kind === "task")
+              return (
+                <TaskBlock
+                  key={bodyBlock.id}
+                  block={bodyBlock}
+                  labels={labels}
+                  locale={locale}
+                  onSelectBlock={selectBody}
+                  store={bodyStore}
+                />
+              );
+            if (bodyBlock.kind === "thematic-break")
+              return (
+                <ThematicBreakBlock
+                  key={bodyBlock.id}
+                  block={bodyBlock}
+                  labels={labels}
+                  store={bodyStore}
+                />
+              );
+            return (
+              <EditableInlineBlock
+                anchor={undefined}
+                key={bodyBlock.id}
+                block={bodyBlock}
+                labels={labels}
+                locale={locale}
+                onSelectBlock={selectBody}
+                store={bodyStore}
+              />
+            );
+          })}
+        </div>
+      </FootnoteEditorContext.Provider>
+      {conflict ? <p role="alert">{labels.writeConflict}</p> : null}
+    </section>
+  );
+}
+
 export function EditCanvas({
   assets,
   displayTitle,
@@ -2299,6 +2502,18 @@ export function EditCanvas({
   store,
 }: EditCanvasProps) {
   const canvasRef = useRef<HTMLDivElement>(null);
+  // The published source can advance before its projection. Keep note ranges
+  // and editor atoms bound to the same revision as the rendered blocks.
+  const projectedSource = snapshot.projection.source;
+  const footnoteContext = useMemo(
+    () => createInlineFootnoteContext(projectedSource),
+    [projectedSource],
+  );
+  const footnotes = useMemo(
+    () =>
+      new Map(indexFootnotes(projectedSource).map((note) => [note.from, note])),
+    [projectedSource],
+  );
   const projectionRef = useRef(snapshot.projection);
   const pointerSelectionStartRef = useRef<{
     point: CanvasCaretPoint;
@@ -2340,6 +2555,11 @@ export function EditCanvas({
     if (!canvas) return;
     const rememberPointerStart = (event: PointerEvent) => {
       if (event.button !== 0 || !event.isPrimary) return;
+      if (
+        event.target instanceof Element &&
+        event.target.closest(".footnote-body")
+      )
+        return;
       const point = caretPointFromViewport(event.clientX, event.clientY);
       if (!point) return;
       const editable = editableForCaretPoint(point);
@@ -2361,6 +2581,7 @@ export function EditCanvas({
         : null;
       if (
         !endEditable ||
+        endEditable.closest(".footnote-body") ||
         !storedEnd ||
         !canvas.contains(endEditable) ||
         start.point.blockId === storedEnd.blockId
@@ -2411,6 +2632,7 @@ export function EditCanvas({
       for (const editable of document.querySelectorAll<HTMLElement>(
         ".block-canvas .block-content-editable",
       )) {
+        if (editable.closest(".footnote-body")) continue;
         try {
           if (!range.intersectsNode(editable)) continue;
         } catch {
@@ -2552,142 +2774,160 @@ export function EditCanvas({
   }, [handoffTarget, onHandoffResolved, snapshot.projection]);
 
   return (
-    <main className="edit-surface" id="document-content">
-      <article className="edit-document">
-        <MetadataInline
-          displayTitle={displayTitle}
-          labels={labels}
-          onOpenInspector={onOpenDocumentInspector}
-          snapshot={snapshot}
-          store={store}
-        />
+    <FootnoteContext.Provider value={footnoteContext}>
+      <main className="edit-surface" id="document-content">
+        <article className="edit-document">
+          <MetadataInline
+            displayTitle={displayTitle}
+            labels={labels}
+            onOpenInspector={onOpenDocumentInspector}
+            snapshot={snapshot}
+            store={store}
+          />
 
-        {snapshot.projectionStatus === "pending" ? (
-          <div className="projection-pending" role="status">
-            {labels.projectionPending}
+          {snapshot.projectionStatus === "pending" ? (
+            <div className="projection-pending" role="status">
+              {labels.projectionPending}
+            </div>
+          ) : null}
+
+          <div
+            className={`block-canvas${multiBlockSelection ? " has-multi-selection" : ""}`}
+            aria-label={labels.blockCanvas}
+            ref={canvasRef}
+          >
+            {snapshot.projection.blocks.map((block) => {
+              if (block.kind === "frontmatter" && block.editable) return null;
+              const definition =
+                block.kind === "footnote"
+                  ? footnotes.get(block.range.from)
+                  : undefined;
+              if (definition)
+                return (
+                  <FootnoteBlock
+                    key={block.id}
+                    block={block}
+                    definition={definition}
+                    labels={labels}
+                    locale={locale}
+                    source={projectedSource}
+                    store={store}
+                  />
+                );
+              if (!block.editable || block.kind === "footnote") {
+                return (
+                  <SourceSafeBlock
+                    block={block}
+                    key={block.id}
+                    labels={labels}
+                    store={store}
+                  />
+                );
+              }
+              if (imageBlockDetails(block)) {
+                return (
+                  <ImageBlock
+                    assets={assets}
+                    block={block}
+                    key={block.id}
+                    labels={labels}
+                    locale={locale}
+                    onSelectBlock={onSelectBlock}
+                    onOpenImage={onOpenImage}
+                    selected={block.id === selectedBlockId}
+                    store={store}
+                  />
+                );
+              }
+              if (block.kind === "thematic-break") {
+                return (
+                  <ThematicBreakBlock
+                    block={block}
+                    key={block.id}
+                    labels={labels}
+                    store={store}
+                  />
+                );
+              }
+              if (block.kind === "task") {
+                return (
+                  <TaskBlock
+                    block={block}
+                    key={block.id}
+                    labels={labels}
+                    locale={locale}
+                    onSelectBlock={onSelectBlock}
+                    store={store}
+                  />
+                );
+              }
+              if (block.kind === "table") {
+                return (
+                  <TableBlock
+                    block={block}
+                    key={block.id}
+                    labels={labels}
+                    locale={locale}
+                    onSelectBlock={onSelectBlock}
+                    store={store}
+                  />
+                );
+              }
+              if (block.kind === "code-fence") {
+                return (
+                  <CodeFenceBlock
+                    block={block}
+                    key={block.id}
+                    labels={labels}
+                    onSelectBlock={onSelectBlock}
+                    store={store}
+                  />
+                );
+              }
+              return (
+                <EditableInlineBlock
+                  anchor={headingAnchors.get(block.id)}
+                  block={block}
+                  isCallout={block.id === calloutId}
+                  key={block.id}
+                  labels={labels}
+                  locale={locale}
+                  onSelectBlock={onSelectBlock}
+                  store={store}
+                />
+              );
+            })}
           </div>
-        ) : null}
-
-        <div
-          className={`block-canvas${multiBlockSelection ? " has-multi-selection" : ""}`}
-          aria-label={labels.blockCanvas}
-          ref={canvasRef}
-        >
-          {snapshot.projection.blocks.map((block) => {
-            if (block.kind === "frontmatter" && block.editable) return null;
-            if (!block.editable) {
-              return (
-                <SourceSafeBlock
-                  block={block}
-                  key={block.id}
+          {multiBlockSelection
+            ? createPortal(
+                <InlineToolbar
+                  block={multiBlockSelection.blocks[0]!}
+                  blocks={multiBlockSelection.blocks}
                   labels={labels}
-                  store={store}
-                />
-              );
-            }
-            if (imageBlockDetails(block)) {
-              return (
-                <ImageBlock
-                  assets={assets}
-                  block={block}
-                  key={block.id}
-                  labels={labels}
-                  locale={locale}
-                  onSelectBlock={onSelectBlock}
-                  onOpenImage={onOpenImage}
-                  selected={block.id === selectedBlockId}
-                  store={store}
-                />
-              );
-            }
-            if (block.kind === "thematic-break") {
-              return (
-                <ThematicBreakBlock
-                  block={block}
-                  key={block.id}
-                  labels={labels}
-                  store={store}
-                />
-              );
-            }
-            if (block.kind === "task") {
-              return (
-                <TaskBlock
-                  block={block}
-                  key={block.id}
-                  labels={labels}
-                  locale={locale}
-                  onSelectBlock={onSelectBlock}
-                  store={store}
-                />
-              );
-            }
-            if (block.kind === "table") {
-              return (
-                <TableBlock
-                  block={block}
-                  key={block.id}
-                  labels={labels}
-                  locale={locale}
-                  onSelectBlock={onSelectBlock}
-                  store={store}
-                />
-              );
-            }
-            if (block.kind === "code-fence") {
-              return (
-                <CodeFenceBlock
-                  block={block}
-                  key={block.id}
-                  labels={labels}
-                  onSelectBlock={onSelectBlock}
-                  store={store}
-                />
-              );
-            }
-            return (
-              <EditableInlineBlock
-                anchor={headingAnchors.get(block.id)}
-                block={block}
-                isCallout={block.id === calloutId}
-                key={block.id}
-                labels={labels}
-                locale={locale}
-                onSelectBlock={onSelectBlock}
-                store={store}
-              />
-            );
-          })}
-        </div>
-        {multiBlockSelection
-          ? createPortal(
-              <InlineToolbar
-                block={multiBlockSelection.blocks[0]!}
-                blocks={multiBlockSelection.blocks}
-                labels={labels}
-                onBlockCommand={(id) => {
-                  const result = executeBlockSelectionCommand(
-                    store,
-                    id,
-                    multiBlockSelection.blocks,
-                  );
-                  if (!result?.ok) return;
-                  window.getSelection()?.removeAllRanges();
-                  setMultiBlockSelection(null);
-                }}
-                position={
-                  {
-                    "--selection-left": `${multiBlockSelection.left}px`,
-                    "--selection-top": `${multiBlockSelection.top}px`,
-                    position: "fixed",
-                  } as CSSProperties
-                }
-                structuralOnly
-              />,
-              document.body,
-            )
-          : null}
-      </article>
-    </main>
+                  onBlockCommand={(id) => {
+                    const result = executeBlockSelectionCommand(
+                      store,
+                      id,
+                      multiBlockSelection.blocks,
+                    );
+                    if (!result?.ok) return;
+                    window.getSelection()?.removeAllRanges();
+                    setMultiBlockSelection(null);
+                  }}
+                  position={
+                    {
+                      "--selection-left": `${multiBlockSelection.left}px`,
+                      "--selection-top": `${multiBlockSelection.top}px`,
+                      position: "fixed",
+                    } as CSSProperties
+                  }
+                  structuralOnly
+                />,
+                document.body,
+              )
+            : null}
+        </article>
+      </main>
+    </FootnoteContext.Provider>
   );
 }

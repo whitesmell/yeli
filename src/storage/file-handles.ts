@@ -1,4 +1,5 @@
 import { fingerprintArtifact } from "../format/save.ts";
+import { readMarkdownFile } from "../host/markdown-files.ts";
 
 export interface WritableLike {
   close(): Promise<void>;
@@ -6,8 +7,12 @@ export interface WritableLike {
 }
 
 export interface FileHandleLike {
+  isSameEntry?(other: FileHandleLike): Promise<boolean>;
   createWritable(): Promise<WritableLike>;
-  getFile(): Promise<{ text(): Promise<string> }>;
+  getFile(): Promise<{
+    arrayBuffer?(): Promise<ArrayBuffer>;
+    text(): Promise<string>;
+  }>;
   name: string;
   queryPermission?(options: { mode: "readwrite" }): Promise<PermissionState>;
   requestPermission?(options: { mode: "readwrite" }): Promise<PermissionState>;
@@ -34,18 +39,24 @@ async function ensureWritePermission(handle: FileHandleLike): Promise<boolean> {
   return (await handle.requestPermission(options)) === "granted";
 }
 
-export async function writeArtifactToHandle(
+async function writeTextToHandle(
   handle: FileHandleLike,
-  artifact: string,
+  text: string,
   expectedFingerprint: string,
   allowExternalOverwrite = false,
+  markdown = false,
 ): Promise<HandleWriteResult> {
   try {
     if (!(await ensureWritePermission(handle))) {
       return { ok: false, reason: "permission-denied" };
     }
     const current = await handle.getFile();
-    const actualFingerprint = fingerprintArtifact(await current.text());
+    const readBytes = markdown ? current.arrayBuffer?.bind(current) : undefined;
+    const actualFingerprint = fingerprintArtifact(
+      markdown && readBytes
+        ? await readMarkdownFile({ arrayBuffer: readBytes })
+        : await current.text(),
+    );
     if (!allowExternalOverwrite && actualFingerprint !== expectedFingerprint) {
       return {
         actualFingerprint,
@@ -54,9 +65,9 @@ export async function writeArtifactToHandle(
       };
     }
     const writable = await handle.createWritable();
-    await writable.write(artifact);
+    await writable.write(text);
     await writable.close();
-    return { fingerprint: fingerprintArtifact(artifact), ok: true };
+    return { fingerprint: fingerprintArtifact(text), ok: true };
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : String(error),
@@ -64,4 +75,33 @@ export async function writeArtifactToHandle(
       reason: "write-failed",
     };
   }
+}
+
+export async function writeArtifactToHandle(
+  handle: FileHandleLike,
+  artifact: string,
+  expectedFingerprint: string,
+  allowExternalOverwrite = false,
+): Promise<HandleWriteResult> {
+  return writeTextToHandle(
+    handle,
+    artifact,
+    expectedFingerprint,
+    allowExternalOverwrite,
+  );
+}
+
+export async function writeMarkdownToHandle(
+  handle: FileHandleLike,
+  source: string,
+  expectedFingerprint: string,
+  allowExternalOverwrite = false,
+): Promise<HandleWriteResult> {
+  return writeTextToHandle(
+    handle,
+    source,
+    expectedFingerprint,
+    allowExternalOverwrite,
+    true,
+  );
 }

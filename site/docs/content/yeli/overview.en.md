@@ -1,6 +1,6 @@
 # Features and where to find them
 
-Yeli carries Markdown, images and a reading/editing environment in one `.yeli.html`. Download a trusted file and open it in a browser to read; choose Edit to write. Find a capability here, then follow its tutorial.
+Yeli has two paths: the web editor processes Markdown locally and does not upload files; a local `.yeli.html` carries Markdown, images and a reading/editing environment in one file. Download a trusted `.yeli.html` to read offline, then choose Edit to write. Find a capability here, then follow its tutorial.
 
 ## Choose your goal
 
@@ -16,6 +16,18 @@ Yeli carries Markdown, images and a reading/editing environment in one `.yeli.ht
 “More → Save” means open More at the end of the toolbar and choose the action directly. File, Export, View, and Settings & help are **section labels**, not intermediate submenus. The save action depends on browser capabilities.
 
 ## Open and write
+
+### Online editor
+
+Open the web editor from the website and Markdown stays in this browser; files are not uploaded. Create a document or open local `.md`; saving from the web downloads Markdown. For one complete file you can keep editing offline, use “Export editable .yeli.html”. Whether the web entry is available depends on the current published site; this does not claim a fixed deployment address or cloud storage.
+
+| Feature                  | Where and how                                                     | When to use it / Details                                                                                             |
+| ------------------------ | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Open Markdown online     | Enter the web editor from the site, or More → Open file for `.md` | Files are not uploaded; local drafts depend on the browser and origin. [Quick start](quickstart.html)                |
+| Save Markdown on the web | More → Download Markdown in the web editor                        | Download readable source; embedded images are not packaged with `.md`. [Export](export.html)                         |
+| Download editable Yeli   | More → Export editable .yeli.html in the web editor               | The download can be edited offline later; if its template fails, only this export is disabled. [Export](export.html) |
+
+### Local `.yeli.html`
 
 | Feature                                           | Where and how                                               | When to use it / Details                                                                                      |
 | ------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
@@ -42,17 +54,18 @@ Yeli carries Markdown, images and a reading/editing environment in one `.yeli.ht
 
 ## Save, recover and deliver
 
-| Feature                     | Where and how                                    | When to use it / Details                                                                                       |
-| --------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| Save edits                  | `⌘/Ctrl + S`; save action in More                | Write back or download an updated copy according to permission; check the result and file. [Saving](save.html) |
-| Save an independent copy    | More → Save a copy                               | Keep a milestone backup or hand off for editing. [Copies](save.html)                                           |
-| Conflicts and reconnection  | Follow conflict or file-association prompts      | Preserve both sets of changes after external edits. [Conflicts](save.html)                                     |
-| Undo and redo               | Top buttons; `⌘/Ctrl + Z` / `⌘/Ctrl + Shift + Z` | Revert current-session operations. [History and undo](history.html)                                            |
-| Version history and restore | More → History in Edit                           | Review changes, confirm restoration, then save. [History](history.html)                                        |
-| Browser draft recovery      | Prompts when reopening                           | Records depend on browser and origin and do not travel with the file. [Recovery scope](history.html)           |
-| Export Markdown             | More → Export Markdown                           | Take readable source; embedded images are not automatically bundled. [Export](export.html)                     |
-| Read-only HTML              | More → Export read-only HTML, inspect preview    | Deliver to readers; output excludes editor scripts. [Sharing](export.html)                                     |
-| Print / PDF                 | More → Print / PDF                               | Select a printer or Save as PDF and inspect pagination. [Printing](export.html)                                |
+| Feature                     | Where and how                                       | When to use it / Details                                                                                       |
+| --------------------------- | --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Save edits                  | `⌘/Ctrl + S`; save action in More                   | Write back or download an updated copy according to permission; check the result and file. [Saving](save.html) |
+| Save an independent copy    | More → Save a copy                                  | Keep a milestone backup or hand off for editing. [Copies](save.html)                                           |
+| Conflicts and reconnection  | Follow conflict or file-association prompts         | Preserve both sets of changes after external edits. [Conflicts](save.html)                                     |
+| Undo and redo               | Top buttons; `⌘/Ctrl + Z` / `⌘/Ctrl + Shift + Z`    | Revert current-session operations. [History and undo](history.html)                                            |
+| Version history and restore | More → History in Edit                              | Review changes, confirm restoration, then save. [History](history.html)                                        |
+| Browser draft recovery      | Prompts when reopening                              | Records depend on browser and origin and do not travel with the file. [Recovery scope](history.html)           |
+| Export Markdown             | More → Export Markdown                              | Take readable source; embedded images are not automatically bundled. [Export](export.html)                     |
+| Editable Yeli               | More → Export editable .yeli.html in the web editor | The downloaded complete file can be reopened and edited offline. [Export](export.html)                         |
+| Read-only HTML              | More → Export read-only HTML, inspect preview       | Deliver to readers; output excludes editor scripts. [Sharing](export.html)                                     |
+| Print via browser           | More → PDF via browser print…                       | Choose a printer or Save as PDF in the browser dialog; no automatic file is claimed. [Printing](export.html)   |
 
 ## Read, present and continue with tools
 

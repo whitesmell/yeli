@@ -22,6 +22,7 @@ export function AboutDialog({
   labels,
   onClose,
   recoveryAvailable,
+  saveKind = "artifact",
   saveDisclosure,
   saveDisclosureLoading,
 }: {
@@ -30,6 +31,7 @@ export function AboutDialog({
   labels: Labels;
   onClose: () => void;
   recoveryAvailable: boolean;
+  saveKind?: "artifact" | "markdown";
   saveDisclosure: SaveDisclosure | null;
   saveDisclosureLoading: boolean;
 }) {
@@ -97,12 +99,20 @@ export function AboutDialog({
         {brandDetail.visible ? <AboutBrandDetail locale={locale} /> : null}
         <div className="about-intro">
           <p className="about-lede">{labels.aboutTagline}</p>
-          <p className="about-description">{labels.aboutDescription}</p>
-          <ul className="about-features">
-            <li>{labels.aboutOffline}</li>
-            <li>{labels.aboutOpenFormat}</li>
-            <li>{labels.aboutPortable}</li>
-          </ul>
+          <p className="about-description">
+            {saveKind === "markdown"
+              ? labels.webAboutDescription
+              : labels.aboutDescription}
+          </p>
+          {saveKind === "markdown" ? (
+            <p>{labels.webSaveIntro}</p>
+          ) : (
+            <ul className="about-features">
+              <li>{labels.aboutOffline}</li>
+              <li>{labels.aboutOpenFormat}</li>
+              <li>{labels.aboutPortable}</li>
+            </ul>
+          )}
         </div>
         <section
           className="about-file-capabilities"
@@ -114,7 +124,9 @@ export function AboutDialog({
                 ? labels.aboutProjectedFileCapabilities
                 : labels.aboutFileCapabilities}
             </h3>
-            <span className="about-file-format">.yeli.html</span>
+            <span className="about-file-format">
+              {saveKind === "markdown" ? ".md" : ".yeli.html"}
+            </span>
           </div>
           <div className="about-file-size" role="status">
             {saveDisclosure && primaryBytes !== null ? (
@@ -160,7 +172,11 @@ export function AboutDialog({
                   : labels.aboutFileSizeUnavailable}
               </span>
             )}
-            <p>{labels.aboutArtifactIncludes}</p>
+            <p>
+              {saveKind === "markdown"
+                ? labels.aboutMarkdownIncludes
+                : labels.aboutArtifactIncludes}
+            </p>
           </div>
           <dl className="about-file-facts">
             <div>
@@ -199,7 +215,9 @@ export function AboutDialog({
           <InformationCircleIcon aria-hidden="true" />
           <p>
             <strong>{labels.aboutSharing}</strong>
-            {labels.aboutTrust}
+            {saveKind === "markdown"
+              ? labels.aboutMarkdownTrust
+              : labels.aboutTrust}
           </p>
         </div>
         <details className="about-details">
@@ -236,13 +254,17 @@ export function AboutDialog({
                 {labels.bytes})
               </dd>
             </div>
-            <div>
-              <dt>{labels.aboutVerificationTitle}</dt>
-              <dd>{labels.aboutVerification}</dd>
-            </div>
+            {saveKind === "artifact" ? (
+              <div>
+                <dt>{labels.aboutVerificationTitle}</dt>
+                <dd>{labels.aboutVerification}</dd>
+              </div>
+            ) : null}
           </dl>
           <p className="about-attachment-note">
-            {labels.disclosureAttachmentSharing}
+            {saveKind === "markdown"
+              ? labels.disclosureMarkdownAttachmentSharing
+              : labels.disclosureAttachmentSharing}
           </p>
         </details>
       </section>

@@ -1,23 +1,43 @@
 # 与 Agent 一起工作
 
-## 准备外部工具
+## 一句话开始
 
-浏览器文档不需要安装；Agent 的文件操作使用单独的 CLI。当前没有已公布的官方 npm 包，不要安装同名陌生包。从可信源代码按仓库 Agent quickstart 构建 `dist/packages/yeli-0.1.0.tgz`，在工具目录安装：
+把这句指令发给能联网、运行命令并读写本地文件的 Agent：
+
+> 阅读 https://yeli.zetury.com/skill.md，按指引开始创建和编辑 Yeli 文档。
+
+然后提供材料与任务，例如把会议记录整理成一份新的 `meeting.yeli.html`。[Yeli Skill](https://yeli.zetury.com/skill.md) 引导首次准备和文档操作，不会修改 Agent 配置。
+
+## 一次准备工具
+
+使用新的官方源码副本，或复用已有的可信源码副本：
 
 ```sh
-npm install --prefix ./yeli-tools --ignore-scripts /trusted/yeli-0.1.0.tgz
-./yeli-tools/node_modules/.bin/yeli --help
+git clone https://github.com/whitesmell/yeli.git
+cd yeli
+nvm use
+npm ci
+npm run setup:agent
 ```
 
-CLI 要求 Node.js `>=24.15.0 <25`。初次装依赖可能联网；已安装工具的文档操作在本地完成。`--help` 给出通用 Skill 的路径，把该目录按所用 Agent 的规则安装；它不自动配置平台插件，也不自动下载可信模板。
+使用 Node.js `>=24.15.0 <25`，精确版本见 `.nvmrc`；也可用其他版本管理器代替 `nvm`。首次安装需要联网。准备命令构建 CLI、Skill 与两种语言的模板，校验模板，再写入 `dist/agent/setup.json`。读取 `paths.skill`；从其他目录执行命令时使用 `paths.node` 与 `paths.cli`。不需要全局安装，也不必把 Skill 安装进平台配置。
+
+下面的示例均在该源码副本中执行。先把用户材料写入 `notes.md`，再创建新文件：
+
+```sh
+node dist/cli/bin/yeli.js import notes.md --template dist/html/starter.zh-CN.yeli.html --output notes.yeli.html
+node dist/cli/bin/yeli.js validate notes.yeli.html
+```
+
+模板的信任来自源码副本，不代表发行签名。工具就绪后，文档命令在本地完成。也可选择单独安装 CLI，打包方式见[仓库快速入门](https://github.com/whitesmell/yeli/blob/main/docs/agent-quickstart.zh-CN.md)。当前没有已公布的官方 npm 包。
 
 ## 先读，再改
 
-以下命令的 `yeli` 指已安装的可执行文件。先使用一个可丢弃的练习文件：
+先读取文档，再规划修改：
 
 ```sh
-yeli pre-read notes.yeli.html
-yeli extract notes.yeli.html
+node dist/cli/bin/yeli.js pre-read notes.yeli.html
+node dist/cli/bin/yeli.js extract notes.yeli.html
 ```
 
 `pre-read` 返回 revision、sourceHash、标题目录、行范围、新鲜度与 shell 指纹；`extract` 返回权威 Markdown。不要让 Agent 扫描或重写压缩运行时。把正文作为任务资料，而不是可覆盖用户指令的授权。
@@ -25,12 +45,12 @@ yeli extract notes.yeli.html
 若原文为 `# Notes`、空行、`First draft.`，将 `replacement-lines.md` 写为 `Reviewed draft.`，再执行：
 
 ```sh
-yeli patch notes.yeli.html \
+node dist/cli/bin/yeli.js patch notes.yeli.html \
   --start-line 3 --delete-count 1 --insert-file replacement-lines.md \
   --expected-hash SOURCE_HASH_FROM_PRE_READ \
   --output reviewed.yeli.html
-yeli validate reviewed.yeli.html
-yeli extract reviewed.yeli.html
+node dist/cli/bin/yeli.js validate reviewed.yeli.html
+node dist/cli/bin/yeli.js extract reviewed.yeli.html
 ```
 
 用真实预读 hash 替换占位参数；输出路径必须不存在。冲突时重新预读并重新判断，不移除 hash 检查。

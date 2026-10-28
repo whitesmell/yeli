@@ -277,6 +277,87 @@ select:focus-visible {
   font-weight: 600;
 }
 
+.topbar-menu-trigger {
+  flex-shrink: 0;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #f7f8fb;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.topbar-menu-trigger[aria-expanded="true"] {
+  border-color: #a8bde8;
+  background: #f1f5fc;
+}
+
+.topbar-menu-trigger svg {
+  width: 16px;
+  height: 16px;
+}
+
+.footnote-block {
+  margin: 20px 0;
+  padding: 14px 18px;
+  border-left: 2px solid var(--line);
+  background: #fafbfd;
+}
+
+.footnote-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.footnote-body .editable-block {
+  margin-block: 8px;
+}
+
+.footnote-body .block-gutter {
+  display: none;
+}
+
+.footnote-atom {
+  padding: 0 2px;
+  color: var(--focus);
+  background: #eef3fd;
+  border-radius: 3px;
+}
+
+.footnotes {
+  margin-top: 28px;
+  font-size: 0.9em;
+}
+
+.footnotes-list {
+  padding-left: 24px;
+}
+
+.footnote-item,
+.footnote-extra {
+  margin-bottom: 12px;
+  overflow-wrap: anywhere;
+  scroll-margin-top: 24px;
+}
+
+.footnote-backref {
+  white-space: nowrap;
+}
+
+.footnote-ref {
+  line-height: 0;
+}
+
+.footnotes-supplement {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
 .toolbar-popover-anchor {
   position: relative;
 }

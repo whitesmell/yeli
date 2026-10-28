@@ -1,6 +1,6 @@
-import type { OpenEmbeddedResult } from "./format/open.ts";
+import type { YeliHost } from "./host/contracts.ts";
 import { Workspace } from "./ui/workspace.tsx";
 
-export function App({ initialResult }: { initialResult: OpenEmbeddedResult }) {
-  return <Workspace initialResult={initialResult} />;
+export function App({ host }: { host: YeliHost }) {
+  return <Workspace host={host} />;
 }

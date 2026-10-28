@@ -22,6 +22,23 @@ function paragraph(source: string, text: string, revision = 1) {
 }
 
 describe("scoped command registry", () => {
+  it("keeps the BOM when deleting frontmatter and restores exact source on undo", () => {
+    const source = "\ufeff---\ntitle: Original\n---\nBody\n";
+    const store = new DocumentStore(source);
+    const frontmatter = store
+      .getSnapshot()
+      .projection.blocks.find((block) => block.kind === "frontmatter")!;
+    expect(frontmatter.range.from).toBe(1);
+
+    expect(
+      executeBlockCommand(store, "block.delete", frontmatter, en),
+    ).toMatchObject({ ok: true, source: "\ufeffBody\n", undoEntries: 1 });
+    expect(store.undo()?.ok).toBe(true);
+    expect(store.getSnapshot().source).toBe(source);
+    expect(store.redo()?.ok).toBe(true);
+    expect(store.getSnapshot().source).toBe("\ufeffBody\n");
+  });
+
   it("keeps command identifiers unique and filters one catalog by mode and surface", () => {
     expect(new Set(COMMAND_CATALOG.map((command) => command.id)).size).toBe(
       COMMAND_CATALOG.length,
