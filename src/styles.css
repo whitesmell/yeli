@@ -4178,7 +4178,7 @@ h3.block-content-editable {
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 420px) {
   .workspace-topbar {
     padding-inline: 6px;
   }
@@ -4198,6 +4198,11 @@ h3.block-content-editable {
 
   .topbar-action-cluster {
     padding-right: 4px;
+  }
+
+  .topbar-menu-trigger {
+    gap: 2px;
+    padding-inline: 2px;
   }
 
   .topbar-document-name {

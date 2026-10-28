@@ -101,6 +101,70 @@ async function savedMarkdown(page: Page) {
 }
 
 for (const host of ["web", "artifact"] as const) {
+  for (const locale of ["zh-CN", "en"] as const) {
+    test(`narrow ${host} toolbar retains editable title and keyboard menu in ${locale}`, async ({
+      page,
+    }) => {
+      if (host === "web") {
+        await open(page);
+        if (locale === "en") {
+          await menu(page);
+          await page.getByRole("menuitem", { name: "English" }).click();
+        }
+      } else {
+        await page.goto(
+          pathToFileURL(path.resolve(`dist/html/starter.${locale}.yeli.html`))
+            .href,
+        );
+        await page
+          .getByRole("button", {
+            name: locale === "en" ? "Edit" : "编辑",
+            exact: true,
+          })
+          .click();
+      }
+      const trigger = page.getByRole("button", {
+        name: locale === "en" ? "Menu" : "菜单",
+        exact: true,
+      });
+      for (const width of [320, 360, 361, 390, 420, 421]) {
+        await page.setViewportSize({ width, height: 720 });
+        const title = page.locator(".topbar-title-input");
+        await expect(title).toBeVisible();
+        const textWidth = await title.evaluate((input) => {
+          const style = getComputedStyle(input);
+          return (
+            input.clientWidth -
+            Number.parseFloat(style.paddingLeft) -
+            Number.parseFloat(style.paddingRight)
+          );
+        });
+        expect(
+          textWidth,
+          `${host} ${locale} at ${width}px`,
+        ).toBeGreaterThanOrEqual(36);
+        expect(
+          await page.evaluate(
+            () => document.documentElement.scrollWidth - window.innerWidth,
+          ),
+        ).toBeLessThanOrEqual(1);
+        await expect(trigger).toBeVisible();
+        expect((await trigger.boundingBox())!.height).toBeGreaterThanOrEqual(
+          44,
+        );
+        await trigger.focus();
+        await expect(trigger).toBeFocused();
+        await page.keyboard.press("Enter");
+        await expect(trigger).toHaveAttribute("aria-expanded", "true");
+        await expect(page.locator(".more-popover")).toBeVisible();
+        await page.keyboard.press("Escape");
+        await expect(trigger).toHaveAttribute("aria-expanded", "false");
+      }
+    });
+  }
+}
+
+for (const host of ["web", "artifact"] as const) {
   test(`continuous undo and redo preserve exact source across body and note edits in ${host}`, async ({
     page,
   }, testInfo) => {
@@ -156,6 +220,24 @@ for (const host of ["web", "artifact"] as const) {
       expect(parsed.freshness.manifest.status).toBe("fresh");
       return parsed.markdown;
     };
+    const historyControl = async (command: "undo" | "redo") => {
+      const toolbarControl = page.locator(
+        `.topbar-tools [data-command-id="document.${command}"]`,
+      );
+      if (await toolbarControl.isVisible()) return toolbarControl;
+      await menu(page);
+      return page.locator(
+        `.more-popover [data-command-id="document.${command}"]`,
+      );
+    };
+    const assertHistoryDisabled = async (command: "undo" | "redo") => {
+      const control = await historyControl(command);
+      await expect(control).toBeVisible();
+      await expect(control).toBeDisabled();
+      if (await page.locator(".more-popover").isVisible()) {
+        await page.keyboard.press("Escape");
+      }
+    };
     const first = initial.replace("另一个[^second]。", "另一个[^second]。 A");
     const second = first.replace(
       "第二行保持两个  空格。",
@@ -172,28 +254,26 @@ for (const host of ["web", "artifact"] as const) {
     await append(body(), " C");
     expect(await savedSource()).toBe(third);
     for (const expected of [second, first, initial]) {
-      await page.locator('[data-command-id="document.undo"]').click();
+      await (await historyControl("undo")).click();
       expect(await savedSource()).toBe(expected);
     }
-    await expect(
-      page.locator('[data-command-id="document.undo"]'),
-    ).toBeDisabled();
-    for (const expected of [first, second, third]) {
-      await page.locator("[data-more-trigger]").focus();
-      await page.keyboard.press("ControlOrMeta+Shift+z");
+    await assertHistoryDisabled("undo");
+    for (const [index, expected] of [first, second, third].entries()) {
+      if (index === 0 && !(await page.locator(".topbar-tools").isVisible())) {
+        await (await historyControl("redo")).click();
+      } else {
+        await page.locator("[data-more-trigger]").focus();
+        await page.keyboard.press("ControlOrMeta+Shift+z");
+      }
       expect(await savedSource()).toBe(expected);
     }
-    await expect(
-      page.locator('[data-command-id="document.redo"]'),
-    ).toBeDisabled();
-    await page.locator('[data-command-id="document.undo"]').click();
+    await assertHistoryDisabled("redo");
+    await (await historyControl("undo")).click();
     await append(body(), " Branch");
     expect(await savedSource()).toBe(
       second.replace("另一个[^second]。 A", "另一个[^second]。 A Branch"),
     );
-    await expect(
-      page.locator('[data-command-id="document.redo"]'),
-    ).toBeDisabled();
+    await assertHistoryDisabled("redo");
   });
 }
 
