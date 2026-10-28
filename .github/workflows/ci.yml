@@ -36,10 +36,15 @@ jobs:
       - run: npm run build:site
       - run: npm run test:browser
       - run: npm run test:quality
+        if: ${{ !cancelled() }}
       - run: npm run validate:single
+        if: ${{ !cancelled() }}
       - run: npm run validate:single -- --locale en
+        if: ${{ !cancelled() }}
       - run: npm run check:site
+        if: ${{ !cancelled() }}
       - run: npm run test:site
+        if: ${{ !cancelled() }}
 
       - name: Upload exact release candidate and browser failures
         if: always()

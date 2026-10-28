@@ -90,6 +90,15 @@ async function menu(page: Page) {
   await expect(page.locator(".more-popover")).toBeVisible();
 }
 
+async function historyControl(page: Page, command: "undo" | "redo") {
+  const toolbarControl = page.locator(
+    `.topbar-tools [data-command-id="document.${command}"]`,
+  );
+  if (await toolbarControl.isVisible()) return toolbarControl;
+  await menu(page);
+  return page.locator(`.more-popover [data-command-id="document.${command}"]`);
+}
+
 async function savedMarkdown(page: Page) {
   await menu(page);
   const pending = page.waitForEvent("download");
@@ -167,10 +176,12 @@ for (const host of ["web", "artifact"] as const) {
 for (const host of ["web", "artifact"] as const) {
   test(`continuous undo and redo preserve exact source across body and note edits in ${host}`, async ({
     page,
+    browserName,
   }, testInfo) => {
     await open(page);
     let initial = source;
     let originalArtifact = "";
+    const offlineRequests: string[] = [];
     if (host === "artifact") {
       await menu(page);
       const pending = page.waitForEvent("download");
@@ -179,7 +190,16 @@ for (const host of ["web", "artifact"] as const) {
       await (await pending).saveAs(target);
       originalArtifact = readFileSync(target, "utf8");
       initial = source.replaceAll("\r\n", "\n");
-      await page.context().setOffline(true);
+      page.on("request", (request) => {
+        if (/^https?:/u.test(request.url())) {
+          offlineRequests.push(request.url());
+        }
+      });
+      if (browserName === "webkit") {
+        await page.context().route(/^https?:/u, (route) => route.abort());
+      } else {
+        await page.context().setOffline(true);
+      }
       await page.goto(pathToFileURL(target).href);
       await page.getByRole("button", { name: "编辑", exact: true }).click();
     }
@@ -220,18 +240,8 @@ for (const host of ["web", "artifact"] as const) {
       expect(parsed.freshness.manifest.status).toBe("fresh");
       return parsed.markdown;
     };
-    const historyControl = async (command: "undo" | "redo") => {
-      const toolbarControl = page.locator(
-        `.topbar-tools [data-command-id="document.${command}"]`,
-      );
-      if (await toolbarControl.isVisible()) return toolbarControl;
-      await menu(page);
-      return page.locator(
-        `.more-popover [data-command-id="document.${command}"]`,
-      );
-    };
     const assertHistoryDisabled = async (command: "undo" | "redo") => {
-      const control = await historyControl(command);
+      const control = await historyControl(page, command);
       await expect(control).toBeVisible();
       await expect(control).toBeDisabled();
       if (await page.locator(".more-popover").isVisible()) {
@@ -254,13 +264,13 @@ for (const host of ["web", "artifact"] as const) {
     await append(body(), " C");
     expect(await savedSource()).toBe(third);
     for (const expected of [second, first, initial]) {
-      await (await historyControl("undo")).click();
+      await (await historyControl(page, "undo")).click();
       expect(await savedSource()).toBe(expected);
     }
     await assertHistoryDisabled("undo");
     for (const [index, expected] of [first, second, third].entries()) {
       if (index === 0 && !(await page.locator(".topbar-tools").isVisible())) {
-        await (await historyControl("redo")).click();
+        await (await historyControl(page, "redo")).click();
       } else {
         await page.locator("[data-more-trigger]").focus();
         await page.keyboard.press("ControlOrMeta+Shift+z");
@@ -268,12 +278,13 @@ for (const host of ["web", "artifact"] as const) {
       expect(await savedSource()).toBe(expected);
     }
     await assertHistoryDisabled("redo");
-    await (await historyControl("undo")).click();
+    await (await historyControl(page, "undo")).click();
     await append(body(), " Branch");
     expect(await savedSource()).toBe(
       second.replace("另一个[^second]。 A", "另一个[^second]。 A Branch"),
     );
     await assertHistoryDisabled("redo");
+    expect(offlineRequests).toEqual([]);
   });
 }
 
@@ -356,7 +367,7 @@ test("editing around footnote references preserves their Markdown and undo resto
   expect(await savedMarkdown(page)).toBe(
     source.replace("另一个[^second]。", "另一个[^second]。 补充"),
   );
-  await page.locator('[data-command-id="document.undo"]').click();
+  await (await historyControl(page, "undo")).click();
   expect(await savedMarkdown(page)).toBe(source);
 });
 
@@ -393,7 +404,7 @@ test("visual footnote edits commit into an immediate export and undo preserves s
   expect(await savedMarkdown(page)).toBe(
     source.replace("第二行保持两个  空格。", "第二行保持两个  空格。 新增内容"),
   );
-  await page.locator('[data-command-id="document.undo"]').click();
+  await (await historyControl(page, "undo")).click();
   expect(await savedMarkdown(page)).toBe(source);
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.screenshot({
@@ -643,7 +654,15 @@ test("footnote HTML and print exports share formatted content and preserve the e
   if (parsed.ok) {
     expect(parsed.markdown).toBe(source.replaceAll("\r\n", "\n"));
   }
-  await page.context().setOffline(true);
+  const offlineRequests: string[] = [];
+  page.on("request", (request) => {
+    if (/^https?:/u.test(request.url())) offlineRequests.push(request.url());
+  });
+  if (browserName === "webkit") {
+    await page.context().route(/^https?:/u, (route) => route.abort());
+  } else {
+    await page.context().setOffline(true);
+  }
   await page.goto(pathToFileURL(target).href);
   await expect(page.locator(".read-document .footnote-item")).toHaveCount(2);
   await page.getByRole("button", { name: "编辑", exact: true }).click();
@@ -685,4 +704,5 @@ test("footnote HTML and print exports share formatted content and preserve the e
     );
   }
   expect(projectShell(savedArtifact).hash).toBe(projectShell(artifact).hash);
+  expect(offlineRequests).toEqual([]);
 });

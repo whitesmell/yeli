@@ -89,10 +89,21 @@ test("groups the brand and document title without a persistent version badge", a
     "rgb(255, 91, 69)",
   );
   const controlBefore = (await toggle.boundingBox())!;
-  expect(controlBefore.width).toBeGreaterThanOrEqual(98);
+  const compact = page.viewportSize()!.width <= 420;
+  expect(controlBefore.width).toBeGreaterThanOrEqual(compact ? 90 : 98);
   await expect(toggle).toHaveCSS("height", "36px");
-  await expect(toggle.locator(".yeli-logo")).toHaveCSS("width", "98px");
-  await expect(toggle.locator(".yeli-logo")).toHaveCSS("height", "26px");
+  if (compact) {
+    const logoWidth = await toggle
+      .locator(".yeli-logo")
+      .evaluate((logo) => Number.parseFloat(getComputedStyle(logo).width));
+    expect(Math.abs(logoWidth - 82.92)).toBeLessThanOrEqual(0.1);
+  } else {
+    await expect(toggle.locator(".yeli-logo")).toHaveCSS("width", "98px");
+  }
+  await expect(toggle.locator(".yeli-logo")).toHaveCSS(
+    "height",
+    compact ? "22px" : "26px",
+  );
   expect(
     await page.locator(".topbar-leading").evaluate((leading) => {
       const brand = leading.querySelector(".topbar-brand");
@@ -411,14 +422,14 @@ test("keeps history in Edit and flattens file actions into a prioritized More me
   await expect(
     page.getByRole("button", { name: "编辑", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "预览" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "阅读" })).toHaveCount(0);
   await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
   await expect(page.getByRole("menuitem", { name: "历史版本" })).toHaveCount(0);
   await page.keyboard.press("Escape");
 
   await page.getByRole("button", { name: "编辑", exact: true }).click();
 
-  await expect(page.getByRole("button", { name: "预览" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "阅读" })).toBeVisible();
   await expect(
     page.getByRole("button", { name: "编辑", exact: true }),
   ).toHaveCount(0);
@@ -553,11 +564,11 @@ test("keeps history in Edit and flattens file actions into a prioritized More me
   await expect(
     page.getByRole("button", { name: /^(?:更多|菜单)$/u }),
   ).toBeFocused();
-  await page.getByRole("button", { name: "预览" }).click();
+  await page.getByRole("button", { name: "阅读" }).click();
   await expect(
     page.getByRole("button", { name: "编辑", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "预览" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "阅读" })).toHaveCount(0);
 });
 
 test("keeps inline block controls visible until their menu is dismissed", async ({
@@ -676,7 +687,7 @@ test("keeps Insert open while either pointer or keyboard focus remains inside", 
 
   const trigger = page.getByRole("button", { name: "插入", exact: true });
   const menu = page.getByRole("menu", { name: "插入" });
-  const outside = page.getByRole("button", { name: "预览", exact: true });
+  const outside = page.getByRole("button", { name: "阅读", exact: true });
   await trigger.focus();
   await expect(menu).toBeVisible();
   await page.keyboard.press("Tab");
@@ -1094,7 +1105,7 @@ test("keeps Document properties and image inspection as distinct tasks", async (
     name: "属性面板",
   });
   await restoredInspector.getByRole("button", { name: "收起属性面板" }).click();
-  await page.getByRole("button", { name: "预览" }).click();
+  await page.getByRole("button", { name: "阅读" }).click();
   await expect(inspector).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "编辑", exact: true }),

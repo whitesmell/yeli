@@ -184,7 +184,7 @@ title: Separate search
     dialog.getByRole("button", { name: "替换当前项" }),
   ).toBeDisabled();
   await dialog.getByRole("button", { name: "关闭文档搜索" }).click();
-  await page.getByRole("button", { name: "预览" }).click();
+  await page.getByRole("button", { name: "阅读" }).click();
   await page.getByRole("button", { name: "目录" }).click();
   const outline = page.getByRole("complementary", { name: "文档大纲" });
   const headingFilter = outline.getByRole("textbox", {

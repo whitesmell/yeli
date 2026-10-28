@@ -68,7 +68,11 @@ for (const locale of ["zh-CN", "en"]) {
       if (/^https?:/u.test(request.url())) requests.push(request.url());
     });
     if (isMobile) await page.setViewportSize({ width: 320, height: 740 });
-    await context.setOffline(true);
+    if (browserName === "webkit") {
+      await context.route(/^https?:/u, (route) => route.abort());
+    } else {
+      await context.setOffline(true);
+    }
     await page.goto(pathToFileURL(artifactFile(locale)).href);
     const payload = await page.locator("#yeli-doc").textContent();
     const dialog = await openAbout(page, chinese);
@@ -131,10 +135,19 @@ for (const locale of ["zh-CN", "en"]) {
 
 test("About brand keyboard interaction preserves save and export content", async ({
   browser,
+  browserName,
   context,
   page,
 }, testInfo) => {
-  await context.setOffline(true);
+  const remoteRequests: string[] = [];
+  context.on("request", (request) => {
+    if (/^https?:/u.test(request.url())) remoteRequests.push(request.url());
+  });
+  if (browserName === "webkit") {
+    await context.route(/^https?:/u, (route) => route.abort());
+  } else {
+    await context.setOffline(true);
+  }
   const artifactPath = artifactFile("zh-CN");
   const original = readFileSync(artifactPath, "utf8");
   const before = await parseYeliArtifact(original);
@@ -178,7 +191,14 @@ test("About brand keyboard interaction preserves save and export content", async
   expect(hasBrandContent(saved)).toBe(false);
   const freshContext = await browser.newContext();
   try {
-    await freshContext.setOffline(true);
+    freshContext.on("request", (request) => {
+      if (/^https?:/u.test(request.url())) remoteRequests.push(request.url());
+    });
+    if (browserName === "webkit") {
+      await freshContext.route(/^https?:/u, (route) => route.abort());
+    } else {
+      await freshContext.setOffline(true);
+    }
     const reopened = await freshContext.newPage();
     await reopened.goto(pathToFileURL(savedPath).href);
     dialog = await openAbout(reopened, true);
@@ -195,4 +215,5 @@ test("About brand keyboard interaction preserves save and export content", async
   } finally {
     await freshContext.close();
   }
+  expect(remoteRequests).toEqual([]);
 });

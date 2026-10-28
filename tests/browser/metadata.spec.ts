@@ -155,7 +155,7 @@ test("metadata drafts cancel, retain focus, and reject an empty number", async (
   await expect(page.locator(".metadata-status")).toHaveCount(0);
   await expect(page.locator(".metadata-row")).not.toContainText("草稿");
   await panel.getByRole("button", { name: "收起属性面板" }).click();
-  await page.getByRole("button", { name: "预览", exact: true }).click();
+  await page.getByRole("button", { name: "阅读", exact: true }).click();
   await expect(page.locator(".metadata-status")).toHaveCount(0);
   await expect(page.locator(".read-heading")).not.toContainText("草稿");
 });

@@ -68,13 +68,18 @@ test("reopens a downloaded compressed copy offline with its shell intact", async
 });
 
 test("reports an unavailable decompressor while preserving readable document data", async ({
+  browserName,
   context,
   page,
 }) => {
   await context.addInitScript(() => {
     Object.defineProperty(window, "DecompressionStream", { value: undefined });
   });
-  await context.setOffline(true);
+  if (browserName === "webkit") {
+    await context.route(/^https?:/u, (route) => route.abort());
+  } else {
+    await context.setOffline(true);
+  }
   const remoteRequests: string[] = [];
   page.on("request", (request) => {
     if (/^https?:/u.test(request.url())) remoteRequests.push(request.url());

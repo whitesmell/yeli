@@ -184,7 +184,7 @@ test("switching to Read closes local history and removes its entry", async ({
     page.getByRole("complementary", { name: "历史版本" }),
   ).toBeVisible();
 
-  await page.getByRole("button", { name: "预览" }).click();
+  await page.getByRole("button", { name: "阅读" }).click();
   await expect(
     page.getByRole("complementary", { name: "历史版本" }),
   ).toHaveCount(0);
@@ -410,7 +410,7 @@ Code target
     await selectText(readBlock, item.selection);
     await page.getByRole("button", { name: "编辑", exact: true }).click();
     await expect(page.locator(item.focus).first()).toBeFocused();
-    await page.getByRole("button", { name: "预览" }).click();
+    await page.getByRole("button", { name: "阅读" }).click();
   }
 
   const image = page.locator("[data-read-block-id]:has(.document-image)");
