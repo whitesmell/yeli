@@ -503,6 +503,83 @@ test("web exports an offline editable Yeli copy without local state", async ({
   );
 });
 
+test("online Select image opens the picker, replaces and restores images, and saves an offline Yeli file", async ({
+  page,
+}, testInfo) => {
+  const errors: string[] = [];
+  const requests: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("request", (request) => requests.push(request.url()));
+  await page.goto(`${origin}/editor/`);
+  await openMarkdown(page, "![Example]()\n", "images.md");
+  await page
+    .getByRole("button", { name: "选择图片: Example", exact: true })
+    .click();
+  const choose = page.waitForEvent("filechooser");
+  await page.locator(".image-replace-action").click();
+  const picker = await choose;
+  const first = Buffer.from(
+    "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+    "base64",
+  );
+  await picker.setFiles({
+    name: "first.gif",
+    mimeType: "image/gif",
+    buffer: first,
+  });
+  const image = page.locator('main img[alt="Example"]');
+  await expect(image).toBeVisible();
+  await expect(page.getByLabel("替换图片", { exact: true })).toBeEnabled();
+  const second = Buffer.from(first);
+  second[13] = 100;
+  await page.getByLabel("替换图片", { exact: true }).setInputFiles({
+    name: "second.gif",
+    mimeType: "image/gif",
+    buffer: second,
+  });
+  await expect(image).toHaveAttribute(
+    "src",
+    `data:image/gif;base64,${second.toString("base64")}`,
+  );
+  await more(page);
+  const save = page.locator('[data-menu-action="save"]');
+  await expect(save).toHaveText(/下载含图片的 Yeli/u);
+  const pending = page.waitForEvent("download");
+  await save.click();
+  const download = await pending;
+  expect(download.suggestedFilename()).toMatch(/\.yeli\.html$/u);
+  const target = testInfo.outputPath("online-image.yeli.html");
+  await download.saveAs(target);
+  const parsed = await parseYeliArtifact(readFileSync(target, "utf8"));
+  expect(parsed).toMatchObject({
+    ok: true,
+    payload: {
+      assets: [{ data: second.toString("base64"), mimeType: "image/gif" }],
+    },
+  });
+  expect(projectShell(readFileSync(target, "utf8")).hash).toBe(
+    templateMetadata().shellHash,
+  );
+  await page.reload();
+  await page
+    .getByRole("dialog", { name: "本机文档", exact: true })
+    .getByRole("button", { name: /images\.md/ })
+    .click();
+  await page
+    .getByRole("dialog", { name: "恢复未保存的更改？" })
+    .getByRole("button", { name: "恢复草稿" })
+    .click();
+  await expect(image).toHaveAttribute(
+    "src",
+    `data:image/gif;base64,${second.toString("base64")}`,
+  );
+  expect(requests.filter((url) => !url.startsWith(origin))).toEqual([]);
+  await page.context().setOffline(true);
+  await page.goto(pathToFileURL(target).href);
+  await expect(page.locator('img[alt="Example"]').first()).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test("web static HTML and browser printing share one inert committed snapshot", async ({
   page,
 }) => {

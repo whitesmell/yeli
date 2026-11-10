@@ -285,7 +285,7 @@ export const en = {
   imageDetails: "Image description",
   imageEmbedded: "Image embedded in this Yeli file",
   imageEmbeddingUnavailableMarkdown:
-    "Embedding image files is unavailable in Markdown mode because .md files cannot include their bytes. Existing image links can still be kept.",
+    "Image selection needs the editable Yeli template. Reload the official editor and try again. Existing image links are kept.",
   imageSource: "Image address",
   imageTitle: "Image title",
   imageTooLarge:
@@ -412,7 +412,7 @@ export const en = {
   saveDownloadedFallback:
     "The original file could not be changed. A Markdown download is ready; check that it finishes. Your changes remain unsaved on this page.",
   saveMarkdownAssetsUnsupported:
-    "This document contains embedded files that .md cannot preserve. Saving is blocked; your changes and embedded files remain on this page. Remove the embedded files before saving as Markdown.",
+    "Markdown cannot package these embedded images. Download an editable Yeli file to keep the images, or remove them before saving Markdown. Your changes remain on this page.",
   saveFile: "Save",
   saveStateClean: "Saved",
   saveStateFailed: "Save failed",
@@ -490,6 +490,9 @@ export const en = {
   webLocalDocuments: "Local documents",
   webNewDocument: "New Markdown",
   webDownloadMarkdown: "Download Markdown",
+  webDownloadYeli: "Download Yeli with images",
+  webImageSaveHint:
+    "Images stay on this device. Save downloads an editable .yeli.html file containing your text and images. Your original Markdown file is kept.",
   webSaveOriginal: "Save to original Markdown",
   webIntro: "Markdown stays on this device. Nothing is uploaded.",
   webGuidance: "Local editing guidance",
@@ -497,7 +500,7 @@ export const en = {
   webPersistence:
     "Drafts and history are stored in this browser. Keep a file backup; clearing browser data removes them.",
   webSaveIntro:
-    "A connected file saves to the original after permission; otherwise save downloads Markdown. The open tab works offline; reopening needs the website assets.",
+    "Text-only documents save to the connected Markdown file after permission, or download Markdown. Documents with embedded images download as .yeli.html. The open tab works offline; reopening needs the website assets.",
   webEmptyDocuments: "No local documents yet. Create one or open Markdown.",
   webHasDraft: "Local draft available",
   webBaselineOnly: "Saved baseline",

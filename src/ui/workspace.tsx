@@ -68,7 +68,6 @@ import {
 } from "../editor/command-registry.ts";
 import type { TableDimensions } from "../editor/table-commands.ts";
 import type { YeliHost } from "../host/contracts.ts";
-import { saveKindForHost } from "../host/host.ts";
 import { en } from "../i18n/en.ts";
 import {
   LOCALE_STORAGE_KEY,
@@ -877,7 +876,7 @@ export function Workspace({ host }: { host: YeliHost }) {
           : labels.saveStateClean;
   const saveReady =
     lifecycle.saveDisclosure !== null && !lifecycle.saveDisclosureLoading;
-  const saveKind = saveKindForHost(host);
+  const saveKind = lifecycle.saveKind;
 
   return (
     <div
@@ -1302,9 +1301,11 @@ export function Workspace({ host }: { host: YeliHost }) {
                     <ArrowDownTrayIcon aria-hidden="true" />
                   )}
                   {host.kind === "web"
-                    ? lifecycle.canDirectSave
-                      ? labels.webSaveOriginal
-                      : labels.webDownloadMarkdown
+                    ? saveKind === "artifact"
+                      ? labels.webDownloadYeli
+                      : lifecycle.canDirectSave
+                        ? labels.webSaveOriginal
+                        : labels.webDownloadMarkdown
                     : lifecycle.canDirectSave
                       ? labels.saveFile
                       : labels.downloadUpdatedCopy}
@@ -1800,6 +1801,9 @@ export function Workspace({ host }: { host: YeliHost }) {
         {!isRead && inspectorOpen && !focusMode ? (
           <Inspector
             canEmbedImages={lifecycle.canEmbedImages}
+            imageEmbeddingNote={
+              host.kind === "web" ? labels.webImageSaveHint : undefined
+            }
             labels={labels}
             onClose={closeInspector}
             onClearSelection={closeInspector}

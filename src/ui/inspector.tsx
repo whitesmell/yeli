@@ -22,6 +22,7 @@ import { DocumentProperties } from "./document-properties.tsx";
 
 interface InspectorProps {
   canEmbedImages?: boolean;
+  imageEmbeddingNote?: string | undefined;
   labels: Labels;
   onClose: () => void;
   onClearSelection: () => void;
@@ -88,6 +89,7 @@ function InspectorSection({
 
 export function Inspector({
   canEmbedImages = true,
+  imageEmbeddingNote,
   labels,
   onClose,
   onClearSelection,
@@ -280,6 +282,8 @@ export function Inspector({
             </label>
             {!canEmbedImages ? (
               <p>{labels.imageEmbeddingUnavailableMarkdown}</p>
+            ) : imageEmbeddingNote ? (
+              <p>{imageEmbeddingNote}</p>
             ) : null}
           </InspectorSection>
 

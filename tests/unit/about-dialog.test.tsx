@@ -44,7 +44,9 @@ describe.each([
     );
     expect(host.textContent).not.toContain(labels.aboutTrust);
     expect(host.textContent).not.toContain(labels.disclosureAttachmentSharing);
-    expect(host.textContent).not.toContain(".yeli.html");
+    expect(host.querySelector(".about-intro")?.textContent).toContain(
+      labels.webSaveIntro,
+    );
     expect(host.textContent).not.toContain(labels.aboutVerification);
     expect(host.querySelector(".about-description")?.textContent).toBe(
       labels.webAboutDescription,

@@ -29,7 +29,7 @@ describe.each([en, zhCN])("Inspector image embedding ($image)", (labels) => {
     return { host, store };
   }
 
-  it("disables replacement and explains the Markdown format boundary", () => {
+  it("disables replacement and explains an unavailable image capability", () => {
     const { host } = render(false);
 
     expect(

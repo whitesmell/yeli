@@ -6,6 +6,8 @@ In a `.yeli.html` file, switch to Edit and choose Image from the top Insert menu
 
 ## Inspect and change an image
 
+The online editor also supports Select image. Images stay on your device. After adding an image, the Save action becomes Download Yeli with images and downloads an editable `.yeli.html` containing the text and image bytes. Open that downloaded file to continue offline. The connected `.md` original is kept; Markdown saving and export are blocked while embedded images are present so their bytes cannot be silently lost. Undoing or deleting the last embedded image restores Markdown saving.
+
 Select an image to inspect its description, title and source in the right rail. Replace, duplicate or delete it there. Replacement selects another local image. Deletion handles attachments according to their references; do not edit internal asset IDs by hand. Open an image preview for details, close with Escape, then save a copy and check it.
 
 Alternative text should describe the information conveyed, such as “First-quarter cost comparison for three options”, rather than “Image 1”. It helps readers who cannot see the image understand the document.

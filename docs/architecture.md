@@ -91,6 +91,14 @@ Yeli uses `markdown-it` with raw HTML and linkification disabled. Every result p
 
 ## Browser Lifecycle
 
+The online Markdown host admits local image selection when its trusted editable
+Yeli export template is available. Images use the same validated asset transaction,
+undo, history and local recovery as portable documents. With embedded assets,
+Save is explicitly labeled as a Yeli download and writes a new `.yeli.html` copy
+through the validated export path. It never writes asset references into a
+connected `.md` file. Markdown saving and export remain blocked until the assets
+are removed; text-only sessions retain their Markdown save behavior.
+
 The File menu distinguishes a connected direct-write handle from a download fallback before the user saves. It generates the current complete artifact first and discloses active-content trust, secure-context state, exact bytes, and local 64 MiB eligibility before enabling Save or Save Copy. Direct save requests permission, compares the exact previously opened fingerprint, and reports success only after the writable stream closes. A mismatch writes nothing and requires an explicit choice among reload, Save Copy, or confirmed overwrite. Without a handle, Yeli downloads a new copy, keeps the session dirty, and retains recovery when persistence is available.
 
 Local recovery, history, and retained handles are addressed by an origin-generated opaque `localInstanceId`, not by payload-controlled `docId`. Retained handles reconnect directly; exact prior fingerprints require human confirmation; Save Copy forks local history. Corrupt or future-version files retain original bytes and enter a bounded recovery sheet rather than partially loading.

@@ -927,7 +927,7 @@ export function useFileLifecycle({
     file: File,
     createPatch: (destination: string) => SourcePatch,
   ): Promise<boolean> => {
-    if (host.kind === "web") {
+    if (host.kind === "web" && !host.webTemplate?.available) {
       notify(labels.imageEmbeddingUnavailableMarkdown);
       return false;
     }
@@ -940,12 +940,14 @@ export function useFileLifecycle({
       return false;
     }
     try {
+      const generation = webGenerationRef.current;
       const bytes = new Uint8Array(await file.arrayBuffer());
       const asset: YeliAsset = {
         data: encodeBase64(bytes),
         id: `sha256:${await sha256Bytes(bytes)}`,
         mimeType: file.type,
       };
+      if (generation !== webGenerationRef.current) return false;
       const patch = createPatch(`yeli-asset:${asset.id}`);
       const upsert = snapshot.assets.some(
         (candidate) => candidate.id === asset.id,
@@ -975,7 +977,9 @@ export function useFileLifecycle({
         notify(budgetFailure ? labels.imageTooLarge : labels.imageUnsupported);
         return false;
       }
-      notify(labels.imageEmbedded);
+      notify(
+        host.kind === "web" ? labels.webImageSaveHint : labels.imageEmbedded,
+      );
       return true;
     } catch {
       notify(labels.imageUnsupported);
@@ -996,10 +1000,14 @@ export function useFileLifecycle({
   };
 
   const buildCurrentArtifact = async () => {
-    if (!document?.releaseTemplate) return null;
+    const releaseTemplate =
+      host.kind === "web" && host.webTemplate?.available
+        ? host.webTemplate.artifact
+        : document?.releaseTemplate;
+    if (!document || !releaseTemplate) return null;
     return createSavedArtifact({
       payload: { ...document.payload, assets: [...snapshot.assets] },
-      releaseTemplate: document.releaseTemplate,
+      releaseTemplate,
       revision: snapshot.revision,
       source: snapshot.source,
     });
@@ -1008,7 +1016,10 @@ export function useFileLifecycle({
   const prepareSaveDisclosure = async () => {
     setSaveDisclosureLoading(true);
     try {
-      if (saveKindForHost(host) === "markdown") {
+      if (
+        saveKindForHost(host) === "markdown" &&
+        snapshot.assets.length === 0
+      ) {
         if (!document) {
           setSaveDisclosure(null);
           return;
@@ -1364,6 +1375,12 @@ export function useFileLifecycle({
     try {
       if (webRepository) await flushWeb();
       if (saveKindForHost(host) === "markdown") {
+        if (snapshot.assets.length > 0 && host.webTemplate?.available) {
+          const downloaded = await exportYeli();
+          setSaveStatus(downloaded ? "idle" : "error");
+          if (downloaded) notify(labels.saveDownloaded);
+          return;
+        }
         if (rejectMarkdownAssets(snapshot)) return;
         if (!document) {
           setSaveStatus("error");
@@ -1492,6 +1509,7 @@ export function useFileLifecycle({
 
   const exportMarkdown = () => {
     const current = store.getSnapshot();
+    if (host.kind === "web" && rejectMarkdownAssets(current)) return;
     const output = createMarkdownExport(
       current.source,
       indexFrontmatter(current.source).metadata.title,
@@ -1560,10 +1578,10 @@ export function useFileLifecycle({
     : templateFailureLabels[webTemplate?.reason ?? "missing"];
 
   const exportYeli = async () => {
-    if (host.kind !== "web") return;
+    if (host.kind !== "web") return false;
     if (!webTemplate?.available) {
       notify(yeliExportUnavailable!);
-      return;
+      return false;
     }
     const captured = captureExport();
     try {
@@ -1585,7 +1603,7 @@ export function useFileLifecycle({
         throw new Error(
           "The complete export is not a valid current Yeli artifact",
         );
-      if (!acceptExport(captured)) return;
+      if (!acceptExport(captured)) return false;
       downloadText(
         result.artifact,
         safeDocumentFilename(
@@ -1594,8 +1612,10 @@ export function useFileLifecycle({
         ),
         "text/html;charset=utf-8",
       );
+      return true;
     } catch {
       if (sameExportSession(captured)) notify(labels.exportFailed);
+      return false;
     }
   };
 
@@ -1933,8 +1953,14 @@ export function useFileLifecycle({
         createWebSession(choice.disk, choice.session.filename, choice.handle),
       );
     },
-    canEmbedImages: host.kind === "artifact",
-    canDirectSave: fileHandle !== null,
+    canEmbedImages: host.kind === "artifact" || !!host.webTemplate?.available,
+    canDirectSave:
+      fileHandle !== null &&
+      !(host.kind === "web" && snapshot.assets.length > 0),
+    saveKind:
+      host.kind === "web" && snapshot.assets.length > 0
+        ? ("artifact" as const)
+        : saveKindForHost(host),
     chooseFile,
     conflict,
     confirmOverwrite,

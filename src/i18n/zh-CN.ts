@@ -262,7 +262,7 @@ export const zhCN = {
   imageDetails: "图片说明",
   imageEmbedded: "图片已嵌入当前 页里 文件",
   imageEmbeddingUnavailableMarkdown:
-    "Markdown 模式暂不支持嵌入图片文件，因为 .md 文件无法包含图片数据。已有的图片链接仍可保留。",
+    "选择图片需要可编辑 Yeli 模板，请重新加载官方编辑器后重试。已有图片链接会保留。",
   imageSource: "图片地址",
   imageTitle: "图片标题",
   imageTooLarge:
@@ -384,7 +384,7 @@ export const zhCN = {
   saveDownloadedFallback:
     "无法修改原文件，已准备 Markdown 下载副本，请确认下载完成。本页修改仍未保存。",
   saveMarkdownAssetsUnsupported:
-    "文档含有 .md 无法保留的内嵌文件，已阻止保存。修改和内嵌文件仍保留在本页；请先移除内嵌文件，再保存为 Markdown。",
+    "Markdown 无法打包内嵌图片。请下载可编辑 Yeli 文件保留图片，或移除图片后再保存 Markdown。修改仍保留在本页。",
   saveFile: "保存",
   saveStateClean: "已保存",
   saveStateFailed: "保存失败",
@@ -455,6 +455,9 @@ export const zhCN = {
   webLocalDocuments: "本机文档",
   webNewDocument: "新建 Markdown",
   webDownloadMarkdown: "下载 Markdown",
+  webDownloadYeli: "下载含图片的 Yeli",
+  webImageSaveHint:
+    "图片仅留在本机。保存时下载包含正文和图片的可编辑 .yeli.html 文件，原 Markdown 文件会保留。",
   webSaveOriginal: "保存到原 Markdown",
   webIntro: "Markdown 仅留在本机，不上传文件。",
   webGuidance: "本地编辑说明",
@@ -462,7 +465,7 @@ export const zhCN = {
   webPersistence:
     "草稿和历史保存在当前浏览器；清理浏览器数据会删除，请另存文件备份。",
   webSaveIntro:
-    "连接文件后，经授权可写回原文件，否则下载 Markdown。当前页面可离线编辑，重新打开页面需加载网站资源。",
+    "纯文本可经授权写回连接的 Markdown 文件，或下载 Markdown；含内嵌图片时下载 .yeli.html。当前页面可离线编辑，重新打开页面需加载网站资源。",
   webEmptyDocuments: "暂无本机文档，可新建或打开 Markdown。",
   webHasDraft: "有本机草稿",
   webBaselineOnly: "本机基线",

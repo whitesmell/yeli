@@ -182,7 +182,7 @@ async function openAndEdit(source = "# Changed\r\n") {
 
 describe("web Markdown file lifecycle", () => {
   it.each([en, zhCN])(
-    "rejects image embedding before reading or changing the document ($image)",
+    "rejects image embedding without a trusted template before reading or changing the document ($image)",
     async (labels) => {
       const original = "![Example](./example.gif)\n";
       const panel = await mountLifecycle(undefined, labels);
@@ -814,6 +814,112 @@ async function webExportHost() {
 }
 
 describe("web portable and print export", () => {
+  it("does not insert an image into another document after a slow file read", async () => {
+    const { host } = await webExportHost();
+    host.webSessions = new WebSessionRepository(new MemoryStorageAdapter());
+    const panel = await mountLifecycle(host);
+    await act(async () =>
+      panel.lifecycle.openFile(new File(["![Example]()\n"], "first.md")),
+    );
+    const block = panel.store.getSnapshot().projection.blocks[0]!;
+    const file = new File([imageBytes], "example.gif", { type: "image/gif" });
+    const read = file.arrayBuffer.bind(file);
+    let finish!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    vi.spyOn(file, "arrayBuffer").mockImplementation(async () => {
+      await gate;
+      return read();
+    });
+    const createPatch = vi.fn((destination: string) =>
+      createConstructPatch(block, { kind: "image-target" }, destination),
+    );
+    const pending = panel.lifecycle.embedImage(file, createPatch);
+    await act(async () =>
+      panel.lifecycle.openFile(new File(["![Example]()\n"], "second.md")),
+    );
+    const before = panel.store.getSnapshot();
+    await act(async () => {
+      finish();
+      expect(await pending).toBe(false);
+    });
+    expect(createPatch).not.toHaveBeenCalled();
+    expect(panel.store.getSnapshot()).toBe(before);
+    expect(panel.store.getSnapshot().assets).toEqual([]);
+  });
+
+  it.each([false, true])(
+    "selects an online image and saves a complete Yeli copy without overwriting Markdown (copy=%s)",
+    async (copy) => {
+      const { host, artifact } = await webExportHost();
+      const panel = await mountLifecycle(host);
+      const connected = markdownHandle("![Example]()\n");
+      await act(async () =>
+        panel.lifecycle.openFile(connected.file(), connected.handle),
+      );
+      const block = panel.store.getSnapshot().projection.blocks[0]!;
+      await act(async () => {
+        expect(
+          await panel.lifecycle.embedImage(
+            new File([imageBytes], "example.gif", { type: "image/gif" }),
+            (destination) =>
+              createConstructPatch(
+                block,
+                { kind: "image-target" },
+                destination,
+              ),
+          ),
+        ).toBe(true);
+      });
+      expect(panel.lifecycle.canEmbedImages).toBe(true);
+      expect(panel.lifecycle.canDirectSave).toBe(false);
+      expect(panel.store.getSnapshot()).toMatchObject({
+        source: imageSource,
+        assets: [imageAsset],
+        dirty: true,
+      });
+      expect(panel.notify).toHaveBeenLastCalledWith(en.webImageSaveHint);
+      act(() => panel.lifecycle.exportMarkdown());
+      expect(panel.download).not.toHaveBeenCalled();
+      expect(panel.notify).toHaveBeenLastCalledWith(
+        en.saveMarkdownAssetsUnsupported,
+      );
+      await act(async () => panel.lifecycle.prepareSaveDisclosure());
+      const disclosure = panel.lifecycle.saveDisclosure;
+      expect(disclosure?.currentBytes).toBeNull();
+
+      await act(async () => panel.lifecycle.save(copy));
+
+      const [text, filename] = panel.download.mock.calls[0]!;
+      expect(filename).toBe("document.yeli.html");
+      expect(await parseYeliArtifact(text)).toMatchObject({
+        ok: true,
+        markdown: imageSource,
+        payload: { assets: [imageAsset] },
+      });
+      expect(projectShell(text).hash).toBe(projectShell(artifact).hash);
+      expect(disclosure?.projectedBytes).toBe(
+        new TextEncoder().encode(text).byteLength,
+      );
+      expect(connected.write).not.toHaveBeenCalled();
+      expect(await connected.file().text()).toBe("![Example]()\n");
+      expect(panel.store.getSnapshot().dirty).toBe(true);
+      expect(panel.notify).toHaveBeenLastCalledWith(en.saveDownloaded);
+
+      act(() => {
+        panel.store.undo();
+      });
+      expect(panel.store.getSnapshot().assets).toEqual([]);
+      expect(panel.lifecycle.canDirectSave).toBe(true);
+      act(() => {
+        panel.store.redo();
+      });
+      expect(panel.store.getSnapshot().assets).toEqual([imageAsset]);
+      expect(panel.lifecycle.canDirectSave).toBe(false);
+    },
+  );
+
   it("exports the committed payload without changing handles, dirty, undo or recovery", async () => {
     const { host, artifact } = await webExportHost();
     const panel = await mountLifecycle(host);
@@ -893,7 +999,7 @@ describe("web portable and print export", () => {
     );
     let pending!: Promise<void>;
     await act(async () => {
-      pending = panel.lifecycle.exportYeli();
+      pending = panel.lifecycle.exportYeli().then(() => undefined);
       await Promise.resolve();
     });
     act(() => {
@@ -1000,7 +1106,7 @@ describe("web portable and print export", () => {
       act(() => {
         pending =
           kind === "yeli"
-            ? panel.lifecycle.exportYeli()
+            ? panel.lifecycle.exportYeli().then(() => undefined)
             : kind === "html"
               ? panel.lifecycle.generateStaticExport()
               : panel.lifecycle.print();
