@@ -455,11 +455,14 @@ test("keeps history in Edit and flattens file actions into a prioritized More me
     await expect(
       page.getByRole("menuitem", { name: /插入会议记录/u }),
     ).toBeVisible();
+    await expect(
+      page.locator('.insert-popover [data-command-id="insert.image"]'),
+    ).toBeVisible();
     const insertIcons = await page
       .locator('.insert-popover [data-command-id^="insert."] svg')
       .evaluateAll((icons) => icons.map((icon) => icon.innerHTML));
-    expect(insertIcons).toHaveLength(9);
-    expect(new Set(insertIcons).size).toBeGreaterThanOrEqual(8);
+    expect(insertIcons).toHaveLength(10);
+    expect(new Set(insertIcons).size).toBeGreaterThanOrEqual(9);
     await page.keyboard.press("Escape");
   } else {
     await expect(page.locator(".topbar-tools")).toBeHidden();
