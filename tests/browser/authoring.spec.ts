@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
+
+import { parseYeliArtifact } from "../../src/format/parse.ts";
+import { projectShell } from "../../src/integrity/shell-projection.ts";
 
 const artifactPath = path.resolve("dist/html/starter.zh-CN.yeli.html");
 const syntheticGif = Buffer.from(
@@ -752,6 +755,101 @@ test("shows formatting controls only for a real selection and supports inline-co
   });
   await expect(paragraph.locator("code")).toBeVisible();
 });
+
+for (const surface of ["top", "blank", "below", "slash"] as const) {
+  test(`inserts a new image from ${surface}, embeds it, and preserves it offline`, async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      surface === "top" && (page.viewportSize()?.width ?? 0) <= 820,
+      "Narrow layouts use block insertion menus instead of the top Insert menu.",
+    );
+    const originalArtifact = readFileSync(artifactPath, "utf8");
+    const original = await parseYeliArtifact(originalArtifact);
+    if (!original.ok) throw new Error("Invalid image insertion fixture");
+    await page.goto(pathToFileURL(artifactPath).href);
+    await page.getByRole("button", { name: "编辑", exact: true }).click();
+    const images = page.locator('[data-block-kind="image"]');
+    const initialCount = await images.count();
+    if (surface === "top") {
+      await page.getByRole("button", { name: "插入", exact: true }).click();
+      await page.locator('[data-command-id="insert.image"]:visible').click();
+    } else if (surface === "below") {
+      const paragraph = page.locator(".block-paragraph").first();
+      await paragraph.locator(".block-menu-trigger").focus();
+      await page.keyboard.press("Enter");
+      await paragraph
+        .getByRole("menuitem", { name: "在下方插入", exact: true })
+        .hover();
+      await paragraph.locator('[data-command-id="insert.image"]').click();
+    } else {
+      const blank = page.locator(".block-blank").first();
+      if (surface === "blank") {
+        await blank.locator(".block-insert-trigger").focus();
+        await page.keyboard.press("Enter");
+        await blank.locator('[data-command-id="insert.image"]').click();
+      } else {
+        await blank.locator(".block-content-editable").focus();
+        await page.keyboard.type("/image");
+        await page.getByRole("option", { name: /^图片/u }).click();
+      }
+    }
+    await expect(images).toHaveCount(initialCount + 1);
+    const inserted = images.filter({
+      has: page.getByRole("button", { name: "选择图片: 图片", exact: true }),
+    });
+    await expect(inserted.locator(".image-selection-button")).toBeFocused();
+    const inspector = page.getByRole("complementary", { name: "属性面板" });
+    await expect(inspector).toBeVisible();
+    await inspector.getByLabel("选择图片", { exact: true }).setInputFiles({
+      buffer: syntheticGif,
+      mimeType: "image/gif",
+      name: "synthetic.gif",
+    });
+    await expect(inserted.locator("img")).toHaveAttribute(
+      "src",
+      /^data:image\/gif;base64,/u,
+    );
+    await expect(inspector.getByLabel("替换图片")).toBeEnabled();
+    await inspector.getByRole("button", { name: "收起属性面板" }).click();
+    await page.getByRole("button", { name: /^(?:更多|菜单)$/u }).click();
+    const pending = page.waitForEvent("download");
+    await page.locator('[data-menu-action="save"]').click();
+    const downloadPath = testInfo.outputPath("inserted.yeli.html");
+    await (await pending).saveAs(downloadPath);
+    const savedArtifact = readFileSync(downloadPath, "utf8");
+    const saved = await parseYeliArtifact(savedArtifact);
+    expect(saved.ok).toBe(true);
+    if (!saved.ok) throw new Error("Invalid saved image artifact");
+    expect(saved.payload.assets).toHaveLength(
+      original.payload.assets.length + 1,
+    );
+    const asset = saved.payload.assets.find(
+      (candidate) => candidate.data === syntheticGif.toString("base64"),
+    );
+    expect(asset).toBeDefined();
+    expect(saved.markdown).toContain(`![图片](yeli-asset:${asset!.id})`);
+    expect(saved.freshness.manifest.status).toBe("fresh");
+    expect(projectShell(savedArtifact).hash).toBe(
+      projectShell(originalArtifact).hash,
+    );
+    await documentShortcut(page, "Meta+z");
+    await expect(inserted.locator("img")).toHaveCount(0);
+    await documentShortcut(page, "Meta+z");
+    await expect(images).toHaveCount(initialCount);
+    await documentShortcut(page, "Meta+Shift+z");
+    await documentShortcut(page, "Meta+Shift+z");
+    await expect(inserted.locator("img")).toHaveAttribute(
+      "src",
+      /^data:image\/gif;base64,/u,
+    );
+    await page.goto(pathToFileURL(downloadPath).href);
+    await expect(page.locator(".read-document img")).toHaveAttribute(
+      "src",
+      /^data:image\/gif;base64,/u,
+    );
+  });
+}
 
 test("selects an image, links the object inspector, and embeds a replacement", async ({
   page,

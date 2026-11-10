@@ -14,6 +14,7 @@ import {
 import { projectMarkdown } from "../../src/editor/block-projection.ts";
 import { en } from "../../src/i18n/en.ts";
 import { zhCN } from "../../src/i18n/zh-CN.ts";
+import { imageBlockDetails } from "../../src/ui/image-block.ts";
 
 function paragraph(source: string, text: string, revision = 1) {
   return projectMarkdown(source, revision).blocks.find(
@@ -22,6 +23,79 @@ function paragraph(source: string, text: string, revision = 1) {
 }
 
 describe("scoped command registry", () => {
+  it.each([
+    ["en", en],
+    ["zh-CN", zhCN],
+  ] as const)(
+    "inserts an editable image from every insertion surface (%s)",
+    async (locale, labels) => {
+      for (const surface of [
+        "top-insert",
+        "empty-block-menu",
+        "slash",
+      ] as const) {
+        expect(
+          commandsForSurface(surface, { mode: "edit" }).map(
+            ({ definition }) => definition.id,
+          ),
+        ).toContain("insert.image");
+      }
+      const source =
+        "---\ntitle: 'Keep me' # comment\n---\nBefore\n\n/图片\n\nAfter\n";
+      const operations = [
+        (store: DocumentStore) =>
+          executeAppendCommand(store, "insert.image", labels, locale),
+        (store: DocumentStore) =>
+          executeInsertAfterCommand(
+            store,
+            "insert.image",
+            paragraph(source, "Before"),
+            labels,
+            locale,
+          ),
+        (store: DocumentStore) =>
+          executeSlashCommand(
+            store,
+            "insert.image",
+            paragraph(source, "/图片"),
+            labels,
+            locale,
+          ),
+      ];
+      for (const [index, insert] of operations.entries()) {
+        const store = new DocumentStore(source);
+        expect(insert(store)).toMatchObject({
+          ok: true,
+          operation: "insert.image",
+          undoEntries: 1,
+        });
+        await Promise.resolve();
+        const expected = `![${labels.image}]()\n`;
+        expect(store.getSnapshot().source).toBe(
+          index === 0
+            ? `${source}\n${expected}`
+            : index === 1
+              ? source.replace("Before\n", `Before\n\n${expected}`)
+              : source.replace("/图片\n", expected),
+        );
+        const block = store
+          .getSnapshot()
+          .projection.blocks.find((candidate) =>
+            candidate.expectedText.trimStart().startsWith("!["),
+          );
+        expect(imageBlockDetails(block)).toEqual({
+          alternative: labels.image,
+          target: "",
+          title: "",
+        });
+        expect(store.undo()?.ok).toBe(true);
+        expect(store.getSnapshot().source).toBe(source);
+        expect(store.redo()?.ok).toBe(true);
+        expect(store.getSnapshot().source).toContain(expected);
+      }
+    },
+  );
+
   it("keeps the BOM when deleting frontmatter and restores exact source on undo", () => {
     const source = "\ufeff---\ntitle: Original\n---\nBody\n";
     const store = new DocumentStore(source);
@@ -70,6 +144,7 @@ describe("scoped command registry", () => {
       "insert.numbered-list",
       "insert.quote",
       "insert.code-block",
+      "insert.image",
       "insert.table",
       "insert.divider",
     ]);
@@ -99,6 +174,7 @@ describe("scoped command registry", () => {
       "insert.numbered-list",
       "insert.quote",
       "insert.code-block",
+      "insert.image",
       "insert.table",
       "insert.divider",
       "template.meeting-notes",

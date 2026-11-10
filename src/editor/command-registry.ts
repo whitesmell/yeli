@@ -53,6 +53,7 @@ export type CommandId =
   | "insert.heading4"
   | "insert.heading5"
   | "insert.heading6"
+  | "insert.image"
   | "insert.numbered-list"
   | "insert.quote"
   | "insert.section"
@@ -306,6 +307,15 @@ export const COMMAND_CATALOG: readonly CommandDefinition[] = [
     mutates: true,
     scope: "document",
     surfaces: ["top-insert", "empty-block-menu", "slash", "efficiency-guide"],
+  },
+  {
+    id: "insert.image",
+    keywords: ["image", "photo", "picture", "insert"],
+    label: "insertImage",
+    modes: EDIT,
+    mutates: true,
+    scope: "document",
+    surfaces: ["top-insert", "empty-block-menu", "slash"],
   },
   {
     id: "insert.table",
@@ -771,6 +781,7 @@ function insertionMarkdown(
   if (id === "insert.quote") return `\n> ${labels.newQuote}\n`;
   if (id === "insert.code-block")
     return `\n\`\`\`\n${labels.newCode}\n\`\`\`\n`;
+  if (id === "insert.image") return `\n![${labels.image}]()\n`;
   if (id === "insert.table") {
     return `\n${createTableMarkdown(labels, tableDimensions)}`;
   }

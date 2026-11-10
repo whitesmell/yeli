@@ -253,12 +253,14 @@ export function Inspector({
           >
             <label className="secondary-action image-replace-action">
               <ArrowPathIcon aria-hidden="true" />
-              {labels.replaceImage}
+              {image!.target ? labels.replaceImage : labels.selectImage}
               <input
                 className="sr-only"
                 type="file"
                 accept="image/png,image/jpeg,image/gif,image/webp"
-                aria-label={labels.replaceImage}
+                aria-label={
+                  image!.target ? labels.replaceImage : labels.selectImage
+                }
                 disabled={!canEmbedImages}
                 onChange={(event) => {
                   const file = event.currentTarget.files?.[0];

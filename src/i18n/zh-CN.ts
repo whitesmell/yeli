@@ -280,6 +280,7 @@ export const zhCN = {
   insertBulletList: "无序列表",
   insertCodeBlock: "代码块",
   insertDivider: "分隔线",
+  insertImage: "图片",
   insertHeading1: "一级标题",
   insertHeading3: "三级标题",
   insertHeading4: "四级标题",

@@ -303,6 +303,7 @@ export const en = {
   insertBulletList: "Bullet list",
   insertCodeBlock: "Code block",
   insertDivider: "Thematic break",
+  insertImage: "Image",
   insertHeading1: "Heading 1",
   insertHeading3: "Heading 3",
   insertHeading4: "Heading 4",

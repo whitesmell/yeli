@@ -1167,6 +1167,7 @@ const insertCommandOrder: readonly CommandId[] = [
   "insert.task",
   "insert.quote",
   "insert.code-block",
+  "insert.image",
   "insert.table",
   "insert.divider",
   "template.meeting-notes",
@@ -1198,6 +1199,7 @@ function InsertCommandIcon({ id }: { id: CommandId }) {
   if (id === "insert.numbered-list")
     return <QueueListIcon aria-hidden="true" />;
   if (id === "insert.code-block") return <CodeBracketIcon aria-hidden="true" />;
+  if (id === "insert.image") return <PhotoIcon aria-hidden="true" />;
   if (id === "insert.table") return <TableCellsIcon aria-hidden="true" />;
   if (id === "insert.divider") return <MinusIcon aria-hidden="true" />;
   return <Square2StackIcon aria-hidden="true" />;
@@ -2184,6 +2186,7 @@ function TableBlock({
 }
 
 function ImageBlock({
+  autoFocus,
   assets,
   block,
   labels,
@@ -2193,6 +2196,7 @@ function ImageBlock({
   selected,
   store,
 }: {
+  autoFocus: boolean;
   assets: readonly YeliAsset[];
   block: SourceBlock;
   labels: Labels;
@@ -2228,9 +2232,12 @@ function ImageBlock({
         className="image-selection-button"
         type="button"
         aria-label={`${labels.selectImage}: ${alternative}`}
+        autoFocus={autoFocus && details?.target === ""}
         aria-pressed={selected}
         onClick={() => onSelectBlock(block, true)}
-        onFocus={() => onSelectBlock(block)}
+        onFocus={() =>
+          onSelectBlock(block, autoFocus && details?.target === "")
+        }
         onDoubleClick={(event) => {
           if (source) {
             onOpenImage({ alternative, source }, event.currentTarget);
@@ -2827,6 +2834,9 @@ export function EditCanvas({
               if (imageBlockDetails(block)) {
                 return (
                   <ImageBlock
+                    autoFocus={
+                      snapshot.lastMutation?.operation === "insert.image"
+                    }
                     assets={assets}
                     block={block}
                     key={block.id}

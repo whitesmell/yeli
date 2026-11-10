@@ -2,7 +2,7 @@
 
 ## Carry images inside the file
 
-In Edit, insert an image and select a local PNG, JPEG, GIF or WebP file. The image is embedded in `.yeli.html` and saved together with its Markdown reference. SVG is not an admitted import format. Images exceeding size, count or total resource limits are rejected; compress them before trying again.
+In a `.yeli.html` file, switch to Edit and choose Image from the top Insert menu. You can also use the empty-block menu, Insert below in a block menu, or type `/image`. The new image placeholder receives focus and opens the right inspector. Click Select image and choose a local PNG, JPEG, GIF or WebP file. The image is embedded in `.yeli.html` and saved together with its Markdown reference. SVG is not an admitted import format. Images exceeding size, count or total resource limits are rejected; compress them before trying again.
 
 ## Inspect and change an image
 

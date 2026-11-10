@@ -28,6 +28,7 @@ import {
   MagnifyingGlassIcon,
   MinusIcon,
   PencilSquareIcon,
+  PhotoIcon,
   PresentationChartBarIcon,
   PlusIcon,
   PrinterIcon,
@@ -212,6 +213,7 @@ function InsertCommandIcon({ id }: { id: CommandId }) {
   if (id === "insert.quote")
     return <ChatBubbleBottomCenterTextIcon aria-hidden="true" />;
   if (id === "insert.code-block") return <CodeBracketIcon aria-hidden="true" />;
+  if (id === "insert.image") return <PhotoIcon aria-hidden="true" />;
   if (id === "insert.table") return <TableCellsIcon aria-hidden="true" />;
   if (id === "insert.divider") return <MinusIcon aria-hidden="true" />;
   return <PencilSquareIcon aria-hidden="true" />;
